@@ -1,0 +1,81 @@
+{
+  "ignore": {
+    "cord_loader": true,
+    "downloader": true,
+	"text_loader":true,
+    "splitter": true,
+    "ner": true,
+	"analysis": false,
+	"merger": true,
+    "add_tags": true,
+    "re": true,
+    "metrics": true
+  },
+  "downloader": {
+    "input_path": "data/20221213_pmid-autophagyANDcancer2020-23-set.txt",
+    "output_path": "data/20221213_pmid-autophagyANDcancer2020-23-set.json",
+    "batch_size": 100 
+  },
+  "cord_loader": {
+    "input_path": "../rafsan/data/cord/metadata.csv",
+    "output_path": "data/cord/metadata.json",
+	"subset":false,
+	"subset_file": ""
+  },
+    "text_loader": {
+    "input_path": "../test_prediction/data/sample_text.txt",
+    "output_path": "data/freetext_trial1.json",
+	"title":"",
+	"id": "freetext"
+  },
+  "splitter": {
+    "input_path": "data/20221213_pmid-autophagyANDcancer2020-23-set.json",
+	"output_folder": "data/sentencer/text-sentences_autophagyANDcancer2020-23/",
+    "output_file_prefix": "text-sentences_autophagyANDcancer2020-23",
+    "tokenizer": "spacy",
+    "model_name": "en_core_web_sm",
+	"batch_size": 100
+  },
+  "ner": {
+    "input_path": "data/sentencer/text-sentences_autophagyANDcancer2020-23/",
+    "output_path": "results_testeval_p50/text-ner-autophagyANDcancer2020-23_species/",
+	"output_file_prefix": "text-ner-autophagyANDcancer2020-23_species",
+    "model_type": "biobert_finetuned",
+    "model_folder": "../rafsan/models/biobert_pytorch_evalontest_v1/",
+    "model_name": "HunFlair_species_all",
+    "vocab_path": "",
+    "store_tokens":"no",
+    "labels": "",
+    "clear_old_results": true,
+    "article_limit": [-1,90000],
+	"entity_type": "species",
+	"multiprocessing":true
+  },
+  "analysis": {
+    "input_path": "C:/Users/rafsa/Documents/AITSLAB/nlp_pipeline/NER_pipeline/results_testeval_p50/text-ner-autophagyANDcancer2020-23_chemical/",
+    "output_path": "C:/Users/rafsa/Documents/AITSLAB/nlp_pipeline/NER_pipeline/results_testeval_p50/"
+  },
+  "merger": {
+	"paths": [],
+	"entities": [],
+	"output_path": "results_p50/merged_mtorandtsc1.json"
+  },
+  "add_tags": {
+    "input_path": "output/text-ner.json",
+    "output_path": "output/text-tags.json"
+  },
+  "re": {
+    "input_path": "output/text-tags.json",
+    "model_dir": "models/scibert/",
+    "preds_path": "output/predictions.tsv",
+    "stats_path": "output/statistics.tsv"
+  },
+  "metrics": {
+    "gold-standard_path": "data/gold-standards/BC5CDR-chem/", 
+    "output_path": "output/metrics.json",
+    "biobert_path": "models/biobert_ner_bc5cdr-chem.onnx",
+    "biobert_metrics": true,
+    "bilstm_metrics": true,
+    "co-occurrence_metrics": true
+  }
+}
