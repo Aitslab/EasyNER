@@ -2,11 +2,11 @@
   "ignore": {
     "cord_loader": true,
     "downloader": true,
-	"text_loader":true,
+    "text_loader":true,
     "splitter": true,
     "ner": true,
-	"analysis": false,
-	"merger": true,
+    "analysis": false,
+    "merger": true,
     "add_tags": true,
     "re": true,
     "metrics": true
