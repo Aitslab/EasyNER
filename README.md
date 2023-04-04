@@ -9,7 +9,7 @@ CIRP is a Customizable, domain-specific Information Retrieval Pipeline to extrac
 1. Before installation: Downnload and install anaconda from https://www.anaconda.com/
 
 
-2. Clone the repository to your target foler:Set up an conda environment
+2. Clone the repository to your target folder
 
 
 ```console
