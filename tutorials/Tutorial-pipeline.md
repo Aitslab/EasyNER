@@ -79,7 +79,7 @@ Config file argument:
     output_path: output file as document collection
     batch_size: download batch size. Note that, too large of a batch size may invalid download requests.
 ```
-example: 
+#### example: 
 
 ![](imgs/downloader_.png)
 
@@ -96,7 +96,7 @@ Config file argument:
     subset: true or false - whether a subset of the CORD-19 data is to be extracted.
 	subset_file: input file path to a file with cord UIDs if subset option is set to true
 ```
-example: 
+#### example: 
 
 
 ![](imgs/cord_loader_.png)
@@ -114,7 +114,7 @@ Config file argument:
     title: Title for the text to be used in the document collection
 	id: user given ID for the free text
 ```
-example: 
+#### example: 
 
 ![](imgs/text_loader_.png)
 
@@ -135,7 +135,7 @@ Config file argument:
 	batch_size: number of articles to be saved in one batch
 
 ```
-example: 
+#### example: 
 
 ![](imgs/splitter_.png)
 
@@ -161,7 +161,7 @@ Config file argument:
     article_limit: if user decides to only choose a range of articles to run the model on, default [-1,9000]
 	entity_type: type of extracted entity
 ```
-example: 
+#### example: 
 
 ![](imgs/ner_.png)
 
@@ -178,12 +178,12 @@ Config file argument:
     input_path: input folder path where all batches of NER are located
     output_path: output folder path where the analysis files will be saved
 ```
-example: 
+#### example: 
 
 ![](imgs/Analysis_.png)
 
 
-output:
+#### output:
 
 1. File with ranked entity list:
 
