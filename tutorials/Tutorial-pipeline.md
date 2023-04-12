@@ -18,7 +18,7 @@ git clone https://github.com/Aitslab/NER_pipeline/
 
 Alternatively, you can download the repository from github to your designated folder as a zip file:
 
-![]imgs/github.png)
+![](imgs/github.png)
 
 ## Installing the conda environment
 
@@ -50,6 +50,7 @@ All configurations are saved in the config.json file in the github repository. O
 
 ![](imgs/ignore_.png)
 <!-- <div>
+style="text-align:center">
 <img src="imgs/ignore_.png", width="200"/>
 </div> -->
 
