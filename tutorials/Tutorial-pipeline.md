@@ -73,13 +73,13 @@ The pipeline allows three diffent methods of data loading:
 
 The first section is the data loader that takes pubmed IDs as input and uses an API to retrieve abstracts from pubmed. The articles are then stored in a single JSON file. To run the data loader, turn ignore to false (cord_loader and text_loader to true) and provide the following arguments into the data loader section of the config file
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input file path with pubmed IDs
     output_path: output file as document collection
     batch_size: download batch size. Note that, too large of a batch size may invalid download requests.
 ```
-#### example: 
+### example: 
 
 ![](imgs/downloader_.png)
 
@@ -89,14 +89,14 @@ Config file argument:
 
 The CORD loader script is tailored specific to the CORD COVID-19 dataset abstracts. The entire abstract is loaded and saved in a similar way to the dataloader script. For the CORD loader to work, the CORD dataset needs to be downloaded and the metadata.csv file path should be provided. To run the CORD loader script, turn ignore to false (and data_loader and text_loader to true) and provide the following arguments:
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input file path with CORD-19 metadata.csv file
     output_path: output file as document collection
     subset: true or false - whether a subset of the CORD-19 data is to be extracted.
 	subset_file: input file path to a file with cord UIDs if subset option is set to true
 ```
-#### example: 
+### example: 
 
 
 ![](imgs/cord_loader_.png)
@@ -107,14 +107,14 @@ Config file argument:
 
 The freetext loader script loads free text from a file. Similar to data_loader and cord_loader, the file path should be provided in the config files.
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input file path with free text
     output_path: output file as document collection
     title: Title for the text to be used in the document collection
 	id: user given ID for the free text
 ```
-#### example: 
+### example: 
 
 ![](imgs/text_loader_.png)
 
@@ -125,7 +125,7 @@ ___
 
 The loaded text is split with the help of Spacy or NLTK sentencer. The document collection will be split into batches with a specific batch size. How the files should be saved, for example batch size, should be specified in the config file. First you need to set the ignore parameter for splitter to false. Following are the arguments that can be provided to the splitter section
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input file path of document collection
     output_folder: output folder path where each bach will be saved
@@ -135,7 +135,7 @@ Config file argument:
 	batch_size: number of articles to be saved in one batch
 
 ```
-#### example: 
+### example: 
 
 ![](imgs/splitter_.png)
 
@@ -146,7 +146,7 @@ ___
 
 In this section the NER models are deployed on split sentences and entities are extracted. To run this section, the ignore argument for ner should be set to false. Then the following config arguments should be provided:
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input folder path where all batches of split sentences are located
     output_folder: output folder path where each bach will be saved
@@ -161,7 +161,7 @@ Config file argument:
     article_limit: if user decides to only choose a range of articles to run the model on, default [-1,9000]
 	entity_type: type of extracted entity
 ```
-#### example: 
+### example: 
 
 ![](imgs/ner_.png)
 
@@ -173,17 +173,17 @@ ___
 
 This section uses the extracted entities to generate a file of ranked entities and frequency plots. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
-Config file argument:
+### Config file argument:
 ```console
     input_path: input folder path where all batches of NER are located
     output_path: output folder path where the analysis files will be saved
 ```
-#### example: 
+### example: 
 
 ![](imgs/Analysis_.png)
 
 
-#### output:
+### output:
 
 1. File with ranked entity list:
 
@@ -216,7 +216,7 @@ ___
 
 The merger section combines results from multiple models into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
-Config file argument:
+### Config file argument:
 ```console
     input_paths: list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]
     
