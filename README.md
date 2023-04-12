@@ -28,10 +28,13 @@ conda env create -f environment.yml
 conda activate env_pipeline
 ```
 
-5. Edit the config file with correct paths to your documents
+5. Provide documents in the form of PubMed IDs, CORD metadata, or through free text.
 
 
-6. Run the following command:
+6. Edit the [config file](congig.json) with correct paths to your documents.
+
+
+7. Run the following command:
 
 ```python
 python main.py
@@ -40,6 +43,6 @@ python main.py
 ___
 
 
-### The complete configuration and inference tutorial can be found here: [Tutorials](tutorials/Tutorial-pipeline.md)  
+### The complete configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md)  
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
