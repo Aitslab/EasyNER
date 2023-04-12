@@ -50,10 +50,7 @@ ___
 
 ## Models
 
-
-The following models are fine-tuned and available for download:
-
-### [BioBERT](https://github.com/dmis-lab/biobert-pytorch) 
+### [BioBERT](https://github.com/dmis-lab/biobert-pytorch) based
 
 1. Cell-lines: biobert_huner_cell_v1 
 2. Chemical: biobert_huner_chemical_v1
@@ -61,14 +58,27 @@ The following models are fine-tuned and available for download:
 4. Gene/protein: biobert_huner_gene_v1
 5. Species: biobert_huner_species_v1
 
-The models can be loaded from huggingface using the following link in the config file: hf_hub:aitslab/biobert_huner_v1/model
+The BioBERT models above have been fine-tuned using the [HUNER corpora](https://github.com/hu-ner/huner) and uploaded to [huggingface hub](https://huggingface.co/aitslab). These and similar models can be loaded from the huggingface hub by setting the "model_path" to "aitslab" and "model_name" to the model intended for use in the NER section of the config file. For example:
 
-https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53
+```console
+"model_type": "biobert_finetuned",
+"model_path": "aitslab",
+"model_name": "biobert_huner_chemical_v1"
+```
+
+#https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53
 
 
 ### Dictionary based
-[Spacy Phrasematcher](https://spacy.io/api/phrasematcher)  is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
-The dictionaries can be loaded 
+[Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the dictionary path in "vocab_path". For example:
+
+```console
+"model_type": "spacy_phrasematcher",
+"model_path": "",
+"model_name": "en_core_web_sm",
+"vocab_path": "dictionaries/LU_GS-disease.txt"
+```
 
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
