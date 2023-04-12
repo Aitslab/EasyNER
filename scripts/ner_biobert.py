@@ -1,12 +1,13 @@
 # coding=utf-8
 
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
+from pathlib import Path, PurePosixPath
 import os
 
 class NER_biobert:
 
     def __init__(self, model_dir: str, model_name: str, model_max_length=192):
-        self.model_path = os.path.join(model_dir, model_name)
+        self.model_path = PurePosixPath(Path(model_dir, model_name))
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, model_max_length=model_max_length)
         self.model = AutoModelForTokenClassification.from_pretrained(self.model_path)
         self.nlp = pipeline(task='ner',model=self.model,tokenizer=self.tokenizer, aggregation_strategy="max")
