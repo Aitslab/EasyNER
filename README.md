@@ -40,6 +40,7 @@ conda activate env_pipeline
 python main.py
 ```
 
+8. Th output will be like [this](results/sample_output/analysis_mtorandtsc1_chemical/)
 ___
 
 
