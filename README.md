@@ -82,3 +82,18 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
+
+
+## Citation
+```bibtex
+@article{ahmed2023LUMINER,
+  title={LUMINER: A Customizable, Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text},
+  author={Ahmed, Rafsan and Berntsson, Petter and Skafte, Alexander and Kazemi Rashed, Salma and Klang, Marcus and Barvesten, Adam and Olde, Ola and Lindholm, William and Arrizabalaga, Antton Lamarca and Nugues, Pierre and Aits, Sonja},
+  journal={},
+  volume={},
+  number={},
+  pages={},
+  year={2023},
+  publisher={}
+}
+```
