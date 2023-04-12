@@ -66,7 +66,7 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 "model_name": "biobert_huner_chemical_v1"
 ```
 
-#https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53
+# (https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53)
 
 
 ### Dictionary based
