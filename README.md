@@ -1,6 +1,6 @@
-# CIRP: A Customizable Information Retrieval Pipeline
+# FLEXNER: A Flexible and Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Literature 
 
-CIRP is a Customizable, domain-specific Information Retrieval Pipeline to extract information from biomedical texts. The pipeline comes with pre-trained models that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins and species.  
+FLEXNER is a Customizable End-to-End Information Retrieval Pipeline for extracting named entities such as diseases, proteins/genes and chemicals medcine-related texts. The pipeline comes with pre-trained models that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins and species.  
 
 !!Insert Image
 
