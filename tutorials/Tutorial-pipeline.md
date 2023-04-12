@@ -13,7 +13,7 @@ ___
 If you have git installed in the computer you can get the repository by simply opening a terminal window in the folder where you want to save the folder and write
 
 ```
-git clone https://github.com/Aitslab/NER_pipeline/
+git clone https://github.com/Aitslab/LUMINER/
 ```
 
 Alternatively, you can download the repository from github to your designated folder as a zip file:

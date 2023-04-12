@@ -13,7 +13,7 @@ LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at
 
 
 ```console
-git clone https://github.com/Aitslab/CIRP
+git clone https://github.com/Aitslab/LUMINER
 
 ```
 
@@ -40,6 +40,6 @@ python main.py
 ___
 
 
-### The complete configuration and inference tutorial can be found here: [Tutorials](tutorials/Tutorial-pipeline.ipynb)  
+### The complete configuration and inference tutorial can be found here: [Tutorials](tutorials/Tutorial-pipeline.md)  
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
