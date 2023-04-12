@@ -5,7 +5,7 @@ LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at
 ![](tutorials/imgs/pipeline3.png)
 
 ## Quick start guide
-___
+
 
 1. Before installation: Downnload and install anaconda from https://www.anaconda.com/
 
@@ -42,7 +42,6 @@ python main.py
 ```
 
 8. The output will be in the form of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png)
-___
 
 
 ### The complete configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md)  
@@ -50,7 +49,7 @@ ___
 ___
 
 ## Models
-___
+
 
 The following models are fine-tuned and available for download:
 
@@ -63,7 +62,9 @@ The following models are fine-tuned and available for download:
 5. Species: biobert_huner_species_v1
 
 The models can be loaded from huggingface using the following link in the config file: hf_hub:aitslab/biobert_huner_v1/model
-[](https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53)
+
+https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53
+
 
 ### Dictionary based
 [Spacy Phrasematcher](https://spacy.io/api/phrasematcher)  is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
