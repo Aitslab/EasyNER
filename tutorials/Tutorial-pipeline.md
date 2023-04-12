@@ -18,7 +18,7 @@ git clone https://github.com/Aitslab/NER_pipeline/
 
 Alternatively, you can download the repository from github to your designated folder as a zip file:
 
-![github.png](attachment:github.png)
+![]imgs/github.png)
 
 ## Installing the conda environment
 
@@ -48,7 +48,7 @@ ___
 
 All configurations are saved in the config.json file in the github repository. One of the main things to remember is that, if you want to run the pipeline sequentially then options in the ignore section need to be switched to "false".
 
-![ignore_.png](attachment:ignore_.png)
+![](imgs/ignore_.png)
 <!-- <div>
 <img src="imgs/ignore_.png", width="200"/>
 </div> -->
@@ -80,7 +80,7 @@ Config file argument:
 ```
 example: 
 
-![downloader_.png](attachment:downloader_.png)
+![](imgs/downloader_.png)
 
 
 
@@ -98,7 +98,7 @@ Config file argument:
 example: 
 
 
-![cord_loader_.png](attachment:cord_loader_.png)
+![](imgs/cord_loader_.png)
 
 
 
@@ -115,7 +115,7 @@ Config file argument:
 ```
 example: 
 
-![text_loader_.png](attachment:text_loader_.png)
+![](imgs/text_loader_.png)
 
 ___
 
@@ -136,7 +136,7 @@ Config file argument:
 ```
 example: 
 
-![splitter_.png](attachment:splitter_.png)
+![](imgs/splitter_.png)
 
 ___
 
@@ -162,7 +162,7 @@ Config file argument:
 ```
 example: 
 
-![ner_.png](attachment:ner_.png)
+![](imgs/ner_.png)
 
 
 ___
@@ -179,20 +179,20 @@ Config file argument:
 ```
 example: 
 
-![Analysis_.png](attachment:Analysis_.png)
+![](imgs/Analysis_.png)
 
 
 output:
 
 1. File with ranked entity list
 
-![Analysis_out_01.png](attachment:Analysis_out_01.png)
+![](imgs/Analysis_out_01.png)
 
 
 
 2. Bar graph of frequencies:
 
-![mtorandtsc1_disease_top_50.png](attachment:mtorandtsc1_disease_top_50.png)
+![](imgs/mtorandtsc1_disease_top_50.png)
 
 ___
 
