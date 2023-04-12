@@ -2,7 +2,7 @@
 
 LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at Lund University for extracting named entities from medcine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins, species, COVID-19 related terms.  
 
-![pipeline](attachment:tutorials/imgs/pipeline3.png)
+![](tutorials/imgs/pipeline3.png)
 
 ## Quick start guide
 
@@ -36,6 +36,9 @@ conda activate env_pipeline
 ```python
 python main.py
 ```
+
+___
+
 
 ### The complete configuration and inference tutorial can be found here: [Tutorials](tutorials/Tutorial-pipeline.ipynb)  
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
