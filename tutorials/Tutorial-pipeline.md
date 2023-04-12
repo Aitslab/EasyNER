@@ -26,18 +26,18 @@ For running the pipeline, anaconda or miniconda must be installed in the compute
 
 The necessary packages for running the environment can be installed by opening a conda terminal and writing the following command:
 
-```console
+```bash
 conda env create -f environment.yml
 ```
 
 After installation the environment should be loaded with:
 
-```console
+```bash
 conda activate env_pipeline
 ```
 
 If the configuration is set, then all you need to do afterwards is run the main.py file in the terminal:
-```console
+```bash
 pyhton main.py
 ```
 
@@ -48,8 +48,21 @@ ___
 
 All configurations are saved in the config.json file in the github repository. One of the main things to remember is that, if you want to run the pipeline sequentially then options in the ignore section need to be switched to "false".
 
-github.com/Aitslab/LUMINER/blob/9502f0cb0d4aef1fdc8745c9dd998cb01adec002/config.json#L1-L13
-
+```bash
+{
+  "ignore": {
+    "cord_loader": true,
+    "downloader": true,
+    "text_loader": true,
+    "splitter": true,
+    "ner": true,
+    "analysis": false,
+    "merger": true,
+    "add_tags": true,
+    "re": true,
+    "metrics": true
+  },
+```
 To run the full pipeline sequentially, the following config terms should be set to false, and the rest to true:
 
 1. One of the data loaders depending on the input type (downloader, cord_loader or free_text loader).
@@ -71,9 +84,9 @@ The first section is the data loader that takes pubmed IDs as input and uses an 
 
 ### Config file argument:
 ```console
-    input_path: input file path with pubmed IDs
-    output_path: output file as document collection
-    batch_size: download batch size. Note that, too large of a batch size may invalid download requests.
+    "input_path": input file path with pubmed IDs
+    "output_path": output file as document collection
+    "batch_size": download batch size. Note that, too large of a batch size may invalid download requests.
 ```
 ### example: 
 
@@ -87,10 +100,10 @@ The CORD loader script is tailored specific to the CORD COVID-19 dataset abstrac
 
 ### Config file argument:
 ```console
-    input_path: input file path with CORD-19 metadata.csv file
-    output_path: output file as document collection
-    subset: true or false - whether a subset of the CORD-19 data is to be extracted.
-	subset_file: input file path to a file with cord UIDs if subset option is set to true
+    "input_path": input file path with CORD-19 metadata.csv file
+    "output_path": output file as document collection
+    "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
+	"subset_file": input file path to a file with cord UIDs if subset option is set to true
 ```
 ### example: 
 
@@ -105,10 +118,10 @@ The freetext loader script loads free text from a file. Similar to data_loader a
 
 ### Config file argument:
 ```console
-    input_path: input file path with free text
-    output_path: output file as document collection
-    title: Title for the text to be used in the document collection
-	id: user given ID for the free text
+    "input_path": input file path with free text
+    "output_path": output file as document collection
+    "title": Title for the text to be used in the document collection
+	"id": user given ID for the free text
 ```
 ### example: 
 
@@ -123,12 +136,12 @@ The loaded text is split with the help of Spacy or NLTK sentencer. The document 
 
 ### Config file argument:
 ```console
-    input_path: input file path of document collection
-    output_folder: output folder path where each bach will be saved
-    output_file_prefix: user-set prefix for output files
-    tokenizer: "spacy" or "nltk"
-    model_name: example: "en_core_web_sm" or "en_core_web_trf" for spacy, for nltk give "" 
-	batch_size: number of articles to be saved in one batch
+    "input_path": input file path of document collection
+    "output_folder": output folder path where each bach will be saved
+    "output_file_prefix": user-set prefix for output files
+    "tokenizer": "spacy" or "nltk"
+    "model_name": example: "en_core_web_sm" or "en_core_web_trf" for spacy, for nltk give "" 
+	"batch_size": number of articles to be saved in one batch
 
 ```
 ### example: 
@@ -144,18 +157,18 @@ In this section the NER models are deployed on split sentences and entities are 
 
 ### Config file argument:
 ```console
-    input_path: input folder path where all batches of split sentences are located
-    output_folder: output folder path where each bach will be saved
-    output_file_prefix: user-set prefix for tagged output files
-    model_type: type of model, use between "biobert_finetuned" and "spacy_phrasematcher". Note that the latter is dictionary based
-    model_folder: folder where model(s) are located. For huggingface models use the repo name instead. Eg. "aitslab"
-    model_name: name of the model within the model folder or repository.
-    vocab_path: if a specific vocab file is provided, used for dictionary based tagging (spacy_phrasematcher)
-    store_tokens:"no",
-    labels: if specific lavels are to be provided. ex: ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
-    clear_old_results: overwrite old results
-    article_limit: if user decides to only choose a range of articles to run the model on, default [-1,9000]
-	entity_type: type of extracted entity
+    "input_path": input folder path where all batches of split sentences are located
+    "output_folder": output folder path where each bach will be saved
+    "output_file_prefix": user-set prefix for tagged output files
+    "model_type": type of model, use between "biobert_finetuned" and "spacy_phrasematcher". Note that the latter is dictionary based
+    "model_folder": folder where model(s) are located. For huggingface models use the repo name instead. Eg. "aitslab"
+    "model_name": name of the model within the model folder or repository.
+    "vocab_path": if a specific vocab file is provided, used for dictionary based tagging (spacy_phrasematcher)
+    "store_tokens":"no",
+    "labels": if specific lavels are to be provided. ex: ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
+    "clear_old_results": overwrite old results
+    "article_limit": if user decides to only choose a range of articles to run the model on, default [-1,9000]
+	"entity_type": type of extracted entity
 ```
 ### example: 
 
@@ -171,8 +184,8 @@ This section uses the extracted entities to generate a file of ranked entities a
 
 ### Config file argument:
 ```console
-    input_path: input folder path where all batches of NER are located
-    output_path: output folder path where the analysis files will be saved
+    "input_path": input folder path where all batches of NER are located
+    "output_path": output folder path where the analysis files will be saved
 ```
 ### example: 
 
@@ -214,9 +227,9 @@ The merger section combines results from multiple models into a single file for 
 
 ### Config file argument:
 ```console
-    input_paths: list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]
+    "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]
     
-    entities: list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
-    output_path: output path where the medged file will be saved
+    "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
+    "output_path": output path where the medged file will be saved
 ```
 ___
