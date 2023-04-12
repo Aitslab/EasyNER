@@ -1,6 +1,6 @@
-# FLEXNER: A Flexible and Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Literature 
+# LUMINER: A Customizable and Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text
 
-FLEXNER is a Customizable End-to-End Information Retrieval Pipeline for extracting named entities such as diseases, proteins/genes and chemicals medcine-related texts. The pipeline comes with pre-trained models that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins and species.  
+LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at Lund University for extracting named entities from medcine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins, species, COVID-19 related terms.  
 
 !!Insert Image
 
