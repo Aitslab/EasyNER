@@ -40,7 +40,7 @@ conda activate env_pipeline
 python main.py
 ```
 
-8. Th output will be like [this](results/sample_output/analysis_mtorandtsc1_chemical/)
+8. The output will be in the form of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png)
 ___
 
 
