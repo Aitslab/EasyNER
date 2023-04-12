@@ -48,11 +48,7 @@ ___
 
 All configurations are saved in the config.json file in the github repository. One of the main things to remember is that, if you want to run the pipeline sequentially then options in the ignore section need to be switched to "false".
 
-![](imgs/ignore_.png)
-<!-- <div>
-style="text-align:center">
-<img src="imgs/ignore_.png", width="200"/>
-</div> -->
+github.com/Aitslab/LUMINER/blob/9502f0cb0d4aef1fdc8745c9dd998cb01adec002/config.json#L1-L13
 
 To run the full pipeline sequentially, the following config terms should be set to false, and the rest to true:
 
@@ -152,8 +148,8 @@ In this section the NER models are deployed on split sentences and entities are 
     output_folder: output folder path where each bach will be saved
     output_file_prefix: user-set prefix for tagged output files
     model_type: type of model, use between "biobert_finetuned" and "spacy_phrasematcher". Note that the latter is dictionary based
-    model_folder: folder where model(s) are located
-    model_name: name of the model within the model folder
+    model_folder: folder where model(s) are located. For huggingface models use the repo name instead. Eg. "aitslab"
+    model_name: name of the model within the model folder or repository.
     vocab_path: if a specific vocab file is provided, used for dictionary based tagging (spacy_phrasematcher)
     store_tokens:"no",
     labels: if specific lavels are to be provided. ex: ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
