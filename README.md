@@ -66,11 +66,11 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 "model_name": "biobert_huner_chemical_v1"
 ```
 
-# (https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53)
+# (https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53)  
 
 ### Dictionary based
 [Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
-Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the dictionary path in "vocab_path". For example:
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. For example:
 
 ```console
 "model_type": "spacy_phrasematcher",
