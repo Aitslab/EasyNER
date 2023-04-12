@@ -185,7 +185,21 @@ example:
 
 output:
 
-1. File with ranked entity list
+1. File with ranked entity list:
+
+The generated output file contains the following columns:
+
+| Column | Description |
+| --- | ---|
+| entity | Name of the entity |
+| total_count | total occurances in the entire document set |
+| articles_spanned | no of articles the entity is found |
+| batches_spanned | no of batches the entity is found |
+| freq_per_article | total_count/articles_spanned |
+| freq_per_batch | total_count/batches_spanned |
+| batch_set | batch IDs where the entity is found |
+| batch_count | no of times the entity is found in each batch |
+| articles_set | article IDs where the entity is found |
 
 ![](imgs/Analysis_out_01.png)
 
