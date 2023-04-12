@@ -2,7 +2,7 @@
 
 LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at Lund University for extracting named entities from medcine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cell-lines, chemicals, disease, gene/proteins, species, COVID-19 related terms.  
 
-![Pipeline3.png](attachment:Pipeline3.png)
+![](attachment:/tutorials/imgs/Pipeline3.png)
 
 ## Quick start guide
 
