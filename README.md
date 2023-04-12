@@ -5,6 +5,7 @@ LUMINER is a customizable End-to-End Information Retrieval Pipeline developed at
 ![](tutorials/imgs/pipeline3.png)
 
 ## Quick start guide
+___
 
 1. Before installation: Downnload and install anaconda from https://www.anaconda.com/
 
@@ -45,5 +46,28 @@ ___
 
 
 ### The complete configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md)  
+
+___
+
+## Models
+___
+
+The following models are fine-tuned and available for download:
+
+### [BioBERT](https://github.com/dmis-lab/biobert-pytorch) 
+
+1. Cell-lines: biobert_huner_cell_v1 
+2. Chemical: biobert_huner_chemical_v1
+3. Disease: biobert_huner_disease_v1
+4. Gene/protein: biobert_huner_gene_v1
+5. Species: biobert_huner_species_v1
+
+The models can be loaded from huggingface using the following link in the config file: hf_hub:aitslab/biobert_huner_v1/model
+[](https://github.com/Aitslab/LUMINER/blob/80dd78e21c1fc75ed346897d977b25896f76838e/config.json#L39-L53)
+
+### Dictionary based
+[Spacy Phrasematcher](https://spacy.io/api/phrasematcher)  is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
+The dictionaries can be loaded 
+
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
