@@ -1,0 +1,807 @@
+19 corona
+19 coronavirus
+19 cov
+19 ncov
+2019 acute respiratory syndrome coronavirus 2
+2019 china cov
+2019 china virus
+2019 chinese corona
+2019 chinese corona virus
+2019 chinese coronavirus
+2019 corona
+2019 corona disease cov
+2019 corona infectious disease cov
+2019 corona virus
+2019 coronaes
+2019 coronavirus
+2019 coronavirus disease cov
+2019 coronavirus infectious disease cov
+2019 coronaviruses
+2019 cov
+2019 cov 2 virus
+2019 cov2
+2019 cov2 corona
+2019 cov2 coronavirus
+2019 hcov 2
+2019 hubei cov
+2019 hubei novel corona
+2019 hubei novel coronavirus
+2019 hubei pneumonia virus
+2019 hubei seafood market pneumonia virus
+2019 hubei virus
+2019 human corona 2
+2019 human corona virus
+2019 human coronaes (hcovs) 2
+2019 human coronavirus
+2019 human coronavirus 2
+2019 human coronaviruses (hcovs) 2
+2019 ncov
+2019 ncov 2
+2019 ncov virus
+2019 new acute respiratory syndrome coronavirus 2
+2019 new china cov
+2019 new china virus
+2019 new chinese corona
+2019 new chinese corona virus
+2019 new chinese coronavirus
+2019 new corona
+2019 new corona cov
+2019 new corona disease cov
+2019 new corona infection cov
+2019 new corona infections cov
+2019 new corona infectious disease cov
+2019 new corona pneumonia cov
+2019 new corona virus
+2019 new coronaes
+2019 new coronavirus
+2019 new coronavirus cov
+2019 new coronavirus disease cov
+2019 new coronavirus infection cov
+2019 new coronavirus infections cov
+2019 new coronavirus infectious disease cov
+2019 new coronavirus pneumonia cov
+2019 new coronaviruses
+2019 new cov
+2019 new cov 2 virus
+2019 new cov2
+2019 new cov2 corona
+2019 new cov2 coronavirus
+2019 new hcov 2
+2019 new hubei cov
+2019 new hubei pneumonia virus
+2019 new hubei seafood market pneumonia virus
+2019 new hubei virus
+2019 new human corona 2
+2019 new human coronaes (hcovs) 2
+2019 new human coronavirus 2
+2019 new human coronaviruses (hcovs) 2
+2019 new ncov
+2019 new ncov 2
+2019 new sars (severe acute respiratory syndrome) cov 2
+2019 new sars (severe acute respiratory syndrome) cov 2 virus
+2019 new sars corona 2
+2019 new sars corona virus 2
+2019 new sars corona virus2
+2019 new sars coronavirus 2
+2019 new sars coronavirus2
+2019 new sars cov 2
+2019 new sars cov 2 (cov 2) corona
+2019 new sars cov 2 (cov 2) coronavirus
+2019 new sars cov 2 (sc2) virus
+2019 new sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+2019 new sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+2019 new sars cov 2 corona
+2019 new sars cov 2 coronaes
+2019 new sars cov 2 coronavirus
+2019 new sars cov 2 coronaviruses
+2019 new sars cov 2 virus
+2019 new sars cov 2 viruses
+2019 new sars cov2 (cov2) virus
+2019 new sarscov2
+2019 new seafood market corona virus
+2019 new seafood market coronavirus
+2019 new seafood market virus
+2019 new severe acute respiratory syndrome (sars) corona (cov) 2
+2019 new severe acute respiratory syndrome (sars) corona 2
+2019 new severe acute respiratory syndrome (sars) coronavirus (cov) 2
+2019 new severe acute respiratory syndrome (sars) coronavirus 2
+2019 new severe acute respiratory syndrome corona virus 2
+2019 new severe acute respiratory syndrome corona virus2
+2019 new severe acute respiratory syndrome coronavirus (cov) 2
+2019 new severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+2019 new severe acute respiratory syndrome coronavirus 2
+2019 new severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+2019 new severe acute respiratory syndrome coronavirus 2 virus
+2019 new severe acute respiratory syndrome coronavirus2
+2019 new severe acute respiratory syndrome virus 2
+2019 new severe acute respiratory syndromerelated corona virus 2
+2019 new severe acute respiratory syndromerelated corona virus2
+2019 new severe acute respiratory syndromerelated coronavirus 2
+2019 new severe acute respiratory syndromerelated coronavirus2
+2019 new virus causing corona disease
+2019 new virus causing coronavirus disease
+2019 new virus that causes corona disease
+2019 new virus that causes coronavirus disease
+2019 new wuhan corona virus
+2019 new wuhan coronavirus
+2019 new wuhan cov
+2019 new wuhan pneumonia virus
+2019 new wuhan seafood market pneumonia virus
+2019 new wuhan seafood market virus
+2019 new wuhan virus
+2019 new wuhancorona virus
+2019 new wuhancoronavirus
+2019 novel acute respiratory syndrome coronavirus 2
+2019 novel china cov
+2019 novel china virus
+2019 novel chinese corona
+2019 novel chinese corona virus
+2019 novel chinese coronavirus
+2019 novel corona
+2019 novel corona 2
+2019 novel corona cov
+2019 novel corona disease cov
+2019 novel corona infection cov
+2019 novel corona infectious disease cov
+2019 novel corona pneumonia cov
+2019 novel corona related pneumonia cov
+2019 novel corona virus
+2019 novel coronaes
+2019 novel coronavirus
+2019 novel coronavirus 2
+2019 novel coronavirus cov
+2019 novel coronavirus disease cov
+2019 novel coronavirus infection cov
+2019 novel coronavirus infectious disease cov
+2019 novel coronavirus pneumonia cov
+2019 novel coronavirus related pneumonia cov
+2019 novel coronaviruses
+2019 novel cov
+2019 novel cov 2 virus
+2019 novel cov2
+2019 novel cov2 corona
+2019 novel cov2 coronavirus
+2019 novel hcov 2
+2019 novel hubei cov
+2019 novel hubei pneumonia virus
+2019 novel hubei seafood market pneumonia virus
+2019 novel hubei virus
+2019 novel human corona 2
+2019 novel human coronaes (hcovs) 2
+2019 novel human coronavirus 2
+2019 novel human coronaviruses (hcovs) 2
+2019 novel ncov
+2019 novel ncov 2
+2019 novel sars (severe acute respiratory syndrome) cov 2
+2019 novel sars (severe acute respiratory syndrome) cov 2 virus
+2019 novel sars corona 2
+2019 novel sars corona virus 2
+2019 novel sars corona virus2
+2019 novel sars coronavirus 2
+2019 novel sars coronavirus2
+2019 novel sars cov 2
+2019 novel sars cov 2 (cov 2) corona
+2019 novel sars cov 2 (cov 2) coronavirus
+2019 novel sars cov 2 (sc2) virus
+2019 novel sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+2019 novel sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+2019 novel sars cov 2 corona
+2019 novel sars cov 2 coronaes
+2019 novel sars cov 2 coronavirus
+2019 novel sars cov 2 coronaviruses
+2019 novel sars cov 2 virus
+2019 novel sars cov 2 viruses
+2019 novel sars cov2 (cov2) virus
+2019 novel sarscov2
+2019 novel seafood market corona virus
+2019 novel seafood market coronavirus
+2019 novel seafood market virus
+2019 novel severe acute respiratory syndrome (sars) corona (cov) 2
+2019 novel severe acute respiratory syndrome (sars) corona (cov)2
+2019 novel severe acute respiratory syndrome (sars) corona 2
+2019 novel severe acute respiratory syndrome (sars) coronavirus (cov) 2
+2019 novel severe acute respiratory syndrome (sars) coronavirus (cov)2
+2019 novel severe acute respiratory syndrome (sars) coronavirus 2
+2019 novel severe acute respiratory syndrome (sars) cov 2
+2019 novel severe acute respiratory syndrome corona virus 2
+2019 novel severe acute respiratory syndrome corona virus2
+2019 novel severe acute respiratory syndrome coronavirus (cov) 2
+2019 novel severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+2019 novel severe acute respiratory syndrome coronavirus 2
+2019 novel severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+2019 novel severe acute respiratory syndrome coronavirus 2 virus
+2019 novel severe acute respiratory syndrome coronavirus2
+2019 novel severe acute respiratory syndrome virus 2
+2019 novel severe acute respiratory syndromerelated corona virus 2
+2019 novel severe acute respiratory syndromerelated corona virus2
+2019 novel severe acute respiratory syndromerelated coronavirus 2
+2019 novel severe acute respiratory syndromerelated coronavirus2
+2019 novel virus causing corona disease
+2019 novel virus causing coronavirus disease
+2019 novel virus that causes corona disease
+2019 novel virus that causes coronavirus disease
+2019 novel wuhan corona virus
+2019 novel wuhan coronavirus
+2019 novel wuhan cov
+2019 novel wuhan pneumonia virus
+2019 novel wuhan seafood market pneumonia virus
+2019 novel wuhan seafood market virus
+2019 novel wuhan virus
+2019 novel wuhancorona virus
+2019 novel wuhancoronavirus
+2019 sars (severe acute respiratory syndrome) cov 2
+2019 sars (severe acute respiratory syndrome) cov 2 virus
+2019 sars corona virus 2
+2019 sars corona virus2
+2019 sars coronavirus 2
+2019 sars coronavirus2
+2019 sars cov 2
+2019 sars cov 2 (cov 2) corona
+2019 sars cov 2 (cov 2) coronavirus
+2019 sars cov 2 (sc2) virus
+2019 sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+2019 sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+2019 sars cov 2 corona
+2019 sars cov 2 coronaes
+2019 sars cov 2 coronavirus
+2019 sars cov 2 coronaviruses
+2019 sars cov 2 new corona virus
+2019 sars cov 2 novel corona
+2019 sars cov 2 novel coronavirus
+2019 sars cov 2 virus
+2019 sars cov 2 viruses
+2019 sars cov2 (cov2) virus
+2019 sarscov2
+2019 seafood market corona virus
+2019 seafood market coronavirus
+2019 seafood market virus
+2019 severe acute respiratory syndrome (sars) corona (cov) 2
+2019 severe acute respiratory syndrome (sars) coronavirus (cov) 2
+2019 severe acute respiratory syndrome corona virus 2
+2019 severe acute respiratory syndrome corona virus2
+2019 severe acute respiratory syndrome coronavirus (cov) 2
+2019 severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+2019 severe acute respiratory syndrome coronavirus 2
+2019 severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+2019 severe acute respiratory syndrome coronavirus 2 virus
+2019 severe acute respiratory syndrome coronavirus2
+2019 severe acute respiratory syndrome virus 2
+2019 severe acute respiratory syndromerelated corona virus 2
+2019 severe acute respiratory syndromerelated corona virus2
+2019 severe acute respiratory syndromerelated coronavirus 2
+2019 severe acute respiratory syndromerelated coronavirus2
+2019 virus causing corona disease
+2019 virus causing coronavirus disease
+2019 virus that causes corona disease
+2019 virus that causes coronavirus disease
+2019 wuhan corona virus
+2019 wuhan coronavirus
+2019 wuhan cov
+2019 wuhan novel corona
+2019 wuhan novel coronavirus
+2019 wuhan pneumonia virus
+2019 wuhan seafood market pneumonia virus
+2019 wuhan seafood market virus
+2019 wuhan virus
+2019 wuhancorona virus
+2019 wuhancoronavirus
+2019ncov
+2019new acute respiratory syndrome coronavirus 2
+2019new china cov
+2019new china virus
+2019new chinese corona
+2019new chinese corona virus
+2019new chinese coronavirus
+2019new corona
+2019new corona disease cov
+2019new corona infectious disease cov
+2019new coronaes
+2019new coronavirus
+2019new coronavirus disease cov
+2019new coronavirus infectious disease cov
+2019new coronaviruses
+2019new cov 2 virus
+2019new cov2
+2019new cov2 corona
+2019new cov2 coronavirus
+2019new hcov 2
+2019new hubei cov
+2019new hubei pneumonia virus
+2019new hubei seafood market pneumonia virus
+2019new hubei virus
+2019new human corona 2
+2019new human coronaes (hcovs) 2
+2019new human coronavirus 2
+2019new human coronaviruses (hcovs) 2
+2019new ncov
+2019new ncov 2
+2019new sars (severe acute respiratory syndrome) cov 2
+2019new sars (severe acute respiratory syndrome) cov 2 virus
+2019new sars corona virus 2
+2019new sars corona virus2
+2019new sars coronavirus 2
+2019new sars coronavirus2
+2019new sars cov 2
+2019new sars cov 2 (cov 2) corona
+2019new sars cov 2 (cov 2) coronavirus
+2019new sars cov 2 (sc2) virus
+2019new sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+2019new sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+2019new sars cov 2 corona
+2019new sars cov 2 coronaes
+2019new sars cov 2 coronavirus
+2019new sars cov 2 coronaviruses
+2019new sars cov 2 virus
+2019new sars cov 2 viruses
+2019new sars cov2 (cov2) virus
+2019new sarscov2
+2019new seafood market corona virus
+2019new seafood market coronavirus
+2019new seafood market virus
+2019new severe acute respiratory syndrome (sars) corona (cov) 2
+2019new severe acute respiratory syndrome (sars) coronavirus (cov) 2
+2019new severe acute respiratory syndrome corona virus 2
+2019new severe acute respiratory syndrome corona virus2
+2019new severe acute respiratory syndrome coronavirus (cov) 2
+2019new severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+2019new severe acute respiratory syndrome coronavirus 2
+2019new severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+2019new severe acute respiratory syndrome coronavirus 2 virus
+2019new severe acute respiratory syndrome coronavirus2
+2019new severe acute respiratory syndrome virus 2
+2019new severe acute respiratory syndromerelated corona virus 2
+2019new severe acute respiratory syndromerelated corona virus2
+2019new severe acute respiratory syndromerelated coronavirus 2
+2019new severe acute respiratory syndromerelated coronavirus2
+2019new virus causing corona disease
+2019new virus causing coronavirus disease
+2019new virus that causes corona disease
+2019new virus that causes coronavirus disease
+2019new wuhan corona virus
+2019new wuhan coronavirus
+2019new wuhan cov
+2019new wuhan pneumonia virus
+2019new wuhan seafood market pneumonia virus
+2019new wuhan seafood market virus
+2019new wuhan virus
+2019new wuhancorona virus
+2019new wuhancoronavirus
+2019novel acute respiratory syndrome coronavirus 2
+2019novel china cov
+2019novel china virus
+2019novel chinese corona
+2019novel chinese corona virus
+2019novel chinese coronavirus
+2019novel corona
+2019novel corona disease cov
+2019novel corona infectious disease cov
+2019novel coronaes
+2019novel coronavirus
+2019novel coronavirus disease cov
+2019novel coronavirus infectious disease cov
+2019novel coronaviruses
+2019novel cov 2 virus
+2019novel cov2
+2019novel cov2 corona
+2019novel cov2 coronavirus
+2019novel hcov 2
+2019novel hubei cov
+2019novel hubei pneumonia virus
+2019novel hubei seafood market pneumonia virus
+2019novel hubei virus
+2019novel human corona 2
+2019novel human coronaes (hcovs) 2
+2019novel human coronavirus 2
+2019novel human coronaviruses (hcovs) 2
+2019novel ncov
+2019novel ncov 2
+2019novel sars (severe acute respiratory syndrome) cov 2
+2019novel sars (severe acute respiratory syndrome) cov 2 virus
+2019novel sars corona virus 2
+2019novel sars corona virus2
+2019novel sars coronavirus 2
+2019novel sars coronavirus2
+2019novel sars cov 2
+2019novel sars cov 2 (cov 2) corona
+2019novel sars cov 2 (cov 2) coronavirus
+2019novel sars cov 2 (sc2) virus
+2019novel sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+2019novel sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+2019novel sars cov 2 corona
+2019novel sars cov 2 coronaes
+2019novel sars cov 2 coronavirus
+2019novel sars cov 2 coronaviruses
+2019novel sars cov 2 virus
+2019novel sars cov 2 viruses
+2019novel sars cov2 (cov2) virus
+2019novel sarscov2
+2019novel seafood market corona virus
+2019novel seafood market coronavirus
+2019novel seafood market virus
+2019novel severe acute respiratory syndrome (sars) corona (cov) 2
+2019novel severe acute respiratory syndrome (sars) coronavirus (cov) 2
+2019novel severe acute respiratory syndrome corona virus 2
+2019novel severe acute respiratory syndrome corona virus2
+2019novel severe acute respiratory syndrome coronavirus (cov) 2
+2019novel severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+2019novel severe acute respiratory syndrome coronavirus 2
+2019novel severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+2019novel severe acute respiratory syndrome coronavirus 2 virus
+2019novel severe acute respiratory syndrome coronavirus2
+2019novel severe acute respiratory syndrome virus 2
+2019novel severe acute respiratory syndromerelated corona virus 2
+2019novel severe acute respiratory syndromerelated corona virus2
+2019novel severe acute respiratory syndromerelated coronavirus 2
+2019novel severe acute respiratory syndromerelated coronavirus2
+2019novel virus causing corona disease
+2019novel virus causing coronavirus disease
+2019novel virus that causes corona disease
+2019novel virus that causes coronavirus disease
+2019novel wuhan corona virus
+2019novel wuhan coronavirus
+2019novel wuhan cov
+2019novel wuhan pneumonia virus
+2019novel wuhan seafood market pneumonia virus
+2019novel wuhan seafood market virus
+2019novel wuhan virus
+2019novel wuhancorona virus
+2019novel wuhancoronavirus
+acute respiratory syndrome coronavirus 2
+acute respiratory syndrome coronavirus 2 2019
+china cov
+china cov 2019
+china virus
+china virus 2019
+chinese corona
+chinese corona 2019
+chinese corona virus
+chinese corona virus 2019
+chinese coronavirus
+chinese coronavirus 2019
+corona
+corona (sars cov 2) causing covid 19
+corona 2019
+corona disease 2019 (sars cov 2) virus
+corona disease 2019 cov
+corona disease cov
+corona disease cov 2019
+corona infectious disease cov
+corona infectious disease cov 2019
+corona responsible for covid 19
+corona that causes covid 19
+coronaes
+coronaes 2019
+coronaes that causes corona disease 2019
+coronavirus
+coronavirus (sars cov 2) causing covid 19
+coronavirus 2019
+coronavirus disease 2019 (sars cov 2) virus
+coronavirus disease 2019 cov
+coronavirus disease cov
+coronavirus disease cov 2019
+coronavirus infectious disease cov
+coronavirus infectious disease cov 2019
+coronavirus responsible for covid 19
+coronavirus that causes covid 19
+coronaviruses
+coronaviruses 2019
+coronaviruses that causes coronavirus disease 2019
+cov 19 virus
+cov 2 virus
+cov 2 virus 2019
+cov2
+cov2 2019
+cov2 corona
+cov2 corona 2019
+cov2 coronavirus
+cov2 coronavirus 2019
+covid 19 cov
+covid 19 novel corona
+covid 19 novel coronavirus
+covid 19 virus
+covid 19 viruses
+covid-19 virus
+covid19 virus
+hcov 19
+hcov 2
+hcov 2 2019
+hcov19
+hubei cov
+hubei cov 2019
+hubei novel corona
+hubei novel corona 2019
+hubei novel coronavirus
+hubei novel coronavirus 2019
+hubei pneumonia virus
+hubei pneumonia virus 2019
+hubei seafood market pneumonia virus
+hubei seafood market pneumonia virus 2019
+hubei virus
+hubei virus 2019
+human corona 2
+human corona 2 2019
+human corona virus 2019
+human coronaes (hcovs) 2
+human coronaes (hcovs) 2 2019
+human coronavirus 2
+human coronavirus 2 2019
+human coronavirus 2019
+human coronaviruses (hcovs) 2
+human coronaviruses (hcovs) 2 2019
+infectious corona that causes covid 19
+infectious coronavirus that causes covid 19
+ncov
+ncov 2
+ncov 2 2019
+ncov 2019
+new corona cov
+new corona cov 2019
+new corona disease cov
+new corona disease cov 2019
+new corona infection cov
+new corona infection cov 2019
+new corona infections cov
+new corona infections cov 2019
+new corona pneumonia cov
+new corona pneumonia cov 2019
+new corona that causes covid 19
+new corona virus
+new corona virus 2019
+new coronavirus
+new coronavirus 2019
+new coronavirus cov
+new coronavirus cov 2019
+new coronavirus disease cov
+new coronavirus disease cov 2019
+new coronavirus infection cov
+new coronavirus infection cov 2019
+new coronavirus infections cov
+new coronavirus infections cov 2019
+new coronavirus pneumonia cov
+new coronavirus pneumonia cov 2019
+new coronavirus that causes covid 19
+new cov
+new cov 2019
+new sars corona 2
+new sars corona 2 2019
+new sars coronavirus 2
+new sars coronavirus 2 2019
+new sars cov 2
+new sars cov 2 2019
+new sars cov 2 corona
+new sars cov 2 corona 2019
+new sars cov 2 coronavirus
+new sars cov 2 coronavirus 2019
+new sars cov 2 virus
+new sars cov 2 virus 2019
+new severe acute respiratory syndrome (sars) corona 2
+new severe acute respiratory syndrome (sars) corona 2 2019
+new severe acute respiratory syndrome (sars) coronavirus 2
+new severe acute respiratory syndrome (sars) coronavirus 2 2019
+new severe acute respiratory syndrome coronavirus 2
+new severe acute respiratory syndrome coronavirus 2 2019
+novel corona (2019 ncov) associated disease cov
+novel corona (sars cov 2) that causes covid 19
+novel corona 2
+novel corona 2 2019
+novel corona 2019 (covid 19) virus
+novel corona causing covid 19
+novel corona cov
+novel corona cov 2019
+novel corona disease cov
+novel corona disease cov 2019
+novel corona infection cov
+novel corona infection cov 2019
+novel corona pneumonia cov
+novel corona pneumonia cov 2019
+novel corona related pneumonia cov
+novel corona related pneumonia cov 2019
+novel corona responsible for covid 19 illness
+novel corona that causes covid 19
+novel corona that causes covid 19 disease
+novel corona virus
+novel corona virus 2019
+novel coronavirus
+novel coronavirus (2019 ncov) associated disease cov
+novel coronavirus (sars cov 2) that causes covid 19
+novel coronavirus 2
+novel coronavirus 2 2019
+novel coronavirus 2019
+novel coronavirus 2019 (covid 19) virus
+novel coronavirus causing covid 19
+novel coronavirus cov
+novel coronavirus cov 2019
+novel coronavirus disease cov
+novel coronavirus disease cov 2019
+novel coronavirus infection cov
+novel coronavirus infection cov 2019
+novel coronavirus pneumonia cov
+novel coronavirus pneumonia cov 2019
+novel coronavirus related pneumonia cov
+novel coronavirus related pneumonia cov 2019
+novel coronavirus responsible for covid 19 illness
+novel coronavirus that causes covid 19
+novel coronavirus that causes covid 19 disease
+novel cov
+novel cov 2019
+novel sars corona 2
+novel sars corona 2 2019
+novel sars corona 2019
+novel sars coronavirus 2
+novel sars coronavirus 2 2019
+novel sars coronavirus 2019
+novel sars cov 2
+novel sars cov 2 2019
+novel sars cov 2 corona
+novel sars cov 2 corona 2019
+novel sars cov 2 coronavirus
+novel sars cov 2 coronavirus 2019
+novel sars cov 2 virus
+novel sars cov 2 virus 2019
+novel severe acute respiratory syndrome (sars) corona (cov)2
+novel severe acute respiratory syndrome (sars) corona (cov)2 2019
+novel severe acute respiratory syndrome (sars) corona 2
+novel severe acute respiratory syndrome (sars) corona 2 2019
+novel severe acute respiratory syndrome (sars) coronavirus (cov)2
+novel severe acute respiratory syndrome (sars) coronavirus (cov)2 2019
+novel severe acute respiratory syndrome (sars) coronavirus 2
+novel severe acute respiratory syndrome (sars) coronavirus 2 2019
+novel severe acute respiratory syndrome (sars) cov 2
+novel severe acute respiratory syndrome (sars) cov 2 2019
+novel severe acute respiratory syndrome coronavirus 2
+novel severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+novel severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus 2019
+novel severe acute respiratory syndrome coronavirus 2 2019
+novel severe acute respiratory syndrome coronavirus 2 virus
+novel severe acute respiratory syndrome coronavirus 2 virus 2019
+pneumonia causing covid 19
+sars (severe acute respiratory syndrome) cov 2
+sars (severe acute respiratory syndrome) cov 2 2019
+sars (severe acute respiratory syndrome) cov 2 virus
+sars (severe acute respiratory syndrome) cov 2 virus 2019
+sars corona virus 2
+sars corona virus 2 2019
+sars corona virus2
+sars corona virus2 2019
+sars coronavirus 2
+sars coronavirus 2 2019
+sars coronavirus2
+sars coronavirus2 2019
+sars cov 19
+sars cov 19 virus
+sars cov 2
+sars cov 2 (2019 ncov, covid 19) corona
+sars cov 2 (2019 ncov, covid 19) coronavirus
+sars cov 2 (cov 2) corona
+sars cov 2 (cov 2) corona 2019
+sars cov 2 (cov 2) coronavirus
+sars cov 2 (cov 2) coronavirus 2019
+sars cov 2 (covid 19) corona
+sars cov 2 (covid 19) coronavirus
+sars cov 2 (covid 19) virus
+sars cov 2 (sc2) virus
+sars cov 2 (sc2) virus 2019
+sars cov 2 (severe acute respiratory syndrome   corona 2) virus
+sars cov 2 (severe acute respiratory syndrome   corona 2) virus 2019
+sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus
+sars cov 2 (severe acute respiratory syndrome   coronavirus 2) virus 2019
+sars cov 2 2019
+sars cov 2 corona
+sars cov 2 corona 2019
+sars cov 2 coronaes
+sars cov 2 coronaes 2019
+sars cov 2 coronavirus
+sars cov 2 coronavirus 2019
+sars cov 2 coronaviruses
+sars cov 2 coronaviruses 2019
+sars cov 2 new corona virus
+sars cov 2 new corona virus 2019
+sars cov 2 novel corona
+sars cov 2 novel corona 2019
+sars cov 2 novel coronavirus
+sars cov 2 novel coronavirus 2019
+sars cov 2 virus
+sars cov 2 virus 2019
+sars cov 2 viruses
+sars cov 2 viruses 2019
+sars cov 2019
+sars cov 2019 virus
+sars cov2 (cov2) virus
+sars cov2 (cov2) virus 2019
+sars-cov-2
+sars-cov2
+sarscov2
+sarscov2 2019
+seafood market corona virus
+seafood market corona virus 2019
+seafood market coronavirus
+seafood market coronavirus 2019
+seafood market virus
+seafood market virus 2019
+severe acute respiratory syndrome (sars) corona (cov) 2
+severe acute respiratory syndrome (sars) corona (cov) 2 2019
+severe acute respiratory syndrome (sars) coronavirus (cov) 2
+severe acute respiratory syndrome (sars) coronavirus (cov) 2 2019
+severe acute respiratory syndrome (sars) cov2 (also referred to as covid 19) corona
+severe acute respiratory syndrome (sars) cov2 (also referred to as covid 19) coronavirus
+severe acute respiratory syndrome corona virus 2
+severe acute respiratory syndrome corona virus 2 2019
+severe acute respiratory syndrome corona virus2
+severe acute respiratory syndrome corona virus2 2019
+severe acute respiratory syndrome coronavirus (cov) 2
+severe acute respiratory syndrome coronavirus (cov) 2 2019
+severe acute respiratory syndrome coronavirus (sars cov) 2 virus
+severe acute respiratory syndrome coronavirus (sars cov) 2 virus 2019
+severe acute respiratory syndrome coronavirus 2
+severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus
+severe acute respiratory syndrome coronavirus 2 (sars cov 2) virus 2019
+severe acute respiratory syndrome coronavirus 2 2019
+severe acute respiratory syndrome coronavirus 2 virus
+severe acute respiratory syndrome coronavirus 2 virus 2019
+severe acute respiratory syndrome coronavirus2
+severe acute respiratory syndrome coronavirus2 2019
+severe acute respiratory syndrome virus 2
+severe acute respiratory syndrome virus 2 2019
+severe acute respiratory syndromerelated corona virus 2
+severe acute respiratory syndromerelated corona virus 2 2019
+severe acute respiratory syndromerelated corona virus2
+severe acute respiratory syndromerelated corona virus2 2019
+severe acute respiratory syndromerelated coronavirus 2
+severe acute respiratory syndromerelated coronavirus 2 2019
+severe acute respiratory syndromerelated coronavirus2
+severe acute respiratory syndromerelated coronavirus2 2019
+virus causing 2019 corona disease
+virus causing 2019 coronavirus disease
+virus causing corona disease
+virus causing corona disease 2019
+virus causing coronavirus disease
+virus causing coronavirus disease 2019
+virus causing covid 19
+virus causing covid 19 disease
+virus causing covid19
+virus responsible for corona disease 2019
+virus responsible for coronavirus disease 2019
+virus responsible for covid 19
+virus responsible for covid 19 disease
+virus responsible for covid19
+virus that causes corona 19 disease
+virus that causes corona disease
+virus that causes corona disease 2019
+virus that causes corona disease 2019 (covid 19) pneumonia
+virus that causes coronavirus 19 disease
+virus that causes coronavirus disease
+virus that causes coronavirus disease 2019
+virus that causes coronavirus disease 2019 (covid 19) pneumonia
+virus that causes covid 19
+virus that causes covid 19 acute respiratory syndrome
+virus that causes covid 19 disease
+virus that causes covid 19 infection
+virus which causes corona disease 2019
+virus which causes coronavirus disease 2019
+wuhan corona virus
+wuhan corona virus 2019
+wuhan coronavirus
+wuhan coronavirus 2019
+wuhan cov
+wuhan cov 2019
+wuhan novel corona
+wuhan novel corona 2019
+wuhan novel coronavirus
+wuhan novel coronavirus 2019
+wuhan pneumonia virus
+wuhan pneumonia virus 2019
+wuhan seafood market pneumonia virus
+wuhan seafood market pneumonia virus 2019
+wuhan seafood market virus
+wuhan seafood market virus 2019
+wuhan virus
+wuhan virus 2019
+wuhancorona virus
+wuhancorona virus 2019
+wuhancoronavirus
+wuhancoronavirus 2019
+NCBI Taxonomy ID: 2697049
+NCBI:txid2697049
+txid2697049
+DiseasesDB:60833
+MeSH:M000679178
