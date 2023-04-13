@@ -14,7 +14,7 @@ EasyNER is a customizable End-to-End Information Retrieval Pipeline developed at
 
 
 ```console
-git clone https://github.com/Aitslab/LUMINER
+git clone https://github.com/Aitslab/EasyNER
 
 ```
 
@@ -83,8 +83,8 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 
 ## Citation
 ```bibtex
-@article{ahmed2023LUMINER,
-  title={LUMINER: A Customizable, Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text},
+@article{ahmed2023EasyNER,
+  title={EasyNER: A Customizable, Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text},
   author={Ahmed, Rafsan and Berntsson, Petter and Skafte, Alexander and Kazemi Rashed, Salma and Klang, Marcus and Barvesten, Adam and Olde, Ola and Lindholm, William and Arrizabalaga, Antton Lamarca and Nugues, Pierre and Aits, Sonja},
   journal={},
   volume={},
