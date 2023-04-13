@@ -74,7 +74,7 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 "model_type": "spacy_phrasematcher",
 "model_path": "",
 "model_name": "en_core_web_sm",
-"vocab_path": "dictionaries/LU_GS-disease.txt"
+"vocab_path": "dictionaries/sars-cov-2_synonyms_v2.txt"
 ```
 
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
