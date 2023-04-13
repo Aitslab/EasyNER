@@ -8,4 +8,4 @@ Please cite this article if you use them.
 The dictionaries contain the following terms:
 1. SARS-CoV-2 synonyms
 2. COVID-19 synonyms
-3. SARS-CoV-2 variant terms
+3. SARS-CoV-2 variant terms (variants_v1.txt)
