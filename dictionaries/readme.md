@@ -6,6 +6,6 @@ Kazemi Rashed S, Ahmed R, Frid J, Aits S. English dictionaries, gold and silver 
 Please cite this article if you use them.
 
 The dictionaries contain the following terms:
-1. SARS-CoV-2 synonyms
+1. SARS-CoV-2 synonyms (sars-cov-2_synonyms_v2.txt)
 2. COVID-19 synonyms
 3. SARS-CoV-2 variant terms (variants_v1.txt)
