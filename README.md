@@ -21,6 +21,7 @@ git clone https://github.com/Aitslab/EasyNER
 3. Set up an conda environment
 
 ```console
+cd EasyNER
 conda env create -f environment.yml
 ```
 

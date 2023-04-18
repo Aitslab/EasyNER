@@ -50,8 +50,8 @@
 	"multiprocessing":true
   },
   "analysis": {
-    "input_path": results/text-ner-Lund-Autophagy-1_species/",
-    "output_path": results/"
+    "input_path": "results/text-ner-Lund-Autophagy-1_species/",
+    "output_path": "results/"
   },
   "merger": {
 	"paths": ["path/to/model-1/", "path/to/model-2/", "path/to/model-3/"],
