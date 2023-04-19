@@ -1,4 +1,4 @@
-# LUMINER - Tutorials
+# EasyNER - Tutorials
 
 ![](imgs/pipeline3.png)
 
