@@ -86,14 +86,12 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 If you use any of the material in this repository, please cite the following article:
 
 ```bibtex
-@article{ahmed2023EasyNER,
-  title={EasyNER: A Customizable, Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text},
-  author={Ahmed, Rafsan and Berntsson, Petter and Skafte, Alexander and Kazemi Rashed, Salma and Klang, Marcus and Barvesten, Adam and Olde, Ola and Lindholm, William and Arrizabalaga, Antton Lamarca and Nugues, Pierre and Aits, Sonja},
-  journal={},
-  volume={},
-  number={},
-  pages={},
+@article{ahmed2023easyner,
+  title={EasyNER: A Customizable Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text},
+  author={Rafsan Ahmed and Petter Berntsson and Alexander Skafte and Salma Kazemi Rashed and Marcus Klang and Adam Barvesten and Ola Olde and William Lindholm and Antton Lamarca Arrizabalaga and Pierre Nugues and Sonja Aits},
   year={2023},
-  publisher={}
+  eprint={2304.07805},
+  archivePrefix={arXiv},
+  primaryClass={q-bio.QM}
 }
 ```
