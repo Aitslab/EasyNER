@@ -33,7 +33,7 @@ conda activate env_pipeline
 5. Provide documents in the form of PubMed IDs, CORD metadata, or through free text.
 
 
-6. Edit the [config file](config.json) with correct paths to your documents.
+6. Edit the [config file](config.json) with correct paths to your documents. The config file contains an “ignore” section in the beginning to select the modules that the user wants to run. 
 
 
 7. Run the following command:
