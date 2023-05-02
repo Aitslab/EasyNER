@@ -28,6 +28,7 @@ conda env create -f environment.yml
 4. After installation activate the environment:
 ```console
 conda activate env_pipeline
+python -m spacy download en_core_web_sm
 ```
 
 5. Provide documents in the form of PubMed IDs, CORD metadata, or through free text.
