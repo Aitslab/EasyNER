@@ -95,7 +95,7 @@ This variant of the data loader module takes a single .txt file with pubmed IDs 
 
 
 
-### B. CORD loader
+### 2.1.2 CORD loader
 
 This variant of the data loader module processes titles and abstracts in the CORD-19 dataset, a collection of SARS-CoV2-related articles. For the CORD loader to work, the CORD19 metadata.csv file first needs to be downloaded manually from the CORD-19 website. The file path should then be provided in the config file as input. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be found in the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and data_loader and text_loader to true) and provide the following arguments:
 
@@ -113,7 +113,7 @@ This variant of the data loader module processes titles and abstracts in the COR
 
 
 
-### C. Freetext loader
+### 2.1.3 Freetext loader
 
 The freetext loader script loads free text from a file. Similar to data_loader and cord_loader, the file path should be provided in the config files.
 
