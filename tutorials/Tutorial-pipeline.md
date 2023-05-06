@@ -71,9 +71,9 @@ To run the full pipeline sequentially, the following config terms should be set 
 
 The following sections will provide more detail on each of these modules
 
+___
 
-
-## 2.1 Data loading
+## 2.1 Data loader module
 
 The pipeline allows three diffent methods of data loading:
 
@@ -129,7 +129,7 @@ The freetext loader script loads free text from a file. Similar to data_loader a
 ___
 
 
-## 2.2 Sentence Spliter
+## 2.2 Sentence Spliter module
 
 The loaded text is split with the help of Spacy or NLTK sentencer. The document collection will be split into batches with a specific batch size. How the files should be saved, for example batch size, should be specified in the config file. First you need to set the ignore parameter for splitter to false. Following are the arguments that can be provided to the splitter section
 
@@ -150,7 +150,7 @@ The loaded text is split with the help of Spacy or NLTK sentencer. The document 
 ___
 
 
-## 2.3 Named Entity Recognition
+## 2.3 Named Entity Recognition module
 
 In this section the NER models are deployed on split sentences and entities are extracted. To run this section, the ignore argument for ner should be set to false. Then the following config arguments should be provided:
 
@@ -177,7 +177,7 @@ In this section the NER models are deployed on split sentences and entities are 
 ___
 
 
-## 2.4 Analysis
+## 2.4 Analysis module
 
 This section uses the extracted entities to generate a file of ranked entities and frequency plots. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
@@ -220,9 +220,9 @@ The generated output file contains the following columns:
 ___
 
 
-## 2.5 Merger (optional)
+## 2.5 Merger module (optional)
 
-The merger section combines results from multiple models into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+The merger section combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file argument:
 ```console
