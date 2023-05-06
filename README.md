@@ -4,8 +4,11 @@ EasyNER is a customizable end-to-end pipeline for extracting named entities from
 
 ![](tutorials/imgs/pipeline3.png)
 
-## Quick start guide
+## How to use the pipeline
 
+A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md).
+
+### Quick start guide
 
 1. Before installation: Downnload and install anaconda from https://www.anaconda.com/
 
@@ -45,7 +48,7 @@ python main.py
 8. The output will be in the form of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png)
 
 
-### The complete configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md)  
+
 
 ___
 
