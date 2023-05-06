@@ -85,7 +85,7 @@ This variant of the data loader module takes a single .txt file with pubmed IDs 
 
 #### Config file argument:
 ```console
-    "input_path": path to file with pubmed IDs (Example: "data/Lund-Autophagy-1.txt")
+    "input_path": path to file with pubmed IDs 
     "output_path": output file as document collection
     "batch_size": download batch size. Note that, too large of a batch size may invalid download requests.
 ```
