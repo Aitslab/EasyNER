@@ -17,7 +17,7 @@ cd PATH TO YOUR FOLDER OF CHOICE (e.g. C:/Users/XYZ/)
 git clone https://github.com/Aitslab/EasyNER/
 ```
 
-Alternatively, you can download the repository from github page https://github.com/Aitslab/EasyNER to your designated folder as a zip file (click on 'Code' in the top right corner and then on 'Download ZIP')
+Alternatively, you can download the repository from github page https://github.com/Aitslab/EasyNER to your designated folder as a zip file (click on 'Code' in the top right corner and then on 'Download ZIP') and unpack it.
 
 ![](imgs/github.png)
 
