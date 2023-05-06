@@ -30,7 +30,7 @@ conda env create -f environment.yml
 
 4. After installation activate the environment:
 ```console
-conda activate env_pipeline
+conda activate easyner_env
 ```
 
 5. Provide input file: list of PubMed IDs, CORD19 metadata.csv file, or file with free text.
