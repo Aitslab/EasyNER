@@ -25,9 +25,10 @@ Alternatively, you can download the repository from github page https://github.c
 
 For running the pipeline, anaconda or miniconda must be installed in the computer. The step-by-step installation instructions can be found on: https://docs.anaconda.com/anaconda/install/index.html.
 
-The necessary packages for running the environment can be installed by opening a conda terminal and writing the following command:
+To install the necessary packages for running the environment, open a conda terminal and write the following commands:
 
 ```bash
+cd PATH TO YOUR EasyNER FOLDER (e.g. C:/Users/XYZ/EasyNER/)
 conda env create -f environment.yml
 ```
 
