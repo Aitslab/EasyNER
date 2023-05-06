@@ -10,13 +10,14 @@ ___
 
 ## GitHub repository
 
-If you have git installed in the computer you can get the repository by simply opening a terminal window in the folder where you want to save the folder and write
+If you have git installed on the computer, open a terminal window and download the repository by writing: 
 
 ```
+cd PATH TO YOUR FOLDER OF CHOICE (e.g. C:/Users/XYZ/)
 git clone https://github.com/Aitslab/EasyNER/
 ```
 
-Alternatively, you can download the repository from github to your designated folder as a zip file:
+Alternatively, you can download the repository from github page https://github.com/Aitslab/EasyNER to your designated folder as a zip file (click on 'Code' in the top right corner and then on 'Download ZIP')
 
 ![](imgs/github.png)
 
