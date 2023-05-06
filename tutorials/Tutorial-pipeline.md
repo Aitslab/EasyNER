@@ -28,14 +28,13 @@ For running the pipeline, anaconda or miniconda must be installed in the compute
 To install the necessary packages for running the environment, open a conda terminal and write the following commands:
 
 ```bash
-cd PATH TO YOUR EasyNER FOLDER (e.g. C:/Users/XYZ/EasyNER/)
 conda env create -f environment.yml
 ```
 
 After installation, load the environment with this:
 
 ```bash
-conda activate env_pipeline
+conda activate easyner_env
 ```
 
 ___
