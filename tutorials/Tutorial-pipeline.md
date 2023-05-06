@@ -43,7 +43,7 @@ ___
 
 # 2. Modify the Config file
 
-For each pipeline run, the config.json file in the repository needs to be modified with the desired settings. It is advisable to save a copy of the modified file elsewhere, to keep a permanent record och each run and ensure reproducibility. 
+The pipeline consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. For each pipeline run, the config.json file in the repository needs to be modified with the desired settings. It is advisable to save a copy of the modified file elsewhere, to keep a permanent record och each run and ensure reproducibility. 
 
 One of the main things to remember is that, if you want to run the pipeline sequentially then options in the ignore section need to be switched to "false".
 
