@@ -44,7 +44,7 @@ ___
 
 The pipeline consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. 
 
-For each pipeline run, the config.json file in the repository needs to be modified with the desired settings. First, the modules that you want to run, should be switched to "false" in the ignore section. Then the section for those modules should be modified as required. It is advisable to save a copy of the modified config file somewhere so you have a permanent record of the run. 
+For each pipeline run, the config.json file in the repository needs to be modified with the desired settings. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the section for those modules should be modified as required. It is advisable to save a copy of the modified config file somewhere so you have a permanent record of the run. 
 
 ```bash
 {
