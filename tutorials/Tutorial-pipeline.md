@@ -21,7 +21,7 @@ Alternatively, you can download the repository from github page https://github.c
 
 ![](imgs/github.png)
 
-## Installing the conda environment
+## Install the conda environment
 
 For running the pipeline, anaconda or miniconda must be installed in the computer. The step-by-step installation instructions can be found on: https://docs.anaconda.com/anaconda/install/index.html.
 
