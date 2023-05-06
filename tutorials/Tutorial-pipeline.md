@@ -81,7 +81,12 @@ The pipeline has three diffent modules for data loading, which handle different 
 - Free text => Text loader module
 
 ### 2.1.1 Downloader
-This downloader variant of the data loader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the Pubmed database. As example, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-Autophagy-1.txt). The titles and abstracts of the corresponding articles are then stored in a single JSON file. To run the downloader module, change "downloader" in the ignore section to false (cord_loader and text_loader to true) and provide the following arguments in the "downloader" section of the config file
+This downloader variant of the data loader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the Pubmed database. As example, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-Autophagy-1.txt). The easiest way to create such a file is to perform a search on Pubmed and then save the search results using the "PMID" format option:
+
+![](imgs/pubmed.jpg)
+
+
+The titles and abstracts of the selected articles are stored in a single JSON output file. To run the downloader module, change "downloader" in the ignore section to false (cord_loader and text_loader to true) and provide the following arguments in the "downloader" section of the config file:
 
 #### Config file argument:
 ```console
