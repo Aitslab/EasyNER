@@ -77,7 +77,7 @@ ___
 The pipeline has three diffent modules for data loading, which each handle a different input type:
 
 - List of Pubmed IDs => Downloader module
-- CORD-19 metadatafile => CORD loader module
+- CORD-19 metadata csv file => CORD loader module
 - Free text => Text loader module
 
 ### 2.1.1 Downloader
@@ -86,7 +86,7 @@ This variant of the data loader module takes a single .txt file with pubmed IDs 
 #### Config file argument:
 ```console
     "input_path": path to file with pubmed IDs 
-    "output_path": output file as document collection
+    "output_path": path to storage location for output
     "batch_size": download batch size. Note that, too large of a batch size may invalid download requests.
 ```
 #### example: 
@@ -97,12 +97,12 @@ This variant of the data loader module takes a single .txt file with pubmed IDs 
 
 ### B. CORD loader
 
-The CORD loader script is tailored specific to the CORD COVID-19 dataset abstracts. The entire abstract is loaded and saved in a similar way to the dataloader script. For the CORD loader to work, the CORD dataset needs to be downloaded and the metadata.csv file path should be provided. To run the CORD loader script, turn ignore to false (and data_loader and text_loader to true) and provide the following arguments:
+This variant of the data loader module processes titles and abstracts in the CORD-19 dataset, a collection of SARS-CoV2-related articles. For the CORD loader to work, the CORD19 metadata.csv file first needs to be downloaded manually from the CORD-19 website. The file path should then be provided in the config file as input. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be found in the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and data_loader and text_loader to true) and provide the following arguments:
 
 #### Config file argument:
 ```console
     "input_path": input file path with CORD-19 metadata.csv file
-    "output_path": output file as document collection
+    "output_path": path to storage location for output
     "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
 	"subset_file": input file path to a file with cord UIDs if subset option is set to true
 ```
