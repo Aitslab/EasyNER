@@ -33,19 +33,19 @@ conda env create -f environment.yml
 conda activate env_pipeline
 ```
 
-5. Provide documents in the form of PubMed IDs, CORD metadata, or through free text.
+5. Provide input file: list of PubMed IDs, CORD metadata file, or file with free text.
 
 
-6. Edit the [config file](config.json) with correct paths to your documents. The config file contains an “ignore” section in the beginning to select the modules that the user wants to run. 
+6. Add the correct paths to your input file in the [config file](config.json) and choose the modules you want to run in the “ignore” section in the beginning of the file. 
 
 
-7. Run the following command:
+7. Run the pipeline with the following command:
 
 ```python
 python main.py
 ```
 
-8. The output will be in the form of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png)
+8. The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
 
 
