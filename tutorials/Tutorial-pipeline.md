@@ -72,17 +72,20 @@ The following sections will provide more detail on each of the modules.
 
 ___
 
-## 2.1 Data loader module
+## 2.1 Data loader modules
 
-The pipeline allows three diffent methods of data loading:
+The pipeline has three diffent modules for data loading, which each handle a different input type:
 
-### A. Downloader (for list of Pubmed IDs)
+List of Pubmed IDs => Downloader module
+CORD-19 metadatafile => CORD loader module
+Free text => Text loader module
 
-The first section is the data loader that takes pubmed IDs as input and uses an API to retrieve abstracts from pubmed. The articles are then stored in a single JSON file. To run the data loader, turn ignore to false (cord_loader and text_loader to true) and provide the following arguments into the data loader section of the config file
+### 2.1.1 Downloader
+This variant of the data loader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the Pubmed database. As example, look at the file ("Lund-Autophagy-1.txt")[data/Lund-Autophagy-1.txt]. The titles and abstracts of the corresponding articles are then stored in a single JSON file. To run the downloader module, change "downloader" in the ignore section to false (cord_loader and text_loader to true) and provide the following arguments in the "downloader" section of the config file
 
 #### Config file argument:
 ```console
-    "input_path": input file path with pubmed IDs
+    "input_path": path to file with pubmed IDs (Example: "data/Lund-Autophagy-1.txt")
     "output_path": output file as document collection
     "batch_size": download batch size. Note that, too large of a batch size may invalid download requests.
 ```
