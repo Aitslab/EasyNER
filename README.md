@@ -33,7 +33,7 @@ conda env create -f environment.yml
 conda activate env_pipeline
 ```
 
-5. Provide input file: list of PubMed IDs, CORD metadata file, or file with free text.
+5. Provide input file: list of PubMed IDs, CORD19 metadata.csv file, or file with free text.
 
 
 6. Add the correct paths to your input file in the [config file](config.json) and choose the modules you want to run in the “ignore” section in the beginning of the file. 
