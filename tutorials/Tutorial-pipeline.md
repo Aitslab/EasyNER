@@ -8,7 +8,7 @@ ___
 
 # Section 0: Installation
 
-## GitHub repository
+## Download the GitHub repository
 
 If you have git installed on the computer, open a terminal window and download the repository by writing: 
 
