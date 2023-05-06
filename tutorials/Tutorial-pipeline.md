@@ -69,15 +69,15 @@ To run the full pipeline sequentially, the following config terms should be set 
 3. ner
 4. analysis
 
-The following sections will provide more detail on each of these terms
+The following sections will provide more detail on each of these modules
 
-___
 
-## 2.1 Data and Data Loading
+
+## 2.1 Data loading
 
 The pipeline allows three diffent methods of data loading:
 
-### A. Dataloader with Pubmed IDs
+### A. Downloader (for list of Pubmed IDs)
 
 The first section is the data loader that takes pubmed IDs as input and uses an API to retrieve abstracts from pubmed. The articles are then stored in a single JSON file. To run the data loader, turn ignore to false (cord_loader and text_loader to true) and provide the following arguments into the data loader section of the config file
 
