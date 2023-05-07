@@ -129,7 +129,7 @@ The text_loader variant of the dataloader module processess a file with free tex
     "input_path": input file path with free text
     "output_path": output file (JSON format)
     "title": user-defined title for the text
-	"id": user defined ID for the text
+    "id": user defined ID for the text
 ```
 #### example: 
 
@@ -149,7 +149,7 @@ This module opens the JSON file with the text collection produced by the data lo
     "output_file_prefix": user-set prefix for output files
     "tokenizer": "spacy" or "nltk"
     "model_name": example: "en_core_web_sm" or "en_core_web_trf" for spacy, for nltk give "" 
-	"batch_size": number of articles to be saved in one batch
+    "batch_size": number of articles to be saved in one batch
 
 ```
 #### example: 
