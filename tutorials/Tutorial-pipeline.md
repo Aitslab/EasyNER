@@ -161,27 +161,28 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-In this section the NER models are deployed on split sentences and entities are extracted. To run this section, the ignore argument for ner should be set to false. Then the following config arguments should be provided:
+The NER module performs NER on JSON files containing texts split into sentences (normally the output files from the sentence splitter module). The user can use deep learning models or use the spaCy phrasematcher with dictionaries for NER. Setveral BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
 #### Config file argument:
 ```console
-    "input_path": input folder path where all batches of split sentences are located
-    "output_folder": output folder path where each bach will be saved
+    "input_path": input folder path where all JSON batch files with texts split into sentences are located
+    "output_folder": output folder path where each batch will be saved
     "output_file_prefix": user-set prefix for tagged output files
-    "model_type": type of model, use between "biobert_finetuned" and "spacy_phrasematcher". Note that the latter is dictionary based
-    "model_folder": folder where model(s) are located. For huggingface models use the repo name instead. Eg. "aitslab"
-    "model_name": name of the model within the model folder or repository.
-    "vocab_path": if a specific vocab file is provided, used for dictionary based tagging (spacy_phrasematcher)
+    "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
+    "model_folder": folder where model is located. For huggingface models use the repo name instead. Eg. "aitslab"
+    "model_name": name of the model file located in the model folder or repository.
+    "vocab_path": path to dictionary (if this option is used)
     "store_tokens":"no",
-    "labels": if specific lavels are to be provided. ex: ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
+    "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
     "clear_old_results": overwrite old results
     "article_limit": if user decides to only choose a range of articles to run the model on, default [-1,9000]
-	"entity_type": type of extracted entity
+    "entity_type": type of extracted entity, e.g. "gene"
 ```
 #### example: 
 
 ![](imgs/ner_.png)
 
+#### models and dictionaries
 
 ___
 
