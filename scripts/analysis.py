@@ -95,8 +95,7 @@ def run(analysis_config, n=50):
     n= number of top entities to plot
     '''
     entity = analysis_config["input_path"].split("_")[-1].strip("\/\n ")
-    #prefix = analysis_config["input_path"].split("_")[-2].strip("\/\n ")
-    prefix="autophagyANDcancer2020-23"
+    prefix = analysis_config["input_path"].split("_")[-2].strip("\/\n ")
     
     #if entity not in ["cell", "chemical", "disease", "gene", "species"]:
     #    raise Exception ("Not a valid entity! Make sure the input folder is named properly. If you are running NER on a new/different entity, you may want to add it to the analysis script.")
