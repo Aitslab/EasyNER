@@ -184,6 +184,32 @@ The NER module performs NER on JSON files containing texts split into sentences 
 
 #### models and dictionaries
 
+##### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
+
+1. Cell-lines: biobert_huner_cell_v1 
+2. Chemical: biobert_huner_chemical_v1
+3. Disease: biobert_huner_disease_v1
+4. Gene/protein: biobert_huner_gene_v1
+5. Species: biobert_huner_species_v1
+
+The BioBERT models above have been fine-tuned using the [HUNER corpora](https://github.com/hu-ner/huner) and uploaded to [huggingface hub](https://huggingface.co/aitslab). These and similar models can be loaded from the huggingface hub by setting the "model_path" to "aitslab" and "model_name" to the model intended for use in the NER section of the config file. For example:
+
+```console
+"model_type": "biobert_finetuned",
+"model_path": "aitslab",
+"model_name": "biobert_huner_chemical_v1"
+```
+
+##### Dictionary-based NER
+[Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. For example:
+
+```console
+"model_type": "spacy_phrasematcher",
+"model_path": "",
+"model_name": "en_core_web_sm",
+"vocab_path": "dictionaries/sars-cov-2_synonyms_v2.txt"
+```
 ___
 
 
