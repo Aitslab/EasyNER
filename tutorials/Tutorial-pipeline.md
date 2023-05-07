@@ -93,7 +93,7 @@ To run the downloader module, change "downloader" in the ignore section to false
 ```console
     "input_path": path to file with pubmed IDs 
     "output_path": path to storage location for output
-    "batch_size": download batch size. Note that, too large of a batch size may invalid download requests.
+    "batch_size": number of article records downloaded in each call to API. Note that, too large of a batch size may invalid download requests.
 ```
 #### example: 
 
@@ -121,7 +121,8 @@ The cord_loader variant of the data loader module processes titles and abstracts
 
 ### 2.1.3 Freetext loader
 
-The text_loader variant of the dataloader module processess a file with free text. Similar to data_loader and cord_loader, the file path should be provided in the config files.
+The text_loader variant of the dataloader module processess a file with free text. Similar to data_loader and cord_loader, the file path should be provided in the config files.  To run the text_loader script, turn "text_loader" in the ignore section to false (and data_loader and cord_loader to true) and provide the following arguments:
+
 
 #### Config file argument:
 ```console
@@ -139,7 +140,7 @@ ___
 
 ## 2.2 Sentence Spliter module
 
-The loaded text is split with the help of Spacy or NLTK sentencer. The document collection will be split into batches with a specific batch size. How the files should be saved, for example batch size, should be specified in the config file. First you need to set the ignore parameter for splitter to false. Following are the arguments that can be provided to the splitter section
+This module opens the JSON file with the text collection produced by the data loader module, splits the texts into sentences with the spaCy or NLTK sentence splitter and stores the output in a set of JSON files. The number of texts that is processed together and stored in the same JSON output file is specified under "batch size" in the config file. First you need to set the ignore parameter for splitter to false. Following are the arguments that can be provided to the splitter section
 
 #### Config file argument:
 ```console
