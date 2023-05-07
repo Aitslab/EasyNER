@@ -140,7 +140,7 @@ ___
 
 ## 2.2 Sentence Spliter module
 
-This module loads a JSON file (normally the file produced by the data loader module) and splits the text(s) into sentences with the spaCy or NLTK sentence splitter. The output is stored in one or several JSON files. To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to specify the model ("en_core_web_sm" or "en_core_web_trf"). The number of texts that is processed together and stored in the same JSON output file is specified under "batch size". 
+This module loads a JSON file (normally the file produced by the data loader module) and splits the text(s) into sentences with the spaCy or NLTK sentence splitter. The output is stored in one or several JSON files. To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to choose the model: "en_core_web_sm" or "en_core_web_trf". The number of texts that is processed together and stored in the same JSON output file is specified under "batch size". 
 
 #### Config file argument:
 ```console
