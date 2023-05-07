@@ -121,15 +121,15 @@ The cord_loader variant of the data loader module processes titles and abstracts
 
 ### 2.1.3 Freetext loader
 
-The text_loader variant of the dataloader module processess a file with free text. Similar to data_loader and cord_loader, the file path should be provided in the config files.  To run the text_loader script, turn "text_loader" in the ignore section to false (and data_loader and cord_loader to true) and provide the following arguments:
+The text_loader variant of the dataloader module processess a file with free text and converts it into a JSON file. Similar to data_loader and cord_loader, the file path should be provided in the config files. To run the text_loader script, turn "text_loader" in the ignore section to false (and data_loader and cord_loader to true) and provide the following arguments:
 
 
 #### Config file argument:
 ```console
     "input_path": input file path with free text
-    "output_path": output file as document collection
-    "title": Title for the text to be used in the document collection
-	"id": user given ID for the free text
+    "output_path": output file (JSON format)
+    "title": user-defined title for the text
+	"id": user defined ID for the text
 ```
 #### example: 
 
