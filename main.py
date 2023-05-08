@@ -18,7 +18,6 @@ from scripts import util
 from scripts import metrics
 from scripts import ner_main
 from scripts import analysis
-from scripts.entity_parser import co_occurrence_extractor, detokenize
 
 CPU_LIMIT=5  #for multiprocessing
 

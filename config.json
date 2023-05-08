@@ -29,7 +29,7 @@
   "splitter": {
     "input_path": "data/Lund-Autophagy-1.json",
 	"output_folder": "data/sentencer/text-sentences_Lund-Autophagy-1/",
-    "output_file_prefix": "text-sentences_Lund-Autophagy-1/",
+    "output_file_prefix": "text-sentences_Lund-Autophagy-1",
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
 	"batch_size": 100
@@ -57,7 +57,7 @@
 	"paths": ["path/to/model-1/", "path/to/model-2/", "path/to/model-3/"],
 	"entities": ["model-1_entity", "model-2_entity","model-3_entity"],
 	"output_path": "results/merged_sample.json"
-  }
+  },
   "nel":{
 	"input_path": "results/text-ner-Lund-Autophagy-1_species/",
 	"output_path": "results/text-nel_Lund_Autophagy-1_species.json"
