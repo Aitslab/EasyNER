@@ -268,6 +268,20 @@ The metrics module can be used to get precision, recall and F1 scores of between
     "true_sep": seperator for true annotations file, default is " " 
 
 ```
+
+#### Output
+
+```console
+
+              precision    recall  f1-score   support
+
+           _    0.67557   0.65274   0.66396      1627
+
+   micro avg    0.67557   0.65274   0.66396      1627
+   macro avg    0.67557   0.65274   0.66396      1627
+weighted avg    0.67557   0.65274   0.66396      1627
+
+```
 ___
 
 
