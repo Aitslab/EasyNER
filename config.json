@@ -22,7 +22,7 @@
 	  "subset_file": ""
   },
   "text_loader": {
-    "input_path": "data/path-to-freetext/sample_text.txt",
+    "input_path": "data/path-to-freetext/",
     "output_path": "data//path-to-freetext/freetext.json",
     "prefix": "freetext"
   },
