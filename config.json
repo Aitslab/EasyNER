@@ -5,8 +5,9 @@
     "text_loader":true,
     "splitter": true,
     "ner": true,
-    "analysis": false,
+    "analysis": true,
     "merger": true,
+    "metrics":false,
 	"nel":true
   },
   "downloader": {
@@ -37,7 +38,7 @@
   "ner": {
     "input_path": "data/sentencer/text-sentences_Lund-Autophagy-1/",
     "output_path": "results/text-ner-Lund-Autophagy-1_species/",
-	"output_file_prefix": "text-ner-Lund-Autophagy-1_species",
+	  "output_file_prefix": "text-ner-Lund-Autophagy-1_species",
     "model_type": "biobert_finetuned",
     "model_folder": "aitslab",
     "model_name": "biobert_huner_species_v1",
@@ -46,20 +47,25 @@
     "labels": "",
     "clear_old_results": true,
     "article_limit": [-1,90000],
-	"entity_type": "species",
-	"multiprocessing":true
+	  "entity_type": "species",
+	  "multiprocessing":true
   },
   "analysis": {
     "input_path": "results/text-ner-Lund-Autophagy-1_species/",
     "output_path": "results/"
   },
   "merger": {
-	"paths": ["path/to/model-1/", "path/to/model-2/", "path/to/model-3/"],
-	"entities": ["model-1_entity", "model-2_entity","model-3_entity"],
-	"output_path": "results/merged_sample.json"
+	  "paths": ["path/to/model-1/", "path/to/model-2/", "path/to/model-3/"],
+	  "entities": ["model-1_entity", "model-2_entity","model-3_entity"],
+	  "output_path": "results/merged_sample.json"
+  },
+  "metrics": {
+    "predictions_file":"path/to/predictions/file.txt",
+    "true_file":"path/to/true/annotated/file.txt",
+    "output_file":"path/to/output/file.txt"
   },
   "nel":{
-	"input_path": "results/text-ner-Lund-Autophagy-1_species/",
-	"output_path": "results/text-nel_Lund_Autophagy-1_species.json"
+	  "input_path": "results/text-ner-Lund-Autophagy-1_species/",
+	  "output_path": "results/text-nel_Lund_Autophagy-1_species.json"
   }
 }

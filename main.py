@@ -59,8 +59,6 @@ def run_text_loader(tl_config: dict, ignore:bool):
     
     results = text_loader.load_freetext(tl_config["input_path"], tl_config["title"], tl_config["id"])
     text_loader.convert_to_json(results, tl_config["output_path"])
-    
-    
 
 
 def run_splitter(splitter_config: dict, ignore: bool) -> dict:
@@ -170,59 +168,6 @@ def run_ner(ner_config: dict, ignore: bool):
     print("Finished running NER script.")
 
 
-def add_tags(add_tags_config: dict, ignore: bool):
-  #this function adds the entity count and, for sentences with exactly two entities, it encloses entity 1 and 2 in << >> and  [[ ]]
-  #infile = path to file returned by ner module
-  #outfile = path to new json file "text-nertags.json"
-    if ignore:
-        print("Ignoring script: ADD_TAGS.")
-        return
-
-    print("Running ADD_TAGS script.")
-
-    with open(add_tags_config["input_path"], "r",encoding="utf-8") as f:
-        articles = json.loads(f.read())
-
-
-# Because we want to save the result periodically.
-    batch_index = 0
-    batch_size = 500
-
-    # Run prediction on each sentence in each article.
-    for pmid in articles:
-        if batch_index > batch_size:
-            util.append_to_json_file(add_tags_config["output_path"], articles)
-            batch_index = 0
-        sentences = articles[pmid]["sentences"]
-        for i, sentence in enumerate(sentences):
-
-            count = len(articles[pmid]["sentences"][i]["entities"])
-            #x = {"text2": articles[pmid]["sentences"][i]["entities"][0]}
-            if count == 2:
-              entity_1 = articles[pmid]["sentences"][i]["entities"][0]
-              entity_2 = articles[pmid]["sentences"][i]["entities"][1]
-              string = articles[pmid]["sentences"][i]["text"]
-              string = string.replace(entity_1, "<< "+entity_1+" >>")
-              string = string.replace(entity_2, "[[ "+entity_2+" ]]")
-            else:
-              string = ""
-            articles[pmid]["sentences"][i]["tagged"] = string
-            articles[pmid]["sentences"][i]["entitycount"] = count
-
-        batch_index += 1
-
-    util.append_to_json_file(add_tags_config["output_path"], articles)
-
-    print("Finished running ADD_TAGS script.")
-
-
-# input  = articles from tagged NER file, dir to pre-trained SciBERT model
-#          path to predictions file, path to statistics file
-# output = predictions on the format: entity1 relation entity2 sentence
-#          statistics sorted by frequency on the format: entity1 entity2 relation frequency
-
-
-
 def run_analysis(analysis_config: dict, ignore: bool):
     if ignore:
         print("Ignoring script: analysis.")
@@ -243,26 +188,9 @@ def run_metrics(config: dict, ignore: bool):
     print("Running metrics script.")
 
     metrics_config = config["metrics"]
-    ner_config = config["ner"]
-
-    ner_session = NERInferenceSession(
-        model_dir=ner_config["model_folder"],
-        model_name=ner_config["model_name"],
-        model_vocab=ner_config["vocab_path"],
-        labels=ner_config["labels"],
-    )
-
-    dir = metrics_config["gold-standard_path"]
-
-    open(metrics_config["output_path"], "w").close()
-
-    files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
-    for file in files:
-        with open(metrics_config["output_path"], "a+") as out_f:
-            out_f.write("\n\n" + "-"*10 + file + "-"*10)
-        metrics.gs_metrics(dir + file)
-        metrics.biobert_metrics(ner_session, dir + file, metrics_config["output_path"])
-
+    
+    metrics.get_metrics(metrics_config)
+    
     print("Finished running metrics script.")
 
 
@@ -280,9 +208,6 @@ if __name__ == "__main__":
 
     ignore = config["ignore"]
 
-    # Run metrics on models and gold-standard set
-    run_metrics(config, ignore=ignore["metrics"])
-    print()
 
     # Load abstracts from the CORD dataset.
     run_cord_loader(config["cord_loader"], ignore=ignore["cord_loader"])
@@ -303,13 +228,13 @@ if __name__ == "__main__":
     # Run NER inference on each sentence for each article.
     run_ner(config["ner"], ignore=ignore["ner"])
     print()
-
-    # Run ADD_TAGS on each sentence for each article.
-    add_tags(config["add_tags"], ignore=ignore["add_tags"])
-    print()
     
     # Run analysis on the entities that were found by NER.
     run_analysis(config["analysis"], ignore=ignore["analysis"])
+    print()
+
+    # Run metrics on models and gold-standard set
+    run_metrics(config, ignore=ignore["metrics"])
     print()
 
     print("Program finished successfully.")

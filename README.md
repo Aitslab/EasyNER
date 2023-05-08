@@ -28,28 +28,34 @@ cd EasyNER
 conda env create -f environment.yml
 ```
 
-4. After installation activate the environment:
+4. Install spacy
+
+```console
+
+python -m spacy download en_core_web_sm
+```
+
+5. After installation activate the environment:
 ```console
 
 conda activate easyner_env
-python -m spacy download en_core_web_sm
 
 ```
 
 
-5. Provide input file: list of PubMed IDs, CORD19 metadata.csv file, or file with free text.
+6. Provide input file: list of PubMed IDs, CORD19 metadata.csv file, or file with free text.
 
 
-6. Add the correct paths to your input file in the [config file](config.json) and choose the modules you want to run in the “ignore” section in the beginning of the file. 
+7. Add the correct paths to your input file in the [config file](config.json) and choose the modules you want to run in the “ignore” section in the beginning of the file. 
 
 
-7. Run the pipeline with the following command:
+8. Run the pipeline with the following command:
 
 ```python
 python main.py
 ```
 
-8. The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
+9. The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
 
 
