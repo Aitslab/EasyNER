@@ -57,9 +57,9 @@ def run_text_loader(tl_config: dict, ignore:bool):
     
     print("Running free text loader script")
     
-    results = text_loader.load_freetext(tl_config["input_path"], tl_config["title"], tl_config["id"])
-    text_loader.convert_to_json(results, tl_config["output_path"])
+    text_loader.run(tl_config)
 
+    print("Finished running freetext loader script.")
 
 def run_splitter(splitter_config: dict, ignore: bool) -> dict:
     if ignore:
