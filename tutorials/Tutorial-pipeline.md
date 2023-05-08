@@ -255,8 +255,23 @@ The generated output file contains the following columns:
 
 ___
 
+## 2.5 Metrics module
 
-## 2.5 Merger module (optional)
+The metrics module can be used to get precision, recall and F1 scores of between a true and a prediction file, as long as both are in IOB2 format. Note that BioBERT raw test prediction file is in IOB2 format. To run metrics, set ignore metrics to false in the config file. Then use the following input and output config arguments:
+
+#### Config file argument:
+```console
+    "predictions_file": file containing predictions by the chosen model (in IOB2 format),
+    "true_file": file containing true (annotated) values (also in IOB2 format),
+    "output_file": file containing precision, recall and f1 scores,
+    "pred_sep": seperator for predictions file, default is " ",
+    "true_sep": seperator for true annotations file, default is " " 
+
+```
+___
+
+
+## 2.6 Merger module (optional)
 
 The merger section combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 

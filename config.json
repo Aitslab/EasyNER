@@ -62,7 +62,9 @@
   "metrics": {
     "predictions_file":"path/to/predictions/file.txt",
     "true_file":"path/to/true/annotated/file.txt",
-    "output_file":"path/to/output/file.txt"
+    "output_file":"path/to/output/file.txt",
+    "pred_sep": " ",
+    "true_sep":" " 
   },
   "nel":{
 	  "input_path": "results/text-ner-Lund-Autophagy-1_species/",
