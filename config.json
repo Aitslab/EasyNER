@@ -8,7 +8,7 @@
     "analysis": false,
     "merger": true,
     "metrics":true,
-	  "nel":true
+    "nel":true
   },
   "downloader": {
     "input_path": "data/list_of_pmids.txt",
@@ -18,8 +18,8 @@
   "cord_loader": {
     "input_path": "data/metadata.csv",
     "output_path": "results/dataloader/text.json",
-	  "subset":false,
-	  "subset_file": ""
+    "subset":false,
+    "subset_file": ""
   },
   "text_loader": {
     "input_path": "data/freetext.txt",
@@ -28,16 +28,16 @@
   },
   "splitter": {
     "input_path": "results/dataloader/text.json",
-	  "output_folder": "results/splitter/",
+    "output_folder": "results/splitter/",
     "output_file_prefix": "sentences",
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
-	  "batch_size": 50
+    "batch_size": 50
   },
   "ner": {
     "input_path": "results/splitter/",
     "output_path": "results/ner/",
-	  "output_file_prefix": "ner_species",
+    "output_file_prefix": "ner_species",
     "model_type": "biobert_finetuned",
     "model_folder": "aitslab",
     "model_name": "biobert_huner_species_v1",
@@ -46,8 +46,8 @@
     "labels": "",
     "clear_old_results": true,
     "article_limit": [-1,90000],
-	  "entity_type": "species",
-	  "multiprocessing":true
+    "entity_type": "species",
+    "multiprocessing":true
   },
   "analysis": {
     "input_path": "results/ner/path-to-ner-folder/",
@@ -56,9 +56,9 @@
     "plot_top_n":50
   },
   "merger": {
-	  "paths": ["results/ner/model-1/", "results/ner/model-2/", "results/ner/model-3/"],
-	  "entities": ["model-1_entity", "model-2_entity","model-3_entity"],
-	  "output_path": "results/merged/path/to/merged-folder/"
+    "paths": ["results/ner/model-1/", "results/ner/model-2/", "results/ner/model-3/"],
+    "entities": ["model-1_entity", "model-2_entity","model-3_entity"],
+    "output_path": "results/merged/path/to/merged-folder/"
   },
   "metrics": {
     "predictions_file":"path/to/predictions/file.txt",
@@ -68,7 +68,7 @@
     "true_sep":" " 
   },
   "nel":{
-	  "input_path": "results/text-ner-Lund-Autophagy-1_species/",
-	  "output_path": "results/text-nel_Lund_Autophagy-1_species.json"
+    "input_path": "results/text-ner-Lund-Autophagy-1_species/",
+    "output_path": "results/text-nel_Lund_Autophagy-1_species.json"
   }
 }
