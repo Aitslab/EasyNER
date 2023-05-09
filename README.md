@@ -28,7 +28,7 @@ cd EasyNER
 conda env create -f environment.yml
 ```
 
-4. Install spacy
+4. Load spacy
 
 ```console
 
