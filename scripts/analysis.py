@@ -83,24 +83,58 @@ def plot_frequency_barchart(df, entity, n):
     '''
     plot a frequency barchart with the top n entities
     '''
-    fig = plt.figure(figsize=(10,10))
-    ax = sns.barplot(y=df.index[:n],x="total_count", data=df[:n])
-    ax.bar_label(ax.containers[0])
-    ax.set_title(f'Top {n} entities for {entity} model', size=15, pad=15)
-    return fig, ax
     
-def run(analysis_config, n=50):
+    if n<=50:
+        fig = plt.figure(figsize=(10,10))
+        ax = sns.barplot(y=df.index[:n],x="total_count", data=df[:n])
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.get_xaxis().set_visible(False)
+
+        ax.bar_label(ax.containers[0])
+        ax.set_title(f'Top {n} entities for {entity} model', size=20, pad=12)
+        return fig, ax
+    
+    elif n<=100:
+        fig = plt.figure(figsize=(20,20))
+        ax = sns.barplot(y=df.index[:n],x="total_count", data=df[:n])
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.get_xaxis().set_visible(False)
+
+        ax.bar_label(ax.containers[0])
+        ax.set_title(f'Top {n} entities for {entity} model', size=30, pad=15)
+        return fig, ax
+    
+    else:
+        print("Plotting more that 100 entities can result in distorted graph")
+        fig = plt.figure(figsize=(2*int(n/10),2*int(n/10)))
+        ax = sns.barplot(y=df.index[:n],x="total_count", data=df[:n])
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.get_xaxis().set_visible(False)
+
+        ax.bar_label(ax.containers[0])
+        ax.set_title(f'Top {n} entities for {entity} model', size=4*int(n/10), pad=15)
+        return fig, ax
+    
+    
+def run(analysis_config):
     '''
     run analysis
     n= number of top entities to plot
     '''
-    entity = analysis_config["input_path"].split("_")[-1].strip("\/\n ")
-    prefix = analysis_config["input_path"].split("_")[-2].strip("\/\n ")
+    
     
     #if entity not in ["cell", "chemical", "disease", "gene", "species"]:
     #    raise Exception ("Not a valid entity! Make sure the input folder is named properly. If you are running NER on a new/different entity, you may want to add it to the analysis script.")
         
     input_folder = analysis_config["input_path"]
+    n = int(analysis_config["plot_top_n"]) if "plot_top_n" in analysis_config else 50
+    entity=analysis_config["entity_type"]
     input_files_list = get_input_files(input_folder)
     df = run_analysis(input_files_list)
     
@@ -110,10 +144,10 @@ def run(analysis_config, n=50):
     
         fig,ax = plot_frequency_barchart(df, entity, n)
         
-        path_ = analysis_config["output_path"] + "/analysis_{}_{}/".format(prefix,entity)
+        path_ = analysis_config["output_path"] + "/analysis_{}/".format(entity)
         os.makedirs(path_, exist_ok=True)
-        plt.savefig(path_+"{}_{}_top_{}.png".format(prefix, entity,n), bbox_inches="tight", aspect="auto", format="png")
-        df.to_csv(path_+"{}_result_{}.tsv".format(prefix, entity), sep="\t")
+        plt.savefig(path_+"{}_top_{}.png".format( entity,n), bbox_inches="tight", aspect="auto", format="png")
+        df.to_csv(path_+"result_{}.tsv".format(entity), sep="\t")
     
 
 if __name__ == "__main__":

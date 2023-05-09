@@ -218,8 +218,11 @@ This section uses the extracted entities to generate a file of ranked entities a
 
 #### Config file argument:
 ```console
-    "input_path": input folder path where all batches of NER are located
-    "output_path": output folder path where the analysis files will be saved
+    "input_path": input folder path where all batches of NER are located,
+    "output_path": output folder path where the analysis files will be saved,
+    "entity_type": type of entity, this will be added as a prefix to the output file and bar graph,
+    "plot_top_n": plot top n entities. defaults to 50. Note that plotting more than 100 entities can result in a distorted graph
+
 ```
 #### example: 
 

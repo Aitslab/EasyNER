@@ -2,10 +2,10 @@
   "ignore": {
     "cord_loader": true,
     "downloader": true,
-    "text_loader":false,
+    "text_loader":true,
     "splitter": true,
     "ner": true,
-    "analysis": true,
+    "analysis": false,
     "merger": true,
     "metrics":true,
 	  "nel":true
@@ -32,7 +32,7 @@
     "output_file_prefix": "sentences",
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
-	  "batch_size": 100
+	  "batch_size": 50
   },
   "ner": {
     "input_path": "results/splitter/",
@@ -50,18 +50,20 @@
 	  "multiprocessing":true
   },
   "analysis": {
-    "input_path": "results/ner/",
-    "output_path": "results/analysis/"
+    "input_path": "results/ner/path-to-ner-folder/",
+    "output_path": "results/analysis/",
+    "entity_type":"species",
+    "plot_top_n":50
   },
   "merger": {
 	  "paths": ["results/ner/model-1/", "results/ner/model-2/", "results/ner/model-3/"],
 	  "entities": ["model-1_entity", "model-2_entity","model-3_entity"],
-	  "output_path": "results/merged.json"
+	  "output_path": "results/merged/path/to/merged-folder/"
   },
   "metrics": {
     "predictions_file":"path/to/predictions/file.txt",
     "true_file":"path/to/true/annotated/file.txt",
-    "output_file":"output/metrics.txt",
+    "output_file":"results/metrics/path/to/metrics_file.txt",
     "pred_sep": " ",
     "true_sep":" " 
   },
