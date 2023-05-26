@@ -17,11 +17,11 @@ class NER_biobert:
         entities = self.nlp(sequence)
         return entities
         
-    def run_ner(self):
+    # def run_ner(self):
         
-        for ix, art in tqdm(enumerate(articles)):
+    #     for ix, art in tqdm(enumerate(articles)):
             
-            sentences = articles[art]["sentences"]
+    #         sentences = articles[art]["sentences"]
             
         
 
