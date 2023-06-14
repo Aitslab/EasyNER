@@ -3,9 +3,9 @@
     "cord_loader": true,
     "downloader": true,
     "text_loader":true,
-    "splitter": true,
+    "splitter": false,
     "ner": true,
-    "analysis": false,
+    "analysis": true,
     "merger": true,
     "metrics":true,
     "nel":true
@@ -30,6 +30,7 @@
     "input_path": "results/dataloader/text.json",
     "output_folder": "results/splitter/",
     "output_file_prefix": "sentences",
+	"pubmed_pre_batched": false,
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
     "batch_size": 100

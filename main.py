@@ -12,6 +12,7 @@ from multiprocessing import cpu_count
 from scripts import cord_loader
 from scripts import downloader
 from scripts import splitter
+from scripts import splitter_pubmed
 from scripts import text_loader
 #from scripts import analysis
 from scripts import util
@@ -67,40 +68,75 @@ def run_splitter(splitter_config: dict, ignore: bool) -> dict:
         return {}
     
     os.makedirs(splitter_config["output_folder"], exist_ok=True)
-        
-    with open(splitter_config["input_path"], "r",encoding="utf-8") as f:
-        full_articles = json.loads(f.read())
 
-    article_batches = splitter.make_batches(list(full_articles), splitter_config["batch_size"])
-
-    # split each batch
-    if splitter_config["tokenizer"] == 'spacy':
-        print("Running splitter script with spacy")
+    if splitter_config["pubmed_pre_batched"]==True:
+        input_files_list = splitter_pubmed.load_pre_batched_files(splitter_config["input_path"])[:20]
         
-        with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
+            # split each batch
+        if splitter_config["tokenizer"] == 'spacy':
+            print("Running splitter script with spacy")
             
-            futures=[executor.submit(splitter.split_batch,splitter_config, idx, art, full_articles,
-                tokenizer="spacy") for idx, art in enumerate(article_batches)]
-            
-            for future in as_completed(futures):
-                #print(future.result)
-                i = future.result()
+            with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
                 
+                futures=[executor.submit(splitter_pubmed.split_prebatch,splitter_config, input_file,
+                    tokenizer="spacy") for input_file in input_files_list]
                 
+                for future in as_completed(futures):
+                    #print(future.result)
+                    i = future.result()
+                    
+                    
 
-    elif splitter_config["tokenizer"] == 'nltk':
-        print("Running splitter script with nltk")
+        elif splitter_config["tokenizer"] == 'nltk':
+            print("Running splitter script with nltk")
 
-        #import nltk
-        #nltk.download("punkt")
+            #import nltk
+            #nltk.download("punkt")
+            
+            with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
+                
+                futures=[executor.submit(splitter_pubmed.split_prebatch,splitter_config,input_file,
+                    tokenizer="nltk") for input_file in input_files_list]
+                
+                for future in as_completed(futures):
+                    i = future.result()
         
-        with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
+
+
+    else:        
+        with open(splitter_config["input_path"], "r",encoding="utf-8") as f:
+            full_articles = json.loads(f.read())
+
+        article_batches = splitter.make_batches(list(full_articles), splitter_config["batch_size"])
+
+        # split each batch
+        if splitter_config["tokenizer"] == 'spacy':
+            print("Running splitter script with spacy")
             
-            futures=[executor.submit(splitter.split_batch,splitter_config,idx, art, full_articles,
-                tokenizer="nltk") for idx, art in enumerate(article_batches)]
+            with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
+                
+                futures=[executor.submit(splitter.split_batch,splitter_config, idx, art, full_articles,
+                    tokenizer="spacy") for idx, art in enumerate(article_batches)]
+                
+                for future in as_completed(futures):
+                    #print(future.result)
+                    i = future.result()
+                    
+                    
+
+        elif splitter_config["tokenizer"] == 'nltk':
+            print("Running splitter script with nltk")
+
+            #import nltk
+            #nltk.download("punkt")
             
-            for future in as_completed(futures):
-                i = future.result()
+            with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
+                
+                futures=[executor.submit(splitter.split_batch,splitter_config,idx, art, full_articles,
+                    tokenizer="nltk") for idx, art in enumerate(article_batches)]
+                
+                for future in as_completed(futures):
+                    i = future.result()
                 
 
     print("Finished running splitter script.")
