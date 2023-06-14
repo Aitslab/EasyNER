@@ -53,9 +53,9 @@ def split_prebatch(splitter_config, input_file, tokenizer="spacy", model="en_cor
     '''
     
     articles = {}
-    d = load_json(input_file=input_file)
-    batch = {k:d[k] for k in list(d)[:20]}
-    # batch = load_json(input_file=input_file)
+    # d = load_json(input_file=input_file)
+    # batch = {k:d[k] for k in list(d)[:20]}
+    batch = load_json(input_file=input_file)
     batch_idx = get_batch_index(input_file=input_file)
 
 
