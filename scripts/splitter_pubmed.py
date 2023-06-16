@@ -12,8 +12,30 @@ def make_batches(list_id, n):
     for i in range(0, len(list_id), n):
         yield list_id[i:i + n]
 
-def load_pre_batched_files(input_folder, k="n"):
-    return sorted(glob(f'{input_folder}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(k)[-1]))
+def load_pre_batched_files(input_folder, limit=[0,100000000],k="n"):
+    if limit==[0,100000000] or limit=="ALL":
+        return sorted(glob(f'{input_folder}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(k)[-1]))
+        
+    elif isinstance(limit,list):
+        
+        if len(limit)==2:
+            if limit[0]>limit[1]:
+                 raise Exception("Error! Make sure to enter in the format of [#,#] where # represents lower and upper limit numbers respectively")
+            all_files = sorted(glob(f'{input_folder}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(k)[-1]))
+            processed_files = []
+            for f in all_files:
+                fidx = int(os.path.splitext(os.path.basename(f))[0].split(k)[-1])
+                if fidx>=limit[0] and fidx<=limit[1]:
+                    processed_files.append(f)    
+            return processed_files
+        
+        else:
+            raise Exception("ERROR!! Invalid limit parameters. Make sure to enter in the format of [#,#] where # represents lower and upper limit numbers respectively")
+    else:
+        raise Exception("ERROR! Invalid filename or limit parameter! Filename should match pubmed naming convention. Ex: pubmed23n0001.json")
+             
+            
+             
 
 def load_json(input_file):
     with open(input_file, "r",encoding="utf-8") as f:

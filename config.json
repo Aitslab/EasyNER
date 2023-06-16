@@ -31,6 +31,7 @@
     "output_folder": "results/splitter/",
     "output_file_prefix": "sentences",
 	"pubmed_pre_batched": false,
+	"file_limit":[0,100],
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
     "batch_size": 100

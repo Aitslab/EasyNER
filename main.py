@@ -70,8 +70,10 @@ def run_splitter(splitter_config: dict, ignore: bool) -> dict:
     os.makedirs(splitter_config["output_folder"], exist_ok=True)
 
     if splitter_config["pubmed_pre_batched"]==True:
-        input_files_list = splitter_pubmed.load_pre_batched_files(splitter_config["input_path"])[:20]
-        
+        if splitter_config["file_limit"]== "ALL":
+            input_files_list = splitter_pubmed.load_pre_batched_files(splitter_config["input_path"])
+        else:
+            input_files_list = splitter_pubmed.load_pre_batched_files(splitter_config["input_path"], limit=splitter_config["file_limit"])
             # split each batch
         if splitter_config["tokenizer"] == 'spacy':
             print("Running splitter script with spacy")
