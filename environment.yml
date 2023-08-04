@@ -53,6 +53,7 @@ dependencies:
   - cuda-visual-tools=11.7.1
   - cycler=0.11.0
   - dbus=1.13.18
+  - datasets=2.14.3
   - expat=2.4.9
   - ffmpeg=4.3
   - filelock=3.6.0
