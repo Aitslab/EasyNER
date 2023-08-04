@@ -31,6 +31,8 @@ def convert_to_json(result, output_file):
         json.dump(result, f, ensure_ascii=False, indent=2)
     
 def run(freetext_config):
+    os.makedirs(os.path.dirname(freetext_config["output_path"]), exist_ok=True)
+
     prefix = freetext_config["prefix"] if "prefix" in freetext_config else "freetext"
     
     results = load_freetext(freetext_config["input_path"], prefix=prefix)

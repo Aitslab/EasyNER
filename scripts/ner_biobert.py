@@ -6,23 +6,16 @@ import os
 
 class NER_biobert:
 
-    def __init__(self, model_dir: str, model_name: str, model_max_length=192):
+    def __init__(self, model_dir: str, model_name: str, model_max_length=192, device=-1):
         self.model_path = PurePosixPath(Path(model_dir, model_name))
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_path, model_max_length=model_max_length)
         self.model = AutoModelForTokenClassification.from_pretrained(self.model_path)
-        self.nlp = pipeline(task='ner',model=self.model,tokenizer=self.tokenizer, aggregation_strategy="max")
+        self.nlp = pipeline(task='ner',model=self.model,tokenizer=self.tokenizer, aggregation_strategy="max", device=device)
         
 
     def predict(self, sequence: str):
-        entities = self.nlp(sequence)
-        return entities
+        return self.nlp(sequence)
         
-    # def run_ner(self):
-        
-    #     for ix, art in tqdm(enumerate(articles)):
-            
-    #         sentences = articles[art]["sentences"]
-            
         
 
 if __name__ == "__main__":

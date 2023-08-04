@@ -4,12 +4,14 @@ import spacy
 import os
 import re
 import json
+import pandas as pd
 from tqdm import tqdm
 from spacy.matcher import PhraseMatcher
+from datasets import Dataset, load_dataset
 from . import ner_biobert, util
 from .ner_inference import NERInferenceSession_biobert_onnx
 
-def run_ner_main(ner_config: dict, batch_file):
+def run_ner_main(ner_config: dict, batch_file, device=-1):
     '''
     run NER in batches from sentence splitter output
     '''
@@ -41,13 +43,12 @@ def run_ner_main(ner_config: dict, batch_file):
         patterns = [nlp.make_doc(term) for term in terms]
         matcher.add(ner_config["entity_type"], patterns)
         
-    # Run prediction on each sentence in each article.
-    for pmid in tqdm(articles, desc=f'batch:{batch_index}'):
+        # Run prediction on each sentence in each article.
+        for pmid in tqdm(articles, desc=f'batch:{batch_index}'):
 
-        sentences = articles[pmid]["sentences"]
+            sentences = articles[pmid]["sentences"]
 
-        #Predict with spacy PhraseMatcher, if it has been selected       
-        if ner_config["model_type"] == 'spacy_phrasematcher':
+            #Predict with spacy PhraseMatcher, if it has been selected       
 
             for i, sentence in enumerate(sentences):
                 ner_class = ner_config["entity_type"]
@@ -79,98 +80,55 @@ def run_ner_main(ner_config: dict, batch_file):
                 articles[pmid]["sentences"][i]["entity spans"] = spans
 
 
-        #Predict with BioBERT onnx model, if it has been selected
+                   
+    elif ner_config["model_type"] == 'biobert_finetuned':
         
-        elif ner_config["model_type"] == 'biobert_onnx':
-            
-            print("Running NER with biobert_onnx")
-            ner_session = NERInferenceSession_biobert_onnx(
-                model_dir=ner_config["model_folder"],
-                model_name=ner_config["model_name"],
-                model_vocab=ner_config["vocab_path"],
-                labels=ner_config["labels"]
-                )
+        #print("Running NER with finetuned BioBERT")
+        
+        ner_session = ner_biobert.NER_biobert(
+        model_dir=ner_config["model_folder"],
+            model_name=ner_config["model_name"],
+            device=device
+        )
+
+        def wrapper_predict(example):
+            '''
+            a wrapper to run map function with predict
+            '''
+            try:
+                example["prediction"] = ner_session.predict(example["text"])
+            except:
+                example["prediction"]  = []
+
+            return example
+        
+        articles_dataset = biobert_process_articles(articles)
+
+        articles_dataset_processed = articles_dataset.map(wrapper_predict)
+
+        articles_processed = convert_dataset_to_dict(articles, articles_dataset_processed)
+        articles = articles_processed
+        
+        # for i, sentence in enumerate(sentences):
+        #     try:
+        #         # the entities predicted are all uncased but the entity within the sentence is cased
+        #         entities = ner_session.predict(sentence["text"])
+        #     except:
+        #         # exception due to existence of utf tags in the data, which is incomprehensable/non-tokenizable by the model
+        #         print("batch {}, sentence no. {} with text [{}] was not predicted".format(batch_index, i, sentence))
+        #         entities = []
                 
-            for i, sentence in enumerate(sentences):
-                #ner_class = ner_config["entity_type"]
-
-
-                token_label_pairs = ner_session.predict(sentence["text"])
-                if ner_config["store_tokens"] == "yes":
-                    tokens = []
-                    for pair in token_label_pairs:
-                        tokens.append(pair[0])
-                    articles[pmid]["sentences"][i]["tokens"] = tokens
-                
-                x = co_occurrence_extractor(detokenize(token_label_pairs))
-
-                articles[pmid]["sentences"][i]["NER class"] = ner_class
-                articles[pmid]["sentences"][i]["entities"] = x["entities"]
-
-                spans = []
-
-                # Run if each entity present in the sentence only once
-                if len(x["entities"]) == len(set(x["entities"])): 
-                    for ent in x["entities"]:
-                        first_char = sentence["text"].find(ent)
-                        last_char = first_char + len(ent) - 1
-                        spans.append((first_char, last_char))
-
-                # Run if at least one entity present in the sentence more than once
-                else:
-                    ner_counter = 0
-                    text = sentence["text"]
-
-                    while ner_counter < len(x["entities"]):
-                        ent = x["entities"][ner_counter]
-
-                        if x["entities"].count(ent) == 1:
-                            first_char = sentence["text"].find(ent)
-                            last_char = first_char + len(ent) - 1
-                            spans.append((first_char, last_char))
-
-                        else:
-                            first_char = text.find(ent)
-                            last_char = first_char + len(ent) - 1
-                            spans.append((first_char, last_char))
-                            mask="x"*len(ent)
-                            text = text[:first_char]+mask+text[last_char+1:]
-
-                        ner_counter = ner_counter + 1
-
-                articles[pmid]["sentences"][i]["entity spans"] = spans
-
-            
-        elif ner_config["model_type"] == 'biobert_finetuned':
-            
-            #print("Running NER with finetuned BioBERT")
-            
-            
-            ner_session = ner_biobert.NER_biobert(
-            model_dir=ner_config["model_folder"],
-                model_name=ner_config["model_name"]
-            )
-            
-            for i, sentence in enumerate(sentences):
-                try:
-                    # the entities predicted are all uncased but the entity within the sentence is cased
-                    entities = ner_session.predict(sentence["text"])
-                except:
-                    # exception due to existence of utf tags in the data, which is incomprehensable/non-tokenizable by the model
-                    print("batch {}, sentence no. {} with text [{}] was not predicted".format(batch_index, i, sentence))
-                    entities = []
+        #     entities_list = []
+        #     entity_spans_list = []
+        #     if len(entities)>0:
+        #         for ent in entities:
+        #             entities_list.append(ent["word"])
+        #             entity_spans_list.append([ent["start"],ent["end"]])
                     
-                entities_list = []
-                entity_spans_list = []
-                if len(entities)>0:
-                    for ent in entities:
-                        entities_list.append(ent["word"])
-                        entity_spans_list.append([ent["start"],ent["end"]])
-                        
-                articles[pmid]["sentences"][i]["entities"] = entities_list
-                articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
-                
-            
+        #     articles[pmid]["sentences"][i]["entities"] = entities_list
+        #     articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
+
+
     util.append_to_json_file(f'{ner_config["output_path"]}/{ner_config["output_file_prefix"]}-{batch_index}.json', articles)        
     return batch_index
     
@@ -185,6 +143,57 @@ def filter_files(list_files, start, end):
             filtered_list_files.append(f)
     
     return filtered_list_files
+
+def biobert_process_articles(articles, column_names=["pmid", "sent_idx", "text"]):
+    '''
+    process articles into a huggingface dataset
+    articles: sentence split articles from splitter
+    column names: column names for the dataframe/dataset
+
+    returns processed hf dataset where each line is a sentence
+    '''
+
+    
+    articles_processed = []
+    
+    for pmid, content in articles.items():
+        l = []
+        sent_idx = 0
+        for sent in content["sentences"]:
+            articles_processed.append([pmid, sent_idx, sent["text"]])
+            sent_idx+=1
+    
+    articles_df = pd.DataFrame(articles_processed)
+    articles_df.columns = column_names
+
+    articles_ds = Dataset.from_pandas(articles_df)
+
+    return articles_ds
+
+def convert_dataset_to_dict(articles, ner_dataset):
+    '''
+    adds predictions and spans to expected dictionary/json format articles
+    articles: original articles
+    ner_dataset: hf dataset with predictions
+
+    returns: articles dictionary with added entities and spans
+    '''
+
+    for row in ner_dataset:
+        pmid = row["pmid"]
+        sent_idx = row["sent_idx"]
+        text = row["text"]
+        prediction = row["prediction"]
+        articles[pmid]["sentences"][sent_idx]["entities"]=[]
+        articles[pmid]["sentences"][sent_idx]["entity_spans"]=[]
+        
+        if len(prediction)!=0:
+            for pred in prediction:
+                articles[pmid]["sentences"][sent_idx]["entities"].append(pred["word"])
+                articles[pmid]["sentences"][sent_idx]["entity_spans"].append([pred["start"], pred["end"]])
+            
+    return articles
+
 
 if __name__ == "__main__":
     pass

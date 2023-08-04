@@ -3,15 +3,15 @@
     "cord_loader": true,
     "downloader": true,
     "text_loader":true,
-    "splitter": false,
-    "ner": true,
+    "splitter": true,
+    "ner": false,
     "analysis": true,
     "merger": true,
     "metrics":true,
     "nel":true
   },
   "downloader": {
-    "input_path": "data/list_of_pmids.txt",
+    "input_path": "data/Lund-Autophagy-1.txt",
     "output_path": "results/dataloader/text.json",
     "batch_size": 100 
   },
@@ -39,16 +39,16 @@
   "ner": {
     "input_path": "results/splitter/",
     "output_path": "results/ner/",
-    "output_file_prefix": "ner_species",
+    "output_file_prefix": "ner_chemical",
     "model_type": "biobert_finetuned",
     "model_folder": "aitslab",
-    "model_name": "biobert_huner_species_v1",
+    "model_name": "biobert_huner_chemical_v1",
     "vocab_path": "",
     "store_tokens":"no",
     "labels": "",
     "clear_old_results": true,
     "article_limit": [-1,90000],
-    "entity_type": "species",
+    "entity_type": "chemical",
     "multiprocessing":true
   },
   "analysis": {

@@ -84,6 +84,7 @@ _tmp_dir = "tmp_dir_dl"
 
 def run(input_file: str, output_file: str, batch_size: int):
     os.makedirs(_tmp_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     try:
         _run(input_file, output_file, batch_size)

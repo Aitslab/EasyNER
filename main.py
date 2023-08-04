@@ -5,6 +5,7 @@ import os
 from glob import glob
 from tqdm import tqdm
 import spacy
+import torch
 from spacy.matcher import PhraseMatcher
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
@@ -198,9 +199,10 @@ def run_ner(ner_config: dict, ignore: bool):
             for future in as_completed(futures):
                 i = future.result()
     else:
-        
+        device=torch.device(0 if torch.cuda.is_available() else "cpu")
+
         for batch_file in tqdm(input_file_list):
-            ner_main.run_ner_main(ner_config,batch_file)
+            ner_main.run_ner_main(ner_config,batch_file, device)
             
 
     print("Finished running NER script.")

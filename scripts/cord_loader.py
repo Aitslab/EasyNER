@@ -4,7 +4,7 @@
 # Build JSON data from CORD CSV data
 # https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases.html
 
-
+import os
 import csv
 import hashlib
 import json
@@ -23,7 +23,9 @@ def run(input_file: str, output_file: str, subset: bool, subset_file: str):
             for line in f.readlines():
                 uid_set.update([line.strip()])
             print(uid_set)
-                
+
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+
     
         
 
