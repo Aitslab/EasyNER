@@ -27,6 +27,9 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
         print(batch_file)
         raise Exception("Filenames not numbered!")
         
+    if len(articles)==0:
+        util.append_to_json_file(f'{ner_config["output_path"]}/{ner_config["output_file_prefix"]}-{batch_index}.json', articles)        
+        return batch_index
         
     # Prepare spacy, if it is needed
     if ner_config["model_type"] == 'spacy_phrasematcher':
@@ -104,7 +107,7 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
         
         articles_dataset = biobert_process_articles(articles)
 
-        articles_dataset_processed = articles_dataset.map(wrapper_predict)
+        articles_dataset_processed = articles_dataset.map(wrapper_predict,desc="Batch "+str(batch_index))
 
         articles_processed = convert_dataset_to_dict(articles, articles_dataset_processed)
         articles = articles_processed
