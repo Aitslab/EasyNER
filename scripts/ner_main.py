@@ -78,9 +78,9 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
                     spans.append((first_char, last_char)) 
 
 
-                articles[pmid]["sentences"][i]["NER class"] = ner_class
+                #articles[pmid]["sentences"][i]["NER class"] = ner_class
                 articles[pmid]["sentences"][i]["entities"] = entities
-                articles[pmid]["sentences"][i]["entity spans"] = spans
+                articles[pmid]["sentences"][i]["entity_spans"] = spans
 
 
                    

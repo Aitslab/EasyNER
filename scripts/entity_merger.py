@@ -53,7 +53,7 @@ def merge_two_articles(articles_1, articles_2):
                     
     return articles_1
 
-def entity_merger(input_file_paths:list, input_entity_tags:list, output_path:str):
+def run_entity_merger(input_file_paths:list, input_entity_tags:list, output_path:str):
     '''
     merge all files within
     '''
@@ -90,4 +90,4 @@ if __name__ == "__main__":
               "../../NER_pipeline/results/text-ner_gene_mtorandtsc1-set.json"]
     infile_entity_tags = ["cell", "chemical", "disease","gene", "species"]
     
-    entity_merger(infile_list, infile_tags)
+    run_entity_merger(infile_list, infile_tags)

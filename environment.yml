@@ -5,6 +5,7 @@ channels:
   - defaults
 dependencies:
   - cryptography=38.0.1
+  - datasets
   - huggingface_hub=0.10.1
   - matplotlib=3.5.3
   - matplotlib-base=3.5.3

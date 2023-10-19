@@ -18,6 +18,7 @@ from scripts import text_loader
 #from scripts import analysis
 from scripts import util
 from scripts import metrics
+from scripts import entity_merger
 from scripts import ner_main
 from scripts import analysis
 
@@ -233,6 +234,18 @@ def run_metrics(config: dict, ignore: bool):
     
     print("Finished running metrics script.")
 
+def run_merger(config: dict, ignore: bool):
+    if ignore:
+        print("Ignoring script: merger.")
+        return
+    
+    print("Running merger script.")
+
+    merger_config = config["merger"]
+    
+    entity_merger.run_entity_merger(merger_config)
+    
+    print("Finished running merger script.")
 
 if __name__ == "__main__":
     print("Please see config.json for configuration!")
