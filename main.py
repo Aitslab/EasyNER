@@ -290,4 +290,8 @@ if __name__ == "__main__":
     run_metrics(config, ignore=ignore["metrics"])
     print()
 
+    # Run merger on specified output folders
+    run_merger(config, ignore=ignore["merger"])
+    print()
+
     print("Program finished successfully.")
