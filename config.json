@@ -60,7 +60,8 @@
   "merger": {
     "paths": ["results/ner/model-1/", "results/ner/model-2/", "results/ner/model-3/"],
     "entities": ["model-1_entity", "model-2_entity","model-3_entity"],
-    "output_path": "results/merged/path/to/merged-folder/"
+    "output_path": "results/merged/path/to/merged-folder/",
+    "output_prefix": "merged"
   },
   "metrics": {
     "predictions_file":"path/to/predictions/file.txt",

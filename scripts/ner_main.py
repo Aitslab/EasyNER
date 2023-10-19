@@ -33,6 +33,9 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
         
     # Prepare spacy, if it is needed
     if ner_config["model_type"] == 'spacy_phrasematcher':
+        if not ner_config["multiprocessing"]:
+            spacy.prefer_gpu()
+            
         print("Running NER with spacy")
         nlp = spacy.load(ner_config["model_name"])
         terms = []

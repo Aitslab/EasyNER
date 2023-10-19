@@ -1,7 +1,10 @@
 # coding=utf-8
 
 import json
-from tqdm import tqdm
+import os
+import re
+from tqdm import tqdm, trange
+from glob import glob
 
 def read_articles(filename:str):
     with open(filename, encoding="utf-8") as f:
@@ -53,13 +56,14 @@ def merge_two_articles(articles_1, articles_2):
                     
     return articles_1
 
-def run_entity_merger(input_file_paths:list, input_entity_tags:list, output_path:str):
+def entity_merger(paths:list, entities:list, output_file:str):
     '''
-    merge all files within
+    merge same files
     '''
+    
     merged_entities = {}
     
-    for file_, tag in tqdm(zip(input_file_paths, input_entity_tags)):
+    for file_, tag in zip(paths, entities):
         # Read articles
         articles = read_articles(file_)
         
@@ -69,13 +73,36 @@ def run_entity_merger(input_file_paths:list, input_entity_tags:list, output_path
         #merge entities
         merged_entities=merge_two_articles(merged_entities, processed_ner_article)
     
-    with open(output_path, "w", encoding="utf-8") as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         f.write(json.dumps(merged_entities, indent=2, ensure_ascii=False))
+        
+    return
+
+def run_entity_merger(merger_config: dict):
+    '''
+    merge all files within
+    '''
+    paths = merger_config["paths"]
+    entities = merger_config["entities"]
+    output_folder = merger_config["output_path"]
+    output_prefix = merger_config["output_prefix"]
+    os.makedirs(output_folder, exist_ok=True)
+
+    file_lists = {entity:get_sorted_files(path) for path, entity in zip(paths, entities)}
+
+    if len(set([len(v) for k,v in file_lists.items()]))!=1:
+        raise Exception("ERROR! Mismatched number of files in given folders")
+    
+    for i in trange(len(file_lists[entities[0]])):
+        processed_paths = [file_lists[j][i] for j in entities]
+        output_file = output_folder+output_prefix + str(get_batch_no_from_filename(processed_paths[0])) +".json"
+
+        entity_merger(paths=processed_paths, entities=entities,output_file=output_file)
         
     return 
     
 def get_batch_no_from_filename(filename):
-    return re.findall(r'\d+',f)[-1]
+    return re.findall(r'\d+',filename)[-1]
 
 def check_match_batch_index(filename1, filename2):
     return get_batch_no_from_filename(filename1) == get_batch_no_from_filename(filename2)
