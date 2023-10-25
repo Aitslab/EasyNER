@@ -62,6 +62,24 @@ python main.py
 
 ___
 
+## Bulk Download PubMED
+
+The EasyNER pipeline includes an additional script for bulk downloading PubMed abstracts. For that, simply open a terminal in the EasyNER folder and run the following script:
+```console
+
+conda activate easyner_env
+cd pubmed_loader
+python pubmed_main.py
+
+```
+
+The above script will download, process and convert (to json) PubMed abstract collection from the 2023 annual baseline (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). You can also specify the file numbers as follows to download files from 0 to 100:
+
+```console
+python pubmed_main.py -s 0 -e 100
+
+```
+
 ## NER 
 
 ### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
