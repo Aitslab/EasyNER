@@ -80,6 +80,14 @@ python pubmed_main.py -s 0 -e 100
 
 ```
 
+To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
+
+1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to true.
+2. In the splitter section Specify the pubmed folder path in the "input_path" parameter.
+3. In the splitter section, set "pubmed_pre_batched" to true.
+
+Then run the pipeline as you would normally.
+
 ## NER 
 
 ### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
