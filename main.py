@@ -21,8 +21,8 @@ from scripts import metrics
 from scripts import entity_merger
 from scripts import ner_main
 from scripts import analysis
+from scripts import pubmed_bulk
 
-CPU_LIMIT=5  #for multiprocessing
 
 def run_cord_loader(cord_loader_config: dict, ignore: bool):
     if ignore:
@@ -63,6 +63,15 @@ def run_text_loader(tl_config: dict, ignore:bool):
     text_loader.run(tl_config)
 
     print("Finished running freetext loader script.")
+
+def run_pubmed_bulk_loader(pbl_config: dict, ignore: bool):
+    if ignore:
+        print("Ignoring script: pubmed bulk downloader")
+        return
+
+    print("Running pubmed bulk downloader script.")
+    pubmed_bulk.run_pbl(pbl_config)
+    
 
 def run_splitter(splitter_config: dict, ignore: bool) -> dict:
     if ignore:
@@ -260,6 +269,8 @@ if __name__ == "__main__":
     os.makedirs("data", exist_ok=True)
 
     ignore = config["ignore"]
+    CPU_LIMIT=config["CPU_LIMIT"]  #for multiprocessing
+    print(f"Limited to {CPU_LIMIT} CPUs")
 
 
     # Load abstracts from the CORD dataset.
@@ -272,6 +283,10 @@ if __name__ == "__main__":
     
     # Prepare free text for pipelne.
     run_text_loader(config["text_loader"], ignore=ignore["text_loader"])
+    print()
+
+    # Bulk download pubmed baseline though ftp
+    run_pubmed_bulk_loader(config["pubmed_bulk_loader"], ignore=ignore["pubmed_bulk_loader"])
     print()
 
     # Extract sentences from each article.

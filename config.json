@@ -1,10 +1,13 @@
 {
+  "CPU_LIMIT": 5,
+
   "ignore": {
     "cord_loader": true,
     "downloader": true,
     "text_loader":true,
+    "pubmed_bulk_loader":false,
     "splitter": true,
-    "ner": false,
+    "ner": true,
     "analysis": true,
     "merger": true,
     "metrics":true,
@@ -26,12 +29,22 @@
     "output_path": "results/dataloader/text.json",
     "prefix": "freetext"
   },
+  "pubmed_bulk_loader": {
+    "output_path": "data/pubmed/",
+    "baseline": "23",
+    "subset": false,
+    "subset_range":[0,5],
+    "get_nightly_update_files": true,
+    "update_file_range":[1167,1169],
+    "count_articles": true,
+    "raw_download_path": ""
+  },
   "splitter": {
     "input_path": "results/dataloader/text.json",
     "output_folder": "results/splitter/",
     "output_file_prefix": "sentences",
-	"pubmed_pre_batched": false,
-	"file_limit":[0,100],
+	  "pubmed_pre_batched": false,
+	  "file_limit":[0,100],
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
     "batch_size": 100
