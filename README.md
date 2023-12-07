@@ -28,18 +28,20 @@ cd EasyNER
 conda env create -f environment.yml
 ```
 
-4. Load spacy
 
-```console
-
-python -m spacy download en_core_web_sm
-```
-
-5. After installation activate the environment:
+4. After installation activate the environment:
 ```console
 
 conda activate easyner_env
 
+```
+
+
+5. Load spacy
+
+```console
+
+python -m spacy download en_core_web_sm
 ```
 
 
@@ -64,29 +66,36 @@ ___
 
 ## Bulk Download PubMED
 
-The EasyNER pipeline includes an additional script for bulk downloading PubMed abstracts. For that, simply open a terminal in the EasyNER folder and run the following script:
-```console
+The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
 
-conda activate easyner_env
-cd pubmed_loader
-python pubmed_main.py
-
-```
-
-The above script will download, process and convert (to json) PubMed abstract collection from the 2023 annual baseline (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). You can also specify the file numbers as follows to download files from 0 to 100:
-
-```console
-python pubmed_main.py -s 0 -e 100
-
-```
-
-To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
-
-1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to true.
+1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to "true", and pubmed_bulk_loader section is set to "false".
 2. In the splitter section Specify the pubmed folder path in the "input_path" parameter.
-3. In the splitter section, set "pubmed_pre_batched" to true.
+3. In the splitter section, set "pubmed_bulk" to "true".
 
 Then run the pipeline as you would normally.
+
+ The PubMed annual baseline files are numbered. If you want to download the files in the range 300 to 700 from the annual baseline, simply update the config file as follows ("subset" and "subset_range" sections) :
+
+ ```
+ "pubmed_bulk_loader": {
+    "output_path": "data/pubmed/",
+    "baseline": "23",
+    "subset": True,
+    "subset_range":[300,700],
+    "get_nightly_update_files": false,
+    "update_file_range":[0,0],
+    "count_articles": true,
+    "raw_download_path": ""
+  },
+ ```
+
+ The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
+
+ 1. Set "get_nightly_update_files" to "true"
+ 2. Provide a range in the "update_file_range" section. This needs to be set by the user. The file ranges for 2023 can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+
+* Note that bulk downloading files requires enough storage space in your device and may take several hours to download and process millions of articles. An err file is generated in the end to account for files that are not downloaded. Kindly refer to the err file (same folder as raw_download_path) for missing files.
+ ____
 
 ## NER 
 

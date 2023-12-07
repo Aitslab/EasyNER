@@ -52,6 +52,7 @@ For each pipeline run, the config.json file in the repository needs to be modifi
     "cord_loader": true,
     "downloader": true,
     "text_loader": true,
+    "pubmed_bulk_loader": false,
     "splitter": true,
     "ner": true,
     "analysis": false,
@@ -63,7 +64,7 @@ For each pipeline run, the config.json file in the repository needs to be modifi
 ```
 In a normal pipeline run, the following modules should be set to false, and the rest to true:
 
-1. One of the data loaders depending on the input type (downloader, cord_loader or free_text loader).
+1. One of the data loaders depending on the input type (downloader, cord_loader, free_text loader or pubmed_bulk_loader).
 2. splitter
 3. ner
 4. analysis
@@ -87,9 +88,9 @@ As example for the input, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-A
 
 ![](imgs/pubmed.jpg)
 
-To run the downloader module, change "downloader" in the ignore section to false (cord_loader and text_loader to true) and provide the following arguments in the "downloader" section of the config file:
+To run the downloader module, change "downloader" in the ignore section to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": path to file with pubmed IDs 
     "output_path": path to storage location for output
@@ -103,9 +104,9 @@ To run the downloader module, change "downloader" in the ignore section to false
 
 ### 2.1.2 CORD loader
 
-The cord_loader variant of the data loader module processes titles and abstracts in the [CORD-19 dataset](https://github.com/allenai/cord19), a large collection of SARS-CoV2-related articles updated until 2022-06-02. For the CORD loader to work, the CORD19 dataset, which includes the metadata.csv file processed by the pipeline, first needs to be downloaded manually from the CORD-19 website ([direct download link](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz)). The file path to the metadata.csv file should then be provided in the config file as input. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000 records). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be extracted from the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and data_loader and text_loader to true) and provide the following arguments:
+The cord_loader variant of the data loader module processes titles and abstracts in the [CORD-19 dataset](https://github.com/allenai/cord19), a large collection of SARS-CoV2-related articles updated until 2022-06-02. For the CORD loader to work, the CORD19 dataset, which includes the metadata.csv file processed by the pipeline, first needs to be downloaded manually from the CORD-19 website ([direct download link](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz)). The file path to the metadata.csv file should then be provided in the config file as input. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000 records). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be extracted from the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and text_loader to true) and provide the following arguments:
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": input file path with CORD-19 metadata.csv file
     "output_path": path to storage location for output
@@ -121,10 +122,10 @@ The cord_loader variant of the data loader module processes titles and abstracts
 
 ### 2.1.3 Freetext loader
 
-The text_loader variant of the dataloader module processess a file with free text and converts it into a JSON file. Similar to data_loader and cord_loader, the file path should be provided in the config files. The output JSON file will contain entries with prefix and a number as IDs and the filename as title. The number randomly assigned. To run the text_loader script, turn "text_loader" in the ignore section to false (and data_loader and cord_loader to true) and provide the following arguments:
+The text_loader variant of the dataloader module processess a file with free text and converts it into a JSON file. Similar to data_loader and cord_loader, the file path should be provided in the config files. The output JSON file will contain entries with prefix and a number as IDs and the filename as title. The number randomly assigned. To run the text_loader script, turn "text_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and cord_loader to true) and provide the following arguments:
 
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": input file path with free text. The folder may contain one or several .txt files.
     "output_path": output file (JSON format)
@@ -134,6 +135,29 @@ The text_loader variant of the dataloader module processess a file with free tex
 
 ![](imgs/text_loader_.png)
 
+
+
+### 2.1.4 PubMed Bulk loader
+
+The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/
+
+Similar to other data loader modules, to run the text_loader script turn "pubmed_bulk_loader" in the ignore section to false (and data_loader, cord_loader and text_loader to true) and provide the following arguments:
+
+
+#### Config file arguments:
+```console
+    "output_path": path to save processed files in (in JSON format),
+    "baseline": The pubmed annual baseline number, defaults to "23",
+    "subset": if a subset of the baseline is to be downloaded, this should be set to "true", otherwise "false" downloads the entire baseline,
+    "subset_range":Specify a range if a subset of files is to be downloaded, ex: to download files numbered 0 to 160 (inclusive) add [0,160],
+    "get_nightly_update_files": set "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set false. Note that a range must be provided.
+    "update_file_range": if get_nightly_update_files is set to true, a range must be provided, ex: [1167,1298] to download files 1167 to 1298 (inclusive). This MUST be provided by the user. To see the available range of files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "count_articles": "true" if number of articles within each file is to be counted. Set "false" otherwise.
+    "raw_download_path": temporary folder where files should be downloaded. Defaults to "data/tmp/pubmed/"
+```
+#### example: 
+
+![](imgs/pubmed_bulk_loader_.png)
 ___
 
 
@@ -141,7 +165,7 @@ ___
 
 This module loads a JSON file (normally the file produced by the data loader module) and splits the text(s) into sentences with the spaCy or NLTK sentence splitter. The output is stored in one or several JSON files. To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to choose the model: "en_core_web_sm" or "en_core_web_trf". The number of texts that is processed together and stored in the same JSON output file is specified under "batch size". 
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": input file path of document collection
     "output_folder": output folder path where each bach will be saved
@@ -149,6 +173,7 @@ This module loads a JSON file (normally the file produced by the data loader mod
     "tokenizer": "spacy" or "nltk"
     "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write "" 
     "batch_size": number of texts to be processed together and saved in the same JSON file
+    "pubmed_bulk": make "true" if pubmed_bulk_loader is used, otherwise use "false"
 
 ```
 #### example: 
@@ -162,7 +187,7 @@ ___
 
 The NER module performs NER on JSON files containing texts split into sentences (normally the output files from the sentence splitter module). The user can use deep learning models or use the spaCy phrasematcher with dictionaries for NER. Setveral BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": input folder path where all JSON batch files with texts split into sentences are located
     "output_folder": output folder path where each batch will be saved
@@ -216,7 +241,7 @@ ___
 
 This section uses the extracted entities to generate a file of ranked entities and frequency plots. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "input_path": input folder path where all batches of NER are located,
     "output_path": output folder path where the analysis files will be saved,
@@ -261,7 +286,7 @@ ___
 
 The metrics module can be used to get precision, recall and F1 scores of between a true and a prediction file, as long as both are in IOB2 format. Note that BioBERT raw test prediction file is in IOB2 format. To run metrics, set ignore metrics to false in the config file. Then use the following input and output config arguments:
 
-#### Config file argument:
+#### Config file arguments:
 ```console
     "predictions_file": file containing predictions by the chosen model (in IOB2 format),
     "true_file": file containing true (annotated) values (also in IOB2 format),
