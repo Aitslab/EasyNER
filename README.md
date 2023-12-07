@@ -84,7 +84,7 @@ The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. T
 To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
 
 1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to "true", and pubmed_bulk_loader section is set to "false".
-2. In the splitter section Specify the pubmed folder path in the "input_path" parameter.
+2. In the splitter section Specify the pubmed folder path in the "input_path" parameter ("data/pubmed/" from the above example).
 3. In the splitter section, set "pubmed_bulk" to "true".
 
 Then run the pipeline as you would normally.
@@ -115,7 +115,7 @@ The PubMed annual baseline files are updated every year. However, they provide a
 * Note that bulk downloading files requires enough storage space in your device and may take several hours to download and process millions of articles. An err file is generated in the end to account for files that are not downloaded. Kindly refer to the err file (same folder as raw_download_path) for missing files.
  ____
 
-## NER 
+## Named Entity Recognition (NER) 
 
 ### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 
