@@ -66,7 +66,22 @@ ___
 
 ## Bulk Download PubMED
 
-The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
+The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The pubmed_bulk_loader section of the config file is as follows:
+
+ ```
+ "pubmed_bulk_loader": {
+    "output_path": "data/pubmed/",
+    "baseline": "23",
+    "subset": false,
+    "subset_range":[0,0],
+    "get_nightly_update_files": false,
+    "update_file_range":[0,0],
+    "count_articles": true,
+    "raw_download_path": ""
+  },
+ ```
+
+To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
 
 1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to "true", and pubmed_bulk_loader section is set to "false".
 2. In the splitter section Specify the pubmed folder path in the "input_path" parameter.
@@ -82,7 +97,7 @@ The PubMed annual baseline files are numbered. If you want to download the files
  "pubmed_bulk_loader": {
     "output_path": "data/pubmed/",
     "baseline": "23",
-    "subset": True,
+    "subset": true,
     "subset_range":[300,700],
     "get_nightly_update_files": false,
     "update_file_range":[0,0],
