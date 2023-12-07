@@ -74,7 +74,9 @@ The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. T
 
 Then run the pipeline as you would normally.
 
- The PubMed annual baseline files are numbered. If you want to download the files in the range 300 to 700 from the annual baseline, simply update the config file as follows ("subset" and "subset_range" sections) :
+
+### Downloading a subset
+The PubMed annual baseline files are numbered. If you want to download the files in the range 300 to 700 from the annual baseline, simply update the config file as follows ("subset" and "subset_range" sections) :
 
  ```
  "pubmed_bulk_loader": {
@@ -89,7 +91,8 @@ Then run the pipeline as you would normally.
   },
  ```
 
- The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
+### Downloading nightly updates
+The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
 
  1. Set "get_nightly_update_files" to "true"
  2. Provide a range in the "update_file_range" section. This needs to be set by the user. The file ranges for 2023 can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
