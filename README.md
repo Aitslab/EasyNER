@@ -91,6 +91,7 @@ Then run the pipeline as you would normally.
 
 
 ### Downloading a subset
+
 The PubMed annual baseline files are numbered. If you want to download the files in the range 300 to 700 from the annual baseline, simply update the config file as follows ("subset" and "subset_range" sections) :
 
  ```
@@ -107,6 +108,7 @@ The PubMed annual baseline files are numbered. If you want to download the files
  ```
 
 ### Downloading nightly updates
+
 The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
 
  1. Set "get_nightly_update_files" to "true"
@@ -134,6 +136,7 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 ```
 
 ### Dictionary-based NER
+
 [Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
 Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. For example:
 
@@ -147,6 +150,24 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 #### For BioBERT model training script follow this [tutorial](tutorials/Tutorial-BioBERT_model_training.ipynb)
 #### All preprocessing scripts can be found [here](supplementary/preprocessing_scripts/)
 
+
+## Result inspection
+
+We have included a result inspection module to search a list of entities occuring within the NER results. The result includes the PubMed ID, sentence where the entity occurs, additional entities within that sentence and their spans. In order to run inspection, do the following in the config file:
+
+1. In the ignore section, set "result_inspection" to "true" and everything else to false.
+2. Provide the input folder path (with a "/" in the end), the output file path and the list of entities to search in a list as shown below.
+```console
+"result_inspection":{
+    "input_folder": "results/ner/",
+    "output_file": "results/ner_search.txt",
+    "entities": ["tsc", "mtor", "cell", "cells", "rapamycin"]
+```
+
+3. Run the following command as you would do to run the pipeline.
+```python
+python main.py
+```
 
 ## Citation
 If you use any of the material in this repository, please cite the following article:

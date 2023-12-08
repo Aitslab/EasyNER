@@ -5,15 +5,15 @@ import json
 import os
 from tqdm import tqdm
 from glob import glob
-import util
+from . import util
 
 class EntitySearch:
 
-    def __init__(self, input_folder, output_file, entities):
+    def __init__(self, search_config:dict):
         
-        self.input_folder = input_folder
-        self.output_file = output_file
-        self.entities = entities
+        self.input_folder = search_config["input_folder"]
+        self.output_file = search_config["output_file"]
+        self.entities = search_config["entities"]
         
         
     def sort_files(self, input_folder):
@@ -40,17 +40,14 @@ class EntitySearch:
             articles = self.read_files(input_file)
             
             for art, val in tqdm(articles.items()):
-                print(art, val)
                 for sent in val["sentences"]:
                     if len(sent["entities"])==0:
                         continue
                     else:
-        #                 print(sent["entities"])
                         for entity in entities:
                             if entity in sent["entities"]:
                                 if art not in main_dict:
                                     main_dict[art]={"sentences":[]}
-                                print(sent["entities"])
                                 main_dict[art]["sentences"].append({"text":sent["text"], "entities": sent["entities"], "entity_spans": sent["entity_spans"]})
         
         return main_dict

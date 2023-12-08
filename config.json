@@ -5,13 +5,14 @@
     "cord_loader": true,
     "downloader": true,
     "text_loader":true,
-    "pubmed_bulk_loader":false,
+    "pubmed_bulk_loader":true,
     "splitter": true,
     "ner": true,
     "analysis": true,
     "merger": true,
     "metrics":true,
-    "nel":true
+    "nel":true,
+    "result_inspection":false
   },
   "downloader": {
     "input_path": "data/Lund-Autophagy-1.txt",
@@ -86,5 +87,10 @@
   "nel":{
     "input_path": "results/text-ner-Lund-Autophagy-1_species/",
     "output_path": "results/text-nel_Lund_Autophagy-1_species.json"
+  },
+  "result_inspection":{
+    "input_folder": "results/ner/",
+    "output_file": "results/ner_search.txt",
+    "entities": ["tsc", "mtor", "cell", "cells", "rapamycin"]
   }
 }

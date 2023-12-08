@@ -15,7 +15,7 @@ from scripts import downloader
 from scripts import splitter
 from scripts import splitter_pubmed
 from scripts import text_loader
-#from scripts import analysis
+from scripts import search
 from scripts import util
 from scripts import metrics
 from scripts import entity_merger
@@ -256,6 +256,21 @@ def run_merger(config: dict, ignore: bool):
     
     print("Finished running merger script.")
 
+def run_search(config: dict, ignore: bool):
+    if ignore:
+        print("Ignoring script: result inspection.")
+        return
+    
+    print("Running result inspection script.")
+
+    search_config = config["result_inspection"]
+
+    os.makedirs(os.path.dirname(search_config["output_file"]), exist_ok=True)
+    searcher = search.EntitySearch(search_config)
+    searcher.run()
+    
+    print("Finished running result inspection script.")
+
 if __name__ == "__main__":
     print("Please see config.json for configuration!")
 
@@ -307,6 +322,10 @@ if __name__ == "__main__":
 
     # Run merger on specified output folders
     run_merger(config, ignore=ignore["merger"])
+    print()
+
+    # Run result inspection on specified NER folder
+    run_search(config, ignore=ignore["result_inspection"])
     print()
 
     print("Program finished successfully.")
