@@ -89,15 +89,16 @@ def count_articles(input_path, baseline=23):
 
 class PubMedLoader:
     
-    def __init__(self, input_path,  output_path):
+    def __init__(self, input_path,  output_path, k:str):
         self.input_path = input_path
         self.output_path = output_path
         self.counter = {}
+        self.k=k
         os.makedirs(output_path, exist_ok=True)
         
-    def get_input_files(self, input_path, k="23n"):
+    def get_input_files(self, input_path):
         # k is used for keyword to split the filename obtained from pubmed. It's different for each annual baseline
-        input_files = sorted(glob(f'{input_path}*.gz'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(k)[-1][:-4]))
+        input_files = sorted(glob(f'{input_path}*.gz'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(self.k+"n")[-1][:-4]))
         return input_files
         # if file_limit==None:
         #     return input_files
@@ -154,45 +155,46 @@ class PubMedLoader:
 
 def run_pbl(pbl_config):
 
-    print("Downloading files...")
+    # print("Downloading files...")
 
     download_path= "data/tmp/pubmed/" if len(pbl_config["raw_download_path"])==0 else pbl_config["raw_download_path"] 
 
-    if pbl_config["subset"] == True:
-        if pbl_config["get_nightly_update_files"]:
-            bulk_download(n_start = pbl_config["subset_range"][0],
-                n_end=pbl_config["subset_range"][1],
-                nupdate=True,
-                u_start=pbl_config["update_file_range"][0],
-                u_end=pbl_config["update_file_range"][1],
-                save_path=download_path,
-                baseline=pbl_config["baseline"])
+    # if pbl_config["subset"] == True:
+    #     if pbl_config["get_nightly_update_files"]:
+    #         bulk_download(n_start = pbl_config["subset_range"][0],
+    #             n_end=pbl_config["subset_range"][1],
+    #             nupdate=True,
+    #             u_start=pbl_config["update_file_range"][0],
+    #             u_end=pbl_config["update_file_range"][1],
+    #             save_path=download_path,
+    #             baseline=pbl_config["baseline"])
             
-        else:
-            bulk_download(n_start = pbl_config["subset_range"][0],
-                            n_end=pbl_config["subset_range"][1],
-                            save_path=download_path,
-                            baseline=pbl_config["baseline"])
+    #     else:
+    #         bulk_download(n_start = pbl_config["subset_range"][0],
+    #                         n_end=pbl_config["subset_range"][1],
+    #                         save_path=download_path,
+    #                         baseline=pbl_config["baseline"])
 
         
-    else:
-        if pbl_config["get_nightly_update_files"]:
-            bulk_download(nupdate=True,
-                            u_start=pbl_config["update_file_range"][0],
-                            u_end=pbl_config["update_file_range"][1],
-                            save_path=download_path,
-                            baseline=pbl_config["baseline"])
-        else:
-            bulk_download(save_path=download_path,
-                            baseline=pbl_config["baseline"])
+    # else:
+    #     if pbl_config["get_nightly_update_files"]:
+    #         bulk_download(nupdate=True,
+    #                         u_start=pbl_config["update_file_range"][0],
+    #                         u_end=pbl_config["update_file_range"][1],
+    #                         save_path=download_path,
+    #                         baseline=pbl_config["baseline"])
+    #     else:
+    #         bulk_download(save_path=download_path,
+    #                         baseline=pbl_config["baseline"])
         
-    print("Download complete.")
+    # print("Download complete.")
     
-    print("Processing raw files...")
+    # print("Processing raw files...")
     
 
     loader = PubMedLoader(input_path=download_path,
-                            output_path=pbl_config["output_path"])
+                            output_path=pbl_config["output_path"],
+                            k=pbl_config["baseline"])
      
     loader.run_loader()
 
