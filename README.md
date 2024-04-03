@@ -60,6 +60,7 @@ python main.py
 9. The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
 
+A reproducable capsule is available on Code Ocean: https://doi.org/10.24433/CO.6908880.v1
 
 
 ___
