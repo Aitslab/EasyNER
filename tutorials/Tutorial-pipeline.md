@@ -100,7 +100,7 @@ To run the downloader module, change "downloader" in the ignore section to false
 ```console
     "input_path": path to file with pubmed IDs 
     "output_path": path to storage location for output
-    "batch_size": number of article records downloaded in each call to API. Note that, too large of a batch size may invalid download requests.
+    "batch_size": number of article records downloaded in each call to API. Note that, too large batch size may result in invalid download requests.
 ```
 #### example: 
 
