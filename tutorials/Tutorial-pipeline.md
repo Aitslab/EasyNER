@@ -336,7 +336,13 @@ ___
 
 # 3. Run pipeline
 
-When the configuration is saved, the pipeline can be executed by running the main.py file in the conda terminal:
+When the configuration is saved, the pipeline can be executed by activating the easyner_env environment, navigating to the easyner folder with "cd" as above, and running the main.py file in the conda terminal:
+
+```bash
+conda activate easyner_env
+```
+
+
 ```bash
 python main.py
 ```
