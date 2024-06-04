@@ -67,12 +67,12 @@ ___
 
 ## Bulk Download PubMED [NOTE: DUE TO A CHANGE IN THE PUBMED DATACENTER THIS IS NOT WORKING RIGHT NOW. WE ARE UPDATING IT]
 
-The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The pubmed_bulk_loader section of the config file is as follows:
+The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023, but file names contain "24" which is to be used as baseline value) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The pubmed_bulk_loader section of the config file is as follows:
 
  ```
  "pubmed_bulk_loader": {
     "output_path": "data/pubmed/",
-    "baseline": "23",
+    "baseline": "24",
     "subset": false,
     "subset_range":[0,0],
     "get_nightly_update_files": false,
@@ -98,7 +98,7 @@ The PubMed annual baseline files are numbered. If you want to download the files
  ```
  "pubmed_bulk_loader": {
     "output_path": "data/pubmed/",
-    "baseline": "23",
+    "baseline": "24",
     "subset": true,
     "subset_range":[300,700],
     "get_nightly_update_files": false,
@@ -113,7 +113,7 @@ The PubMed annual baseline files are numbered. If you want to download the files
 The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
 
  1. Set "get_nightly_update_files" to "true"
- 2. Provide a range in the "update_file_range" section. This needs to be set by the user. The file ranges for 2023 can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+ 2. Provide a range in the "update_file_range" section. This needs to be set by the user. The file ranges for 2024 can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
 
 * Note that bulk downloading files requires enough storage space in your device and may take several hours to download and process millions of articles. An err file is generated in the end to account for files that are not downloaded. Kindly refer to the err file (same folder as raw_download_path) for missing files.
  ____
