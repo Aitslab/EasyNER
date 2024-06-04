@@ -108,7 +108,7 @@ To run the downloader module, change "downloader" in the ignore section to false
 
 
 
-### 2.1.2 PubMed Bulk loader [NOTE: DUE TO CHANGES IN THE PUBMED DATACENTRE THIS IS NOT WORKING RIGHT NOW. WE ARE IN THE PROCESS OF UPDATING IT]
+### 2.1.2 PubMed Bulk loader
 
 The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
 
@@ -118,7 +118,7 @@ Similar to other data loader modules, to run the text_loader script turn "pubmed
 #### Config file arguments:
 ```console
     "output_path": path to save processed files in (in JSON format),
-    "baseline": The pubmed annual baseline number, which is the year contained in the file names, e.g. pubmed24n0001.xml.gz; it defaults to "24",
+    "baseline": The pubmed annual baseline number, which is the year contained in the file names listed on https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/, e.g. 24 in pubmed24n0001.xml.gz,
     "subset": if a subset of the baseline is to be downloaded, this should be set to "true", otherwise "false" downloads the entire baseline,
     "subset_range":Specify a range if a subset of files is to be downloaded, ex: to download files numbered 0 to 160 (inclusive) add [0,160],
     "get_nightly_update_files": set "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set false. Note that a range must be provided.
