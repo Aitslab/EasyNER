@@ -159,37 +159,37 @@ def run_pbl(pbl_config):
 
     download_path= "data/tmp/pubmed/" if len(pbl_config["raw_download_path"])==0 else pbl_config["raw_download_path"] 
 
-    # if pbl_config["subset"] == True:
-    #     if pbl_config["get_nightly_update_files"]:
-    #         bulk_download(n_start = pbl_config["subset_range"][0],
-    #             n_end=pbl_config["subset_range"][1],
-    #             nupdate=True,
-    #             u_start=pbl_config["update_file_range"][0],
-    #             u_end=pbl_config["update_file_range"][1],
-    #             save_path=download_path,
-    #             baseline=pbl_config["baseline"])
+    if pbl_config["subset"] == True:
+        if pbl_config["get_nightly_update_files"]:
+            bulk_download(n_start = pbl_config["subset_range"][0],
+                n_end=pbl_config["subset_range"][1],
+                nupdate=True,
+                u_start=pbl_config["update_file_range"][0],
+                u_end=pbl_config["update_file_range"][1],
+                save_path=download_path,
+                baseline=pbl_config["baseline"])
             
-    #     else:
-    #         bulk_download(n_start = pbl_config["subset_range"][0],
-    #                         n_end=pbl_config["subset_range"][1],
-    #                         save_path=download_path,
-    #                         baseline=pbl_config["baseline"])
+        else:
+            bulk_download(n_start = pbl_config["subset_range"][0],
+                            n_end=pbl_config["subset_range"][1],
+                            save_path=download_path,
+                            baseline=pbl_config["baseline"])
 
         
-    # else:
-    #     if pbl_config["get_nightly_update_files"]:
-    #         bulk_download(nupdate=True,
-    #                         u_start=pbl_config["update_file_range"][0],
-    #                         u_end=pbl_config["update_file_range"][1],
-    #                         save_path=download_path,
-    #                         baseline=pbl_config["baseline"])
-    #     else:
-    #         bulk_download(save_path=download_path,
-    #                         baseline=pbl_config["baseline"])
+    else:
+        if pbl_config["get_nightly_update_files"]:
+            bulk_download(nupdate=True,
+                            u_start=pbl_config["update_file_range"][0],
+                            u_end=pbl_config["update_file_range"][1],
+                            save_path=download_path,
+                            baseline=pbl_config["baseline"])
+        else:
+            bulk_download(save_path=download_path,
+                            baseline=pbl_config["baseline"])
         
-    # print("Download complete.")
+    print("Download complete.")
     
-    # print("Processing raw files...")
+    print("Processing raw files...")
     
 
     loader = PubMedLoader(input_path=download_path,
