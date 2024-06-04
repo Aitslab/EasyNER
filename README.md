@@ -65,7 +65,7 @@ A reproducable capsule is available on Code Ocean: https://doi.org/10.24433/CO.6
 
 ___
 
-## Bulk Download PubMED
+## Bulk Download PubMED [NOTE: DUE TO A CHANGE IN THE PUBMED DATACENTER THIS IS NOT WORKING RIGHT NOW. WE ARE UPDATING IT]
 
 The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) PubMed abstract collection from the annual baseline (currently 2023) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The pubmed_bulk_loader section of the config file is as follows:
 
