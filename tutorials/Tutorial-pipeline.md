@@ -108,7 +108,7 @@ To run the downloader module, change "downloader" in the ignore section to false
 
 
 
-### 2.1.2 PubMed Bulk loader
+### 2.1.2 PubMed Bulk loader [NOTE: DUE TO CHANGES IN THE PUBMED DATACENTRE THIS IS NOT WORKING RIGHT NOW. WE ARE IN THE PROCESS OF UPDATING IT]
 
 The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/
 
