@@ -100,22 +100,7 @@ class PubMedLoader:
         # k is used for keyword to split the filename obtained from pubmed. It's different for each annual baseline
         input_files = sorted(glob(f'{input_path}*.gz'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(self.k+"n")[-1][:-4]))
         return input_files
-        # if file_limit==None:
-        #     return input_files
-        # elif isinstance(file_limit, list) and len(file_limit)==2:
-        #     start=file_limit[0]
-        #     end=file_limit[1]
 
-        #     filtered_files = []
-        #     for f in input_files:
-        #         f_idx = int(os.path.splitext(os.path.basename(f))[0].split(k)[-1][:-4])
-        #         if f_idx>=start and f_idx<=end:
-        #             filtered_files.append(f)
-    
-        #     return filtered_files
-        # else:
-        #     raise Exception("ERROR: File limit must be None or in [x,y] format where x is lower limit and y is upper limit (both inclusive)")
-        
     
     def get_counter(self):
         return self.counter
