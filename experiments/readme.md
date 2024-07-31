@@ -3,7 +3,7 @@
 
 All info and scripts to reproduce the benchmarking experiments for the EasyNER article are in this folder.
 
-## 1. Datasets and preprocesing scripts
+## Datasets and preprocesing scripts
 We used the following datasets and preprocessing scripts
 
 | Corpus                 | File                                                                                                        | Format    | Script| 
@@ -18,29 +18,25 @@ We used the following datasets and preprocessing scripts
 | BioID                  |[hunflair2/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator (Hunflair2 predictions)||
 | BioRED                 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
 
-## 3. EasyNER
+## EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
 Separate runs were conducted for each entity class (WHICH?), using dictionary-based or model-based NER.
 For runtimes without the Sentence Splitter or Analysis module the runtime for the respective module (OBTAINED HOW?) was subtracted from the total runtime.
 
-## 4. Hunflair2
-Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo] (https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). OTHER CORPORA PREDICTIONS?
+## Hunflair2
+Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo] (https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). WHAT WAS DONE FOR OTHER CORPORA PREDICTIONS AND RUNTIMES?
 
-## 5. BERN2
-BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors. Instead, predictions were obtained from the web demo and API.
+## BERN2
+BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors. Instead, predictions were obtained using the [BERN2 web demo and API](http://bern2.korea.ac.kr/).
 
-## 6. Runtime evaluation
-Tools: EasyNER, Hunflair2, BERN2 web demo, BERN2 API
-
+## Runtime evaluation
 Hardware: DETAILS? 
 
 Timing script:
 
 RESULT TABLE
 
-## 7. F1, precision and recall evaluation
-Tools: EasyNER, Hunflair2, BERN2 web demo, BERN2 API
-
+## F1, precision and recall evaluation
 Evaluation script:
 
 Metrics:
