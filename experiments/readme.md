@@ -3,8 +3,7 @@
 
 All info and scripts to reproduce the benchmarking experiments for the EasyNER article are in this folder.
 
-## Datasets and preprocesing scripts
-We used the following datasets and preprocessing scripts
+## Datasets and preprocessing scripts
 
 | Corpus                 | File                                                                                                        | Format    | Script| 
 |------------------------|-------------------------------------------------------------------------------------------------------------|-----------|-------|
