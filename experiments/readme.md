@@ -22,23 +22,25 @@ We used the following datasets and preprocessing scripts
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
 Separate runs were conducted for each entity class (WHICH?), using dictionary-based or model-based NER.
 For runtimes without the Sentence Splitter or Analysis module the runtime for the respective module (OBTAINED HOW?) was subtracted from the total runtime.
+EasyNER output files were converted to PubTator format using the conversion script (FIX AND UPLOAD)
 
 ## Hunflair2
-Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo] (https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). WHAT WAS DONE FOR OTHER CORPORA PREDICTIONS AND RUNTIMES?
+Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo](https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). WHAT WAS DONE FOR OTHER CORPORA PREDICTIONS AND RUNTIMES?
 
 ## BERN2
 BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors. Instead, predictions were obtained using the [BERN2 web demo and API](http://bern2.korea.ac.kr/).
 
-## Runtime evaluation
+## Evaluation
 Hardware: DETAILS? 
 
+### Runtime
 Timing script:
 
 RESULT TABLE
 
-## F1, precision and recall evaluation
-Evaluation script:
+Evaluation script: [Hunflair2 evaluation script](https://github.com/hu-ner/hunflair2-experiments/blob/main/evaluate.py)
 
+### Performance
 Metrics:
 
 RESULT TABLE
