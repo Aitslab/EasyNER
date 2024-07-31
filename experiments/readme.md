@@ -21,7 +21,7 @@ All info and scripts to reproduce the benchmarking experiments for the EasyNER a
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
 Separate runs were conducted for each entity class (WHICH?), using dictionary-based or model-based NER.
 For runtimes without the Sentence Splitter or Analysis module the runtime for the respective module (OBTAINED HOW?) was subtracted from the total runtime.
-EasyNER output files were converted to PubTator format using the conversion script (FIX AND UPLOAD)
+EasyNER output files were converted to PubTator format using the conversion script (FIX AND UPLOAD) so that they could be evaluated using the Hunflair2 evaluation script.
 
 ## Hunflair2
 Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo](https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). WHAT WAS DONE FOR OTHER CORPORA PREDICTIONS AND RUNTIMES?
