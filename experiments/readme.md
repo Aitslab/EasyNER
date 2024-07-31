@@ -11,11 +11,12 @@ We used the following datasets and preprocessing scripts
 | Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)              | PMID list |       |
 | Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)              | PMID list |       |
 | Lund-COVID-19          |                                                                                                             | PMID list |       |
-| Lund-COVID-19          | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text|       |
+|                        | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text|       |
 | tmVar (Version 3)      ||||
 | MedMentions            ||||
-| BioID                  ||||
-| BioRED                 | [BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
+| BioID                  |[goldstandard/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|||
+| BioID                  |[hunflair2/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator (Hunflair2 predictions)||
+| BioRED                 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
 
 ## 3. EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
