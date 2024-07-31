@@ -6,7 +6,7 @@ All info and scripts to reproduce the benchmarking experiments for the EasyNER a
 ## 1. Datasets
 We used the following datasets:
 
-| Corpus                 | File Name                       | Format               |
+| Corpus                 | File                      | Format               |
 |------------------------|---------------------------------|----------------------|
 | Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)            | PMID list            |
 | Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)            | PMID list            |
