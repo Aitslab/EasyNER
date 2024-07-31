@@ -38,7 +38,7 @@ Timing script:
 
 RESULT TABLE
 
-Evaluation script: [Hunflair2 evaluation script](https://github.com/hu-ner/hunflair2-experiments/blob/main/evaluate.py)
+Evaluation script: [Hunflair2 evaluation script](https://github.com/hu-ner/hunflair2-experiments/blob/main/evaluate.py) (ANY MODIFICATIONS?)
 
 ### Performance
 Metrics:
