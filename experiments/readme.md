@@ -32,10 +32,13 @@ Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [H
 BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors. Instead, predictions were obtained from the web demo and API.
 
 ## 6. Runtime evaluation
-Hardware: DETAILS? 
 Tools: EasyNER, Hunflair2, BERN2 web demo, BERN2 API
+
+Hardware: DETAILS? 
+
 Timing script:
 
 ## 7. F1, precision and recall evaluation
 Tools: EasyNER, Hunflair2, BERN2 web demo, BERN2 API
+
 Evaluation script:
