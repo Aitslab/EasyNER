@@ -3,22 +3,19 @@
 
 All info and scripts to reproduce the benchmarking experiments for the EasyNER article are in this folder.
 
-## 1. Datasets
-We used the following datasets:
+## 1. Datasets and preprocesing scripts
+We used the following datasets and preprocessing scripts
 
-| Corpus                 | File                      | Format               |
-|------------------------|---------------------------------|----------------------|
-| Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)            | PMID list            |
-| Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)            | PMID list            |
-| Lund-COVID-19          | Lund-COVID-19                   | PMID list            |
-| Lund-COVID-19          | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)     | Plain text           |
-| tmVar (Version 3)      |                                 | PubTator             |
-| MedMentions            |                                 | PubTator             |
-| BioID                  |                                 | PubTator             |
-| BioRED                 |                                 | PubTator             |
-
-## 2. Pre-processing
-We used the following scripts to convert PubTator files into document collection json files for EasyNER.
+| Corpus                 | File                                                                                                        | Format    | Script| 
+|------------------------|-------------------------------------------------------------------------------------------------------------|-----------|-------|
+| Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)              | PMID list |       |
+| Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)              | PMID list |       |
+| Lund-COVID-19          |                                                                                                             | PMID list |       |
+| Lund-COVID-19          | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text|       |
+| tmVar (Version 3)      ||||
+| MedMentions            ||||
+| BioID                  ||||
+| BioRED                 | [BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
 
 ## 3. EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
@@ -38,7 +35,13 @@ Hardware: DETAILS?
 
 Timing script:
 
+RESULT TABLE
+
 ## 7. F1, precision and recall evaluation
 Tools: EasyNER, Hunflair2, BERN2 web demo, BERN2 API
 
 Evaluation script:
+
+Metrics:
+
+RESULT TABLE
