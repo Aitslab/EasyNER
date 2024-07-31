@@ -27,7 +27,7 @@ EasyNER output files were converted to PubTator format using the conversion scri
 Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [Hunflair repo](https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/hunflair2). WHAT WAS DONE FOR OTHER CORPORA PREDICTIONS AND RUNTIMES?
 
 ## BERN2
-BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors. Instead, predictions were obtained using the [BERN2 web demo and API](http://bern2.korea.ac.kr/).
+BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors [Github issue](https://github.com/dmis-lab/BERN2/issues/70). Instead, predictions were obtained using the [BERN2 web demo and API](http://bern2.korea.ac.kr/).
 
 ## Evaluation
 Hardware: DETAILS? 
