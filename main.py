@@ -4,6 +4,7 @@ import json
 import os
 from glob import glob
 from tqdm import tqdm
+import time
 import spacy
 import torch
 from spacy.matcher import PhraseMatcher
@@ -272,14 +273,19 @@ def run_search(config: dict, ignore: bool):
     print("Finished running result inspection script.")
 
 if __name__ == "__main__":
+
     print("Please see config.json for configuration!")
 
     with open("config.json", "r") as f:
         config = json.loads(f.read())
 
     print("Loaded config:")
-    # print(json.dumps(config, indent=2, ensure_ascii=False))
-    # print()
+
+    TIMEKEEP = config["TIMEKEEP"]
+    if TIMEKEEP:
+        start_main = time.time()
+        tkff = open("timekeep.txt", "w", encoding="utf8")
+        tkff.write(f"start_time at: {start_main}\n")
 
     os.makedirs("data", exist_ok=True)
 
@@ -289,31 +295,81 @@ if __name__ == "__main__":
 
 
     # Load abstracts from the CORD dataset.
+    if not ignore["cord_loader"] and TIMEKEEP:
+        start_cordloader = time.time()
+    
     run_cord_loader(config["cord_loader"], ignore=ignore["cord_loader"])
+
+    if not ignore["cord_loader"] and TIMEKEEP:
+        end_cordloader = time.time()
+        tkff.write(f"Cord Loader time: {end_cordloader-start_cordloader}\n")
     print()
 
     # Download articles from the PubMed API.
+    if not ignore["downloader"] and TIMEKEEP:
+        start_downloader = time.time()
+    
     run_download(config["downloader"], ignore=ignore["downloader"])
+
+    if not ignore["downloader"] and TIMEKEEP:
+        end_downloader = time.time()
+        tkff.write(f"Downloader time: {end_downloader-start_downloader}\n")
     print()
     
     # Prepare free text for pipelne.
+    if not ignore["text_loader"] and TIMEKEEP:
+        start_textloader = time.time()
+    
     run_text_loader(config["text_loader"], ignore=ignore["text_loader"])
+
+    if not ignore["text_loader"] and TIMEKEEP:
+        end_textloader = time.time()
+        tkff.write(f"Text loader time: {end_textloader-start_textloader}\n")
     print()
 
     # Bulk download pubmed baseline though ftp
+    if not ignore["pubmed_bulk_loader"] and TIMEKEEP:
+        start_pbloader = time.time()
+
     run_pubmed_bulk_loader(config["pubmed_bulk_loader"], ignore=ignore["pubmed_bulk_loader"])
+    
+    if not ignore["pubmed_bulk_loader"] and TIMEKEEP:
+        end_pbloader = time.time()
+        tkff.write(f"Pubmed bulk loader time: {end_pbloader-start_pbloader}\n")
     print()
 
     # Extract sentences from each article.
+    if TIMEKEEP:
+        start_splitter= time.time()
+
     run_splitter(config["splitter"], ignore=ignore["splitter"])
+
+    if TIMEKEEP:
+        end_splitter= time.time()
+        tkff.write(f"Splitter time: {end_splitter-start_splitter}\n")
     print()
 
     # Run NER inference on each sentence for each article.
+    if TIMEKEEP:
+        start_ner= time.time()
+
     run_ner(config["ner"], ignore=ignore["ner"])
+
+    if TIMEKEEP:
+        end_ner= time.time()
+        tkff.write(f"NER time: {end_ner-start_ner}\n")
+        tkff.write(f"Total time till NER: {end_ner-start_main}\n")
     print()
     
     # Run analysis on the entities that were found by NER.
+    if not ignore["analysis"] and TIMEKEEP:
+        start_analysis = time.time()
+    
     run_analysis(config["analysis"], ignore=ignore["analysis"])
+
+    if not ignore["analysis"] and TIMEKEEP:
+        end_analysis = time.time()
+        tkff.write(f"Analysis time: {end_analysis-start_analysis}\n")
     print()
 
     # Run metrics on models and gold-standard set
@@ -329,3 +385,11 @@ if __name__ == "__main__":
     print()
 
     print("Program finished successfully.")
+
+    if TIMEKEEP:
+        end_main = time.time()
+        tkff.write(f"end_time at: {end_main}\n")
+        
+        tkff.write(f"Total runtime: {end_main-start_main}\n")
+        tkff.close()
+
