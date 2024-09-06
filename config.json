@@ -1,15 +1,15 @@
 {
   "CPU_LIMIT": 5,
-  "TIMEKEEP":false,
+  "TIMEKEEP":true,
 
   "ignore": {
     "cord_loader": true,
-    "downloader": true,
+    "downloader": false,
     "text_loader":true,
-    "pubmed_bulk_loader":false,
-    "splitter": true,
-    "ner": true,
-    "analysis": true,
+    "pubmed_bulk_loader":true,
+    "splitter": false,
+    "ner": false,
+    "analysis": false,
     "merger": true,
     "metrics":true,
     "nel":true,
@@ -67,9 +67,9 @@
     "multiprocessing":true
   },
   "analysis": {
-    "input_path": "results/ner/path-to-ner-folder/",
+    "input_path": "results/ner/",
     "output_path": "results/analysis/",
-    "entity_type":"species",
+    "entity_type":"chemical",
     "plot_top_n":50
   },
   "merger": {
