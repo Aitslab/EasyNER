@@ -45,6 +45,7 @@ __version__ = '0.1.0'
 import os
 import pandas as pd
 from bioc import pubtator
+from typing import List
 
 
 # Function to initialize the metrics dictionary
@@ -103,7 +104,7 @@ def initialize_metrics_dictionary(tools, corpora):
 
 
 
-def load_pubtator(path: str, entity_classes: list[str]) -> dict:
+def load_pubtator(path: str, entity_classes: List[str]) -> dict:
     """
     Load annotations from PubTator into nested dict and harmonize type names:
         - text_id:
@@ -180,12 +181,11 @@ def load_gold(corpora, gold_dir):
         print(f"Loading {corpus} goldstandard: {path}")
         print(f"Evaluated classes: {entity_types}")
 
-        gold[corpus] = load_pubtato
-        r(path, entity_types)
+        gold[corpus] = load_pubtator(path, entity_types)
 
         print("-"*100)
 
-    print(gold)
+    # print(gold)
     print("="*100)
     return gold
 
@@ -220,7 +220,7 @@ def load_preds(tools, corpora, dir):
 
             print("-"*100)
 
-    print(preds)
+    # print(preds)
     print("="*100)
     return preds
 
@@ -262,7 +262,7 @@ def calculate_gold_stats(gold, preds, metrics):
             for tool, pred in preds.items():
                 metrics[tool][corpus]['class_metrics'][entity_class]['gold_count'] = entity_count
 
-    print(metrics)
+    # print(metrics)
     print("="*100)
     return metrics
 
@@ -287,7 +287,7 @@ def calculate_pred_stats(preds, metrics):
 
                     metrics[tool][corpus]['class_metrics'][entity_class]['pred_count'] = entity_count
 
-    print(metrics)
+    # print(metrics)
     print("="*100)
     return metrics
 
@@ -490,7 +490,7 @@ def calculate_corpus_metrics(metrics):
             metric_types['corpus_metrics']['weighted_recall'] = weighted_rec
             metric_types['corpus_metrics']['weighted_f1'] = weighted_f1
 
-    print(metrics)
+    # print(metrics)
     print("="*100)
     return metrics
 
@@ -520,7 +520,7 @@ def flatten_metrics(metrics):
 
 
 # Function to run the evaluation
-def main(corpora, tools, data_folder, offset_stride):
+def main(corpora, tools, data_folder, offset_stride, text=""):
 
     # print warning
     print('ATTENTION: The script only evaluates entities which have identifiers in the gold standard and prediction files. Use a dummy identifier (e.g. -1) if needed.')
@@ -552,7 +552,10 @@ def main(corpora, tools, data_folder, offset_stride):
     # Convert to dataframe and save
     flattened_metrics = flatten_metrics(corpus_metrics)
     df = pd.DataFrame(flattened_metrics)
-    df.to_csv(f'{data_folder}/metrics.tsv', sep='\t', index=False, encoding = 'utf-8')
+
+    metrics_folder = data_folder+"/metrics/"
+    os.makedirs(metrics_folder, exist_ok=True)
+    df.to_csv(f'{metrics_folder}/metrics_{text}.tsv', sep='\t', index=False, encoding = 'utf-8')
 
     print("="*100)
     print("="*100)
@@ -568,20 +571,35 @@ if __name__ == "__main__":
     # Example usage
 
     # Define name of the folder containing predictions and goldstandard subfolders
-    data_folder = C:/Users/sonja/python_runs/evaluation/  
+    # data_folder = "/home/rafsan/aitslab/nlp/paper_review/hunflair2-experiments/annotations/" 
+    # data_folder = "/home/rafsan/aitslab/nlp/EasyNER/results_huner_eval/ner_merged2/"
+    data_folder = "/home/rafsan/aitslab/nlp/paper_review/hunflair2-experiments/annotations2/" 
 
-   # Define corpora and entity classes to be evaluated (corpora names should match subfolder names)
-    corpora = {
-        "medmentions": ["disease", "chemical"],
-        "medmentions_original_preprocessed": ["disease", "chemical", "gene", "species", "cell"],
-        "tmvar_v3": ["gene", "species", "cell"],
-        "tmvar_v3_preprocessed": ["gene", "species", "cell"],
+
+    CORPORA = {
+        "medmentions": ["cell","gene","disease", "chemical", "species"],
         "bioid": ["gene", "chemical", "cell", "species"],
-        "bioid_preprocessed": ["gene", "chemical", "cell", "species"]
+        "tmvar_v3": ["gene", "species", "cell"],
+        "biored":["gene", "disease","chemical", "cell", "species"]
     }
-
-    # Define NER prediction tools to be evaluated (should match subfolder names)
-    tools = ["hunflair2", "pubtator", "bent", "goldstandard"]
     
-    # Run evaluation
-    main(corpora=corpora, tools=tools, data_folder=data_folder, offset_stride=1)
+    ## The evaluation was done for each entity separately
+    for ent in ["cell","chemical", "disease", "gene", "species"]:
+    # for ent in ["chemical", "disease"]:
+    # Define corpora and entity classes to be evaluated (corpora names should match subfolder names)
+        # corpora = {
+        #     "bioid": ["chemical"],
+        #     "medmentions": ["chemical"],
+        #     "biored": ["chemical"],
+        # }
+        corpora = {c:[ent] for c in CORPORA if ent in CORPORA[c]}
+        print("\n\n\n\n\n")
+        print(corpora)
+        print("\n\n\n\n\n")
+        # Define NER prediction tools to be evaluated (should match subfolder names)
+        # tools = ["hunflair2", "goldstandard", f"easyner_{ent}"]
+        tools = ["bent", "bern_processed", "pubtator", "scispacy","hunflair2","hunflair2_rerun",f"easyner_{ent}","old_goldstandard", "goldstandard"]
+        
+        # Run evaluation
+        main(corpora=corpora, tools=tools, data_folder=data_folder, offset_stride=1, text=ent)
+        

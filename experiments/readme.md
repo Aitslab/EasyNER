@@ -30,16 +30,31 @@ Hunflair2 predictions for tmVar, BioID and MedMentions were obtained from the [H
 BERN2 local installation was attempted on both laptop and HPC system but failed with multiple errors [Github issue](https://github.com/dmis-lab/BERN2/issues/70). Instead, predictions were obtained using the [BERN2 web demo and API](http://bern2.korea.ac.kr/).
 
 ## Evaluation
-Hardware: DETAILS? 
+Hardware: The runs and evaluation were done on an ASUS TUF A15 Gaming Laptop with Ubuntu 23.10 OS and AMD Ryzen 7 7735HS with Radeon Graphics X 16 and NVIDIA GeForce RTX4060 dedicated GPU. The runs were conducted on the latter.
 
 ### Runtime
-Timing script:
+Timing script: get_runtime_for_all_timestamps.ipynb
 
 RESULT TABLE
 
-Evaluation script: [Hunflair2 evaluation script](https://github.com/hu-ner/hunflair2-experiments/blob/main/evaluate.py) (ANY MODIFICATIONS?)
+Evaluation script: evaluate_ner_pubtatorformat.py which was modified from [Hunflair2 evaluation script](https://github.com/hu-ner/hunflair2-experiments/blob/main/evaluate.py)
 
 ### Performance
 Metrics:
 
 RESULT TABLE
+
+## Script descriptions
+
+1. convert_hunflair2_pubtator_to_json.py: Convert corpora in raw pubtator format into JSON format. For example, in case of corpora used for HunFlair2 runs like medmentions, bioID, TmVar_v3 etc
+2. convert_easyner_raw_json_to_pubtator.py: Convert raw JSON files into Pubtator format.
+3. convert_easyner_output_json_to_pubtator.py: Convert output from EasyNER in JSON format into Pubtator format.
+4. entity_merger2.py: Merge entities in json formats from multiple input folders with same JSON file but different annotations.
+5. get_runtime_for_all_timestamps.ipynb: Get a python dataframe with runtimes from different models. Can be used to both input times manually or from EasyNER output format. This script was used to combine all timestamps and compare different models.
+6. evaluate_ner_pubtatorformat.py: run evaluation on annotations in the data folder that are presented in Pubtator format. Each folder name should represent the method and each filename within should contain annotation from that corpus.
+7. count_characters_in_each_corpus.ipynb: Count characters, words and articles in each corpus
+8. postprocess_separator_merging.py: Post process separators and punctuation marks withins annotated file. Is used to epand EasyNER output from a single detected character, such as "-" into the nearest whole word.
+9. preprocess_pubtatorformat.py: preprocess pubtator formats to make sure all annotations contain -1 in the end and are detectable with the evaluation script.
+10. remove_NEL_from_biored.ipynb: Remove NEL tags at the end of each annotation for the BioRED corpus.
+
+
