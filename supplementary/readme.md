@@ -23,9 +23,7 @@ All info and scripts to reproduce the experiments for the EasyNER article are in
 
 
 ## Script descriptions
-| Script                    | Description |
-|---------------------------|-------------|
-|process_GS.py|-------------|converts Lund-COVID-19 corpus to Simplified Lund-COVID-19 corpus: merges Species_human, Species_other, Virus_family, Virus_other, Virus_SARS-CoV-2 into "species" and Disease_COVID_19 and Disease_other into "disease", removes “chemicals” and “cells” |
+- process_GS.py: converts Lund-COVID-19 corpus to Simplified Lund-COVID-19 corpus: merges Species_human, Species_other, Virus_family, Virus_other, Virus_SARS-CoV-2 into "species" and Disease_COVID_19 and Disease_other into "disease", removes “chemicals” and “cells” |
 
 1. convert_hunflair2_pubtator_to_json.py: Convert corpora in raw pubtator format into JSON format. For example, in case of corpora used for HunFlair2 runs like medmentions, bioID, TmVar_v3 etc
 2. convert_easyner_raw_json_to_pubtator.py: Convert raw JSON files into Pubtator format.
