@@ -3,19 +3,24 @@
 
 All info and scripts to reproduce the experiments for the EasyNER article are in this folder.
 
-## Datasets and preprocessing scripts
+## Corpora and preprocessing scripts
 
-| Corpus                                                                                                                              | Format    | Script| 
-|-------------------------------------------------------------------------------------------------------------------------------------|-----------|-------|
-|[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                     | IOB2      |       |
-|[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                      |           |       | 
-|[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                            | IOB2      |       |
-|[Lund-COVID-19](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                       | Plain text|       |
-|tmVar (Version 3)      |||
-|MedMentions            |||
-|[BioID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|||
-|[BioID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator||
-|[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
+| Corpus                                                                                                                                     | Format    | Script| 
+|--------------------------------------------------------------------------------------------------------------------------------------------|-----------|-------|
+|[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                                   | IOB2      |       |
+|[Bio-ID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)                                      |           |       |
+|[Bio-ID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)                   |PubTator   |       |
+|[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                                                         |           |       |
+|[CRAFT (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                          |           |       |
+|[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                            | IOB2      |       |
+|[Lund-COVID-19](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                              | Plain text| yes |
+|[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                |           |       |
+|[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        |           | yes   |
+|[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |           |       | 
+|[tmVar (Version 3.0)}(https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |           |       |
+|[tmVar (Version 3.0) Hunflair2 predictions}(https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator   |       |
+
+
 
 ## EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
