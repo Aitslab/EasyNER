@@ -17,8 +17,8 @@ All info and scripts to reproduce the experiments for the EasyNER article are in
 |[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                |           |       |
 |[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        |           | yes   |
 |[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |           |       | 
-|[tmVar (Version 3.0)}(https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |           |       |
-|[tmVar (Version 3.0) Hunflair2 predictions}(https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator   |       |
+|[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |           |       |
+|[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator   |       |
 
 
 
