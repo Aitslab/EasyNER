@@ -14,6 +14,7 @@ All info and scripts to reproduce the experiments for the EasyNER article are in
 |[CRAFT (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                          |           |       |
 |[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                            | IOB2      |       |
 |[Lund-COVID-19](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                              | Plain text| yes |
+|[Simplified Lund-COVID-19]                                                                                                                  | Plain text| yes |
 |[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                |           |       |
 |[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        |           | yes   |
 |[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |           |       | 
