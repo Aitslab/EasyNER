@@ -1,21 +1,21 @@
 *** UNDER CONSTRUCTION ***
 
 
-All info and scripts to reproduce the benchmarking experiments for the EasyNER article are in this folder.
+All info and scripts to reproduce the experiments for the EasyNER article are in this folder.
 
 ## Datasets and preprocessing scripts
 
-| Corpus                 | File                                                                                                        | Format    | Script| 
-|------------------------|-------------------------------------------------------------------------------------------------------------|-----------|-------|
-| Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)              | PMID list |       |
-| Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)              | PMID list |       |
-| Lund-COVID-19          |                                                                                                             | PMID list |       |
-|                        | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text|       |
-| tmVar (Version 3)      ||||
-| MedMentions            ||||
-| BioID                  |[goldstandard/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|||
-| BioID                  |[hunflair2/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator (Hunflair2 predictions)||
-| BioRED                 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
+| Corpus                                                                                                                              | Format    | Script| 
+|-------------------------------------------------------------------------------------------------------------------------------------|-----------|-------|
+|[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                     | IOB2      |       |
+|[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                      |           |       | 
+|[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                            | IOB2      |       |
+|[Lund-COVID-19](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                       | Plain text|       |
+|tmVar (Version 3)      |||
+|MedMentions            |||
+|[BioID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|||
+|[BioID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator||
+|[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
 
 ## EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
