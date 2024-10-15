@@ -3,28 +3,31 @@
 
 All info and scripts to reproduce the experiments for the EasyNER article are in this folder.
 
-## Corpora
-
-| Corpus                                                                                                                                     | Format      | Preprocessing required| 
+## Acquired and produced corpora
+| Corpus                                                                                                                                     | Format      | Preprocessing | 
 |--------------------------------------------------------------------------------------------------------------------------------------------|-------------|-------|
 |[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                                   | IOB2        |       |
 |[Bio-ID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)                                      |             |       |
 |[Bio-ID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)                   |PubTator     |       |
 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                                                         |             |       |
-|[CRAFT (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                          |             | yes |
+|[CRAFT* (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                         | PubAnnotation| yes |
 |[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                            | IOB2        |               |
 |[Lund-COVID-19](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                              | Plain text  | yes |
-|Simplified Lund-COVID-19                                                                                                                    | Plain text  |       |
+|Simplified Lund-COVID-19 (produced by processing Lund-COVID-19)                                                                             | IOB2  |       |
 |[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                |             | yes      |
 |[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        |             |       |
+|Simplified MedMentions                                                                                                               | Plain text  |       |
 |[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |             |       | 
 |[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |             |       |
 |[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator     |       |
+* Follow these instructions to obtain the CRAFT corpus in PubAnnotation format: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats
 
+  
 ## Corpus preprocessing
 - **process_GS.py**: converts the Lund-COVID-19 corpus to the Simplified Lund-COVID-19 corpus. The script merges the classes "Species_human", "Species_other", "Virus_family", "Virus_other", "Virus_SARS-CoV-2" into "species" and "Disease_COVID_19" and "Disease_other" into "disease", and removes the classes “chemicals” and “cells”.
-- **CRAFT_preprocessing_spacy.py**: used in combination with **BioBERT preprocess.sh** to the corpus from Pubannotation to IOB2 format.
+- **CRAFT_preprocessing_spacy.py**: converts the CRAFT corpus from PubAnnotation to IOB2 format
 - **preprocess_pubtatorformat.py**: ensures all annotation in a Pubtator file contain -1 in the end and are detectable with the evaluation script; also remaps classes for MedMention corpus using the mapping file.
+- **BioBERT process.sh**: converts
 
 1. convert_hunflair2_pubtator_to_json.py: Convert corpora in raw pubtator format into JSON format. For example, in case of corpora used for HunFlair2 runs like medmentions, bioID, TmVar_v3 etc
 2. convert_easyner_raw_json_to_pubtator.py: Convert raw JSON files into Pubtator format.
