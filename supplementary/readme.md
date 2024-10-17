@@ -1,6 +1,5 @@
 *** UNDER CONSTRUCTION ***
 
-
 All info and scripts to reproduce the experiments for the EasyNER article are in this folder.
 
 ## Acquired and produced corpora
@@ -28,7 +27,7 @@ All info and scripts to reproduce the experiments for the EasyNER article are in
 - **process_GS.py**: converts the Lund-COVID-19 corpus to the Simplified Lund-COVID-19 corpus. The script merges the classes "Species_human", "Species_other", "Virus_family", "Virus_other", "Virus_SARS-CoV-2" into "species" and "Disease_COVID_19" and "Disease_other" into "disease", and removes the classes “chemicals” and “cells”.
 - **CRAFT_preprocessing_spacy.py**: converts the CRAFT corpus from PubAnnotation to IOB2 format
 - **preprocess_pubtatorformat.py**: ensures all annotation in a Pubtator file contain -1 in the end and are detectable with the evaluation script; also remaps classes for MedMention corpus using the mapping file.
-- **BioBERT process.sh**: converts
+- **BioBERT process.sh**: converts an IOB2 file into chunks alligned with the max_len parameter (default 128). If the sentence length is too long, the preprocess.sh file will cut the sentence into these chunks in the size of max_len.
 
 1. convert_hunflair2_pubtator_to_json.py: Convert corpora in raw pubtator format into JSON format. For example, in case of corpora used for HunFlair2 runs like medmentions, bioID, TmVar_v3 etc
 2. convert_easyner_raw_json_to_pubtator.py: Convert raw JSON files into Pubtator format.

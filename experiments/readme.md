@@ -7,15 +7,15 @@ All info and scripts to reproduce the benchmarking experiments for the EasyNER a
 
 | Corpus                 | File                                                                                                        | Format    | Script| 
 |------------------------|-------------------------------------------------------------------------------------------------------------|-----------|-------|
-| Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)              | PMID list |       |
-| Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)              | PMID list |       |
+| Lund-Autophagy-1       | [Lund-Autophagy-1.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-1.txt)              | PMID list | [EasyNER JSON to Pubtator](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_easyner_output_json_to_pubtator.py)      |
+| Lund-Autophagy-2       | [Lund-Autophagy-2.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-Autophagy-2.txt)              | PMID list | [EasyNER JSON to Pubtator](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_easyner_output_json_to_pubtator.py)      |
 | Lund-COVID-19          |                                                                                                             | PMID list |       |
-|                        | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text|       |
-| tmVar (Version 3)      ||||
-| MedMentions            ||||
-| BioID                  |[goldstandard/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|||
-| BioID                  |[hunflair2/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator (Hunflair2 predictions)||
-| BioRED                 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         |||
+|                        | [Lund-COVID-19_plaintext.txt](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)| Plain text| [EasyNER JSON to Pubtator](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_easyner_output_json_to_pubtator.py)      |
+| tmVar (Version 3)      ||| [Pubtator to EasyNER JSON](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_hunflair2_pubtator_to_json.py) |
+| MedMentions            ||| [Pubtator to EasyNER JSON](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_hunflair2_pubtator_to_json.py) |
+| BioID                  |[goldstandard/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)|| [Pubtator to EasyNER JSON](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_hunflair2_pubtator_to_json.py) |
+| BioID                  |[hunflair2/bioid.txt](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)|PubTator (Hunflair2 predictions)| [Pubtator to EasyNER JSON](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_hunflair2_pubtator_to_json.py) |
+| BioRED                 |[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                         || [Pubtator to EasyNER JSON](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/convert_hunflair2_pubtator_to_json.py) |
 
 ## EasyNER
 EasyNER runs included the following modules: Sentence Splitter, NER, Analysis.
