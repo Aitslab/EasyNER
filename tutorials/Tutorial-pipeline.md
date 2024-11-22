@@ -99,19 +99,19 @@ The pipeline has four diffent modules for data loading, which handle different i
 - Plain text => Text loader module
 
 ### 2.1.1 Downloader
-This downloader variant of the data loader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the Pubmed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs. 
+The Downloader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the PubMed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs. 
 
 As example for the input, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-Autophagy-1.txt). The easiest way to create such a file is to perform a search on Pubmed and then save the search results using the "PMID" format option:
 
 ![](imgs/pubmed.jpg)
 
-To run the downloader module, change "downloader" in the ignore section to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
+To run the Downloader module, change "downloader" in the ignore section to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
 
 #### Config file arguments:
 ```console
     "input_path": path to file with pubmed IDs 
     "output_path": path to storage location for output
-    "batch_size": number of article records downloaded in each call to API. Note that, too large batch size may result in invalid download requests.
+    "batch_size": number of article records downloaded in each call to API. Note that a too large batch size may result in invalid download requests.
 ```
 #### example: 
 
