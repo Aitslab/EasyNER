@@ -370,4 +370,5 @@ conda activate easyner_env
 ```
 
 The output files are placed into your designated output folder. When the run is completed "Program finished successfully will appear in the conda terminal:
+
 ![](imgs/easyner_run.png)
