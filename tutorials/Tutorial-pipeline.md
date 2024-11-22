@@ -2,7 +2,7 @@
 
 ![](imgs/pipeline3.png)
 
-The end-to-end NER pipeline for information extraction is designed to take user given input and extract a list of entities. The figure above describes how the given text is processed through the pipeline. Following are step-by-step tutorials on running the NER pipeline
+The end-to-end NER pipeline for information extraction is designed to process text provided by the user and extract a list of entities. The figure above describes how the given text is processed through the pipeline. Following are step-by-step instructions on installing and running the NER pipeline.
 
 ___
 
