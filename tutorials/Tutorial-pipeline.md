@@ -60,7 +60,7 @@ ___
 
 EasyNER consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. 
 
-For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
+For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
 
 ```bash
 {
@@ -369,4 +369,5 @@ conda activate easyner_env
 (easyner_env) C://Users//YOURUSERNAME//Documents//git_repos//EasyNER>python main.py
 ```
 
-The output files are placed into your designated output folder. 
+The output files are placed into your designated output folder. When the run is completed "Program finished successfully will appear in the conda terminal
+![](imgs/easyne_run.png)
