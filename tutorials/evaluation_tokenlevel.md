@@ -15,6 +15,8 @@ $ mkdir -p $OUTPUT_DIR
 4. Run combined prediction and evaluation with run_ner.py like this
 $ python run_ner.py --do_train=false --do_predict=true --do_eval=true --output_dir=$OUTPUT_DIR
 
+# Evalution of non-BioBERT predictions (e.g. from HunFlair or ScispaCy)
+ADD DESCRIPTION
 
 # Conversion to IOB2 format
 The CRAFT corpus in Pubannotation format (and any other corpus with this format) needs to be converted to IOB2 format before it can be used with BioBERT. 
