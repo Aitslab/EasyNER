@@ -31,7 +31,7 @@ Alternatively, you can download the repository from github page https://github.c
 
 ## 1.3 Install the conda environment
 
-To install the necessary packages for running the environment, open a conda terminal ("Anaconda prompt" in the Windows program window) and navigate to the EasyNER folder you downloaded using the change directory command (cd). For example:
+Conda environments make it possible to install and manage specific versions of software and their dependencies without interfering with other project. It is best to install EasyNER in a new environment. To install the necessary packages for running the environment, open a conda terminal (called "Anaconda prompt" in the Windows program list) and navigate to the EasyNER folder you downloaded using the change directory command (cd). For example:
 ```bash
 (base) C:\Users\YOURUSERNAME>cd C://Users//YOURUSERNAME//Documents//git_repos//EasyNER
 ```
