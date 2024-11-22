@@ -46,6 +46,7 @@ conda env create -f environment.yml
 ```
 
 If you get an error "CondaValueError: prefix already exists" open the environment.yml file which is located in the main folder of the EasyNER folder and change the name of the environment name in the first row.
+
 After installation, load the environment in the conda terminal with this:
 
 ```bash
