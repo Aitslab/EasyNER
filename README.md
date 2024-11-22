@@ -4,9 +4,6 @@ EasyNER is a easy to use, customizable end-to-end pipeline for extracting named 
 
 ![](tutorials/imgs/pipeline3.png)
 
-## How to use the pipeline
-
-A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md). A quick start guide is below.
 
 ## What are the folders in this repo?
 - **data**: datasets from the EasyNER article
@@ -18,6 +15,9 @@ A detailed guide, including installation, configuration and inference tutorial c
 - **supplementary**: supplementary files for the EasyNER article and all info and scripts to replicate the benchmarking experiments from the article
 - **tutorials**: step-by-step instructions on how to install and use EasyNER
 
+## How to use the pipeline
+
+A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md). A quick start guide is below.
 
 ### Quick start guide
 
