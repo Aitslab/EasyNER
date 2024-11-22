@@ -2,7 +2,7 @@ This is a step by step guide to evaluating model predictions with the run_ner.py
 
 https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/run_ner.py
 
-The script uses IOB2 files as input and calculates precision, recall and F1 scores on token-level.
+The script calculates precision, recall and F1 scores on token-level.
 
 # Combined prediction and evaluation procedure for BioBERT models
 1. Convert the gold standard to IOB2 format (if needed, see below). 
