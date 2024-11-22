@@ -17,7 +17,7 @@ EasyNER is a easy to use, customizable end-to-end pipeline for extracting named 
 
 ## How to use the pipeline
 
-A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md). A quick start guide is below.
+A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md).
 
 ### Quick start guide
 
