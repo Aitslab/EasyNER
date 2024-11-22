@@ -8,7 +8,12 @@ ___
 
 # 1. Installation
 
-## 1.1 Download the GitHub repository
+## 1.1 Install Python
+EasyNER is written in the Python programming language. Before you use EasyNER, you need to install Python. The easiest way to do this is to use Anacondaa. 
+Anaconda can be downloaded from https://www.anaconda.com/ and step-by-step installation instructions can be found on https://docs.anaconda.com/anaconda/install/index.html.  
+
+
+## 1.2 Download the EasyNER GitHub repository
 
 If you have git installed on the computer, open a terminal window and download the repository by writing: 
 
@@ -21,9 +26,7 @@ Alternatively, you can download the repository from github page https://github.c
 
 ![](imgs/github.png)
 
-## 1.2 Install the conda environment
-
-For running the pipeline, anaconda or miniconda must be installed in the computer. The step-by-step installation instructions can be found on: https://docs.anaconda.com/anaconda/install/index.html.
+## 1.3 Install the conda environment
 
 To install the necessary packages for running the environment, open a conda terminal ("Anaconda prompt" in the Windows program window) and navigate to the EasyNER folder you downloaded using the change directory command (cd). For example:
 ```bash
