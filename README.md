@@ -21,10 +21,10 @@ A detailed guide, including installation, configuration and inference tutorial c
 
 ### Quick start guide
 
-1. Before installation of EasyNER:
-   EasyNER is written in the Python programming language. Before you use it, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. 
+Before installation of EasyNER:
+Before you use EasyNER, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. 
 
-3. Clone the repository to your target folder
+1. Transfer the EasyNER repo to your computer by downloading it manually or cloning the EasyNER GitHub repository to your target folder.
 
 
 ```console
@@ -32,7 +32,7 @@ git clone https://github.com/Aitslab/EasyNER
 
 ```
 
-3. Set up an conda environment
+2. Set up an conda environment
 
 ```console
 cd EasyNER
