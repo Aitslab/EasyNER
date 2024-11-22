@@ -1,6 +1,6 @@
 # EasyNER: A Customizable and Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text
 
-EasyNER is a customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.  
+EasyNER is a easy to use, customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.  
 
 ![](tutorials/imgs/pipeline3.png)
 
@@ -10,10 +10,11 @@ A detailed guide, including installation, configuration and inference tutorial c
 
 ### Quick start guide
 
-1. Before installation: Downnload and install anaconda from https://www.anaconda.com/
+1. Before installation of EasyNER:
+   EasyNER is written in the Python programming language. Before you use it, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. Alternatively, follow this Python installation guide: https://realpython.com/installing-python/.
 
 
-2. Clone the repository to your target folder
+3. Clone the repository to your target folder
 
 
 ```console
