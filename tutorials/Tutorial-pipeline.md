@@ -13,7 +13,7 @@ EasyNER is written in the Python programming language. Before you use EasyNER, y
 Anaconda can be downloaded from https://www.anaconda.com/ and step-by-step installation instructions can be found on https://docs.anaconda.com/anaconda/install/index.html.  
 
 EasyNER requires very little knowledge of Python but you probably find it easier to use if you watch our [Python tutorial](https://youtu.be/yDNBdB59J1s) on YouTube.
-The notebook for the tutorial can be found [here](https://github.com/COMPUTE-LU/PLGroup_PythonforBeginners/blob/main/kickoff_tutorial_20210127.ipynb). You can open the notebook by copying it to google drive and then loading it in colab (Tutorial for colab here: https://github.com/Aitslab/training/blob/master/tutorials/colab.md). 
+The notebook for the tutorial can be found [here](https://github.com/COMPUTE-LU/PLGroup_PythonforBeginners/blob/main/kickoff_tutorial_20210127.ipynb). You can open the notebook by copying it to google drive and then loading it in colab (see our [tutorial for colab](https://github.com/Aitslab/training/blob/master/tutorials/colab.md)). 
 
 EasyNER was developed using Python version 3.9 but also works with other Python versions. If you do encounter issues, install Python 3.9.
 
