@@ -9,12 +9,15 @@ The script calculates precision, recall and F1 scores on token-level.
 2. Convert the IOB2 file to BioBERT input format by running the [BioBERT preprocess.sh script](https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/preprocess.sh). We used a max sequence length at the default value of 128, which splits sentences larger than this length into two.
 3. Make an empty input folder and place your file in it (no othe files should be in the folder).
 4. Specify the input and output folder like this and make the output folder
+```console
 $ export NER_DIR=./YOUR_INPUT_FOLDER
 $ export OUTPUT_DIR=./YOUR_OUTPUT_FOLDER
 $ mkdir -p $OUTPUT_DIR
+```
 4. Run combined prediction and evaluation with run_ner.py like this
+```console
 $ python run_ner.py --do_train=false --do_predict=true --do_eval=true --output_dir=$OUTPUT_DIR
-
+```
 # Evalution of non-BioBERT predictions (e.g. from HunFlair or ScispaCy)
 ADD DESCRIPTION
 
