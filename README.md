@@ -11,8 +11,7 @@ A detailed guide, including installation, configuration and inference tutorial c
 ### Quick start guide
 
 1. Before installation of EasyNER:
-   EasyNER is written in the Python programming language. Before you use it, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. Alternatively, follow this Python installation guide: https://realpython.com/installing-python/.
-
+   EasyNER is written in the Python programming language. Before you use it, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. 
 
 3. Clone the repository to your target folder
 
