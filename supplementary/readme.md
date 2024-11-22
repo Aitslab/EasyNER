@@ -1,6 +1,8 @@
 *** UNDER CONSTRUCTION ***
 
-All info and scripts to reproduce the experiments for the EasyNER article are in this folder.
+This folder contains
+1. all the supplementay files for the EasyNER manuscript
+2. all info and scripts to reproduce the experiments for the EasyNER article are in this folder.
 
 ## Acquired and produced corpora
 | Corpus                                                                                                                                     | Format      | Preprocessing | 
