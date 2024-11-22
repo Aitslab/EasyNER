@@ -18,7 +18,7 @@ The notebook for the tutorial can be found here: https://github.com/COMPUTE-LU/P
 
 ## 1.2 Download the EasyNER GitHub repository
 
-If you have git installed on the computer, open a terminal window and download the repository by writing: 
+If you have Git installed on the computer, open a terminal window and download the repository by writing: 
 
 ```
 cd PATH TO YOUR FOLDER OF CHOICE (e.g. C:/Users/XYZ/)
