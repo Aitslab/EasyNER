@@ -93,12 +93,13 @@ ___
 
 ## 2.1 Data loader modules
 
-The pipeline has four diffent modules for data loading, which handle different input types and convert them to JSON files that can be processed further by the other EasyNER modules:
-
+The EasyNER pipeline has four diffent modules for data loading, which handle different input types:
 - List of PubMed IDs => Downloader module
 - PubMed database => Pubmed bulk loader module
 - CORD-19 metadata.csv file => CORD loader module
 - Plain text => Text loader module
+
+The data loader modules convert the respective input files to one or several JSON files (depending on the number of texts your are processing). These will be placed in the designated output folde and can be processed further by the other EasyNER modules. If the other modules are not run directly, the downloaded files can be saved and the pipeline can be started at the sentence splitter module later.
 
 Example of the generated JSON file:
 ![](imgs/output_downloader.png)
@@ -110,7 +111,7 @@ As example for the input, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-A
 
 ![](imgs/pubmed.jpg)
 
-To run the Downloader module, change "downloader" in the ignore section to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
+To run the Downloader module, change "downloader" in the ignore section of the config file to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
 
 #### Config file arguments:
 ```console
