@@ -85,7 +85,9 @@ In a standard pipeline run, the following modules should be set to false (and th
 3. ner
 4. analysis
 
-The following sections will provide more detail on each of the modules.
+When the config file is updated, save it and start the run (see step 3.).
+
+The following sections will provide more detail on each of the modules and instructions for the config file.
 
 ___
 
@@ -334,7 +336,7 @@ ___
 
 ## 2.6 Merger module (optional)
 
-The merger section combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file argument:
 ```console
@@ -345,12 +347,18 @@ The merger section combines results from multiple NER module runs into a single 
 ```
 ___
 
-# 3. Run pipeline
+# 3. Run EasyNER pipeline
 
-When the configuration is saved, the pipeline can be executed by activating the easyner_env environment, navigating to the easyner folder with "cd" as above, and running the main.py file in the conda terminal:
+When the updated config file is saved, the EasyNER pipeline can be run by activating the easyner_env environment in the conda terminal (Anaconda Prompt), navigating to the easyner folder with "cd" , and running the main.py file in the conda terminal:
 
 ```bash
 conda activate easyner_env
+```
+
+
+```bash
+(easyner_env) C:\Users\YOURUSERNAME>cd C://Users//YOURUSERNAME//Documents//git_repos//EasyNER
+```
 ```
 
 
