@@ -1,4 +1,4 @@
-# EasyNER - Tutorials
+# EasyNER Installation and Useage
 
 ![](imgs/pipeline3.png)
 
