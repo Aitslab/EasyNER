@@ -36,12 +36,13 @@ Conda environments make it possible to install and manage specific versions of s
 (base) C:\Users\YOURUSERNAME>cd C://Users//YOURUSERNAME//Documents//git_repos//EasyNER
 ```
 
-Then create the environment by writing the following command:
+Then create a new environment called "easyner_env" by writing the following command:
 
 ```bash
 conda env create -f environment.yml
 ```
 
+If you get an error "CondaValueError: prefix already exists" open the environment.yml file which is located in the main folder of the EasyNER folder and change the name of the environment name in the first row.
 After installation, load the environment in the conda terminal with this:
 
 ```bash
