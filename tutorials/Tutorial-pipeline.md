@@ -58,9 +58,9 @@ ___
 
 # 2. Modify the Config file
 
-The pipeline consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. 
+EasyNER consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. 
 
-For each pipeline run, the config.json file in the repository needs to be modified with the desired settings. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the section for those modules should be modified as required. It is advisable to save a copy of the modified config file somewhere so you have a permanent record of the run. 
+For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
 
 ```bash
 {
@@ -78,7 +78,7 @@ For each pipeline run, the config.json file in the repository needs to be modifi
     "metrics": true
   },
 ```
-In a normal pipeline run, the following modules should be set to false, and the rest to true:
+In a standard pipeline run, the following modules should be set to false (and the rest to true):
 
 1. One of the data loaders depending on the input type (downloader, cord_loader, free_text loader or pubmed_bulk_loader).
 2. splitter
