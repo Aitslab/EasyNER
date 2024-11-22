@@ -6,7 +6,18 @@ EasyNER is a easy to use, customizable end-to-end pipeline for extracting named 
 
 ## How to use the pipeline
 
-A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md).
+A detailed guide, including installation, configuration and inference tutorial can be found in this [collection of tutorials](tutorials/Tutorial-pipeline.md). A quick start guide is below.
+
+## What are the folders in this repo?
+- **data**: datasets from the EasyNER article
+- **dictionaries**: 3 COVID-19-related dictionaries for the EasyNER pipeline
+- **models**: empty folder to copy the models into on your computer
+- **pubmed_loader**: everything needed for using EasyNER with the PubMed bulk files
+- **results**: example output files; when running EasyNER you can use this to store your output files
+- **scripts**: EasyNER pipeline scripts
+- **supplementary**: supplementary files for the EasyNER article and all info and scripts to replicate the benchmarking experiments from the article
+- **tutorials**: step-by-step instructions on how to install and use EasyNER
+
 
 ### Quick start guide
 
