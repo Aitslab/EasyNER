@@ -93,10 +93,10 @@ ___
 
 The pipeline has four diffent modules for data loading, which handle different input types:
 
-- List of Pubmed IDs => Downloader module
-- Pubmed database => Pubmed bulk loader module
+- List of PubMed IDs => Downloader module
+- PubMed database => Pubmed bulk loader module
 - CORD-19 metadata.csv file => CORD loader module
-- Free text => Text loader module
+- Plain text => Text loader module
 
 ### 2.1.1 Downloader
 This downloader variant of the data loader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the Pubmed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs. 
