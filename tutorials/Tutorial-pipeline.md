@@ -93,12 +93,15 @@ ___
 
 ## 2.1 Data loader modules
 
-The pipeline has four diffent modules for data loading, which handle different input types:
+The pipeline has four diffent modules for data loading, which handle different input types and convert them to JSON files that can be processed further by the other EasyNER modules:
 
 - List of PubMed IDs => Downloader module
 - PubMed database => Pubmed bulk loader module
 - CORD-19 metadata.csv file => CORD loader module
 - Plain text => Text loader module
+
+Example of the generated JSON file:
+![](imgs/output_downloader.png)
 
 ### 2.1.1 Downloader
 The Downloader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the PubMed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs. 
@@ -349,7 +352,7 @@ ___
 
 # 3. Run EasyNER pipeline
 
-When the updated config file is saved, the EasyNER pipeline can be run by activating the easyner_env environment in the conda terminal (Anaconda Prompt), navigating to the easyner folder with "cd" , and running the main.py file in the conda terminal:
+When the updated config file is saved, the EasyNER pipeline can be run by activating the easyner_env environment in the conda terminal (Anaconda Prompt), navigating to the easyner folder with the "cd" command, and starting the main.py file in the conda terminal:
 
 ```bash
 conda activate easyner_env
@@ -359,10 +362,10 @@ conda activate easyner_env
 ```bash
 (easyner_env) C:\Users\YOURUSERNAME>cd C://Users//YOURUSERNAME//Documents//git_repos//EasyNER
 ```
-```
 
 
 ```bash
-python main.py
+(easyner_env) C://Users//YOURUSERNAME//Documents//git_repos//EasyNER>python main.py
 ```
 
+The output files are placed into your designated output folder. 
