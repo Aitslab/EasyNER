@@ -59,9 +59,7 @@ python -m spacy download en_core_web_sm
 6. Choose the input file: list of PubMed IDs, CORD19 metadata.csv file, or file with plain text. If you want to download and process the entire PubMed article collection follow the instructions below.
 
 
-7. Add the correct paths to your input file in the [config file](config.json).
-  
-8. choose the modules you want to run in the “ignore” section in the beginning of the file and save the desired settings for these modules in the config file. 
+7. Add the correct paths to your input file in the [config file](config.json). Choose the modules you want to run in the “ignore” section in the beginning of the file and save the desired settings for these modules in the respective sections. 
 
 
 10. Run the pipeline with the following command:
