@@ -127,7 +127,7 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 ### 2.1.2 PubMed Bulk loader
 
-The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this here: [https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt](https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt)/. The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
+The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this  [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
 
 
 The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
