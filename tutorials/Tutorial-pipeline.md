@@ -150,14 +150,14 @@ ___
 
 ### 2.1.3 CORD loader
 
-The cord_loader variant of the data loader module processes titles and abstracts in the [CORD-19 dataset](https://github.com/allenai/cord19), a large collection of SARS-CoV2-related articles updated until 2022-06-02. For the CORD loader to work, the CORD19 dataset, which includes the metadata.csv file processed by the pipeline, first needs to be downloaded manually from the CORD-19 website ([direct download link](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz)). The file path to the metadata.csv file should then be provided in the config file as input. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000 records). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be extracted from the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and text_loader to true) and provide the following arguments:
+[CORD-19 dataset](https://github.com/allenai/cord19) is a large collection of SARS-CoV2-related articles updated until 2022-06-02. The cord_loader variant of the data loader module processes titles and abstracts in the CORD-19 metadata.csv file. To use the cord_cord loader, CORD-19  needs to be downloaded manually ([direct download link](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz)). The downloaded gz file should then be unpacked and the metadata.csv file placed in a folder. The file path to the metadata.csv file should then be provided in the config file as input path. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000 records). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be extracted from the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and text_loader to true) and provide the following arguments:
 
 #### Config file arguments:
 ```console
-    "input_path": input file path with CORD-19 metadata.csv file
-    "output_path": path to storage location for output
+    "input_path": input file path for CORD-19 metadata.csv file
+    "output_path": path to storage location for output files
     "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
-	"subset_file": input file path to a file with cord UIDs if subset option is set to true
+    "subset_file": input file path to a file with cord UIDs if subset option is set to true
 ```
 #### example: 
 
