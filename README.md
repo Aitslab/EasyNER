@@ -56,22 +56,24 @@ python -m spacy download en_core_web_sm
 ```
 
 
-6. Provide input file: list of PubMed IDs, CORD19 metadata.csv file, or file with free text.
+6. Choose the input file: list of PubMed IDs, CORD19 metadata.csv file, or file with plain text. If you want to download and process the entire PubMed article collection follow the instructions below.
 
 
-7. Add the correct paths to your input file in the [config file](config.json) and choose the modules you want to run in the “ignore” section in the beginning of the file. 
+7. Add the correct paths to your input file in the [config file](config.json).
+  
+8. choose the modules you want to run in the “ignore” section in the beginning of the file and save the desired settings for these modules in the config file. 
 
 
-8. Run the pipeline with the following command:
+10. Run the pipeline with the following command:
 
 ```python
 python main.py
 ```
 
-9. The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv) and a graph [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
+The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv), a graph of the most frequent entities [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
 
-A reproducable capsule is available on Code Ocean: https://doi.org/10.24433/CO.6908880.v1
+A reproducable capsule for EasyNER is available on Code Ocean: https://doi.org/10.24433/CO.6908880.v1
 
 
 ___
@@ -135,6 +137,8 @@ To download the update files alongside the annual baseline, adjust the config fi
  ____
 
 ## Named Entity Recognition (NER) 
+
+EasyNER can identify entities with BioBERT models (or other models in the same format) or dictionaries (= long lists of the words which are to be detected). Five BioBERT models and three dictionaries are included but the use can also provide their own models or dictionaries.
 
 ### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 
