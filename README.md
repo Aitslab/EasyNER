@@ -76,9 +76,13 @@ A reproducable capsule is available on Code Ocean: https://doi.org/10.24433/CO.6
 
 ___
 
-## Bulk Download PubMED
+## PubMed Bulk Download
 
-The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. The bulk loader script will download, process and convert (to json) the PubMed abstract collection from the annual baseline (currently 2023, but file names contain "24" which is to be used as baseline value in the config file) (more insight here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The pubmed_bulk_loader section of the config file is as follows:
+The EasyNER pipeline includes a data loader module that can download, process and convert (to JSON files) the entire PubMed abstract collection. This is provided as the annual baseline, updated only once per year, and nightly update files. You can read more about the baseline here: https://ftp.ncbi.nlm.nih.gov/pubmed/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz. 
+
+Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err file is generated in the end to account for files that are not downloaded. Kindly refer to the err file (same folder as raw_download_path) for missing files and download them in a second run or manually from the ftp site.
+
+The pubmed_bulk_loader section of the config file is as follows:
 
  ```
  "pubmed_bulk_loader": {
@@ -93,18 +97,20 @@ The EasyNER pipeline includes a script for bulk downloading PubMed abstracts*. T
   },
  ```
 
-To process the bulk PubMed files through the pipeline, all you need to do is to make the following changes in the config file:
+When using this module you need to make the following changes in the config file:
 
 1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to "true", and pubmed_bulk_loader section is set to "false".
-2. In the splitter section Specify the pubmed folder path in the "input_path" parameter ("data/pubmed/" from the above example).
-3. In the splitter section, set "pubmed_bulk" to "true".
+2. In the pubmed_bulk_loader section, specify the desired output path. 
+3. In the pubmed_bulk_loader section, specify the baseline version
+4. In the splitter section Specify the pubmed folder path in the "input_path" parameter ("data/pubmed/" from the above example).
+5. In the splitter section, set "pubmed_bulk" to "true".
 
-Then run the pipeline as you would normally.
+Then run the pipeline. 
 
 
-### Downloading a subset
+### Downloading a subset of the PubMed annual baseline
 
-The PubMed annual baseline files are numbered. If you want to download the files in the range 300 to 700 from the annual baseline, simply update the config file as follows ("subset" and "subset_range" sections) :
+If you want to download only a subset of the files in the the annual baseline, set "subset" to true and indicate the start and end file in the "subset_range" section:
 
  ```
  "pubmed_bulk_loader": {
@@ -119,14 +125,13 @@ The PubMed annual baseline files are numbered. If you want to download the files
   },
  ```
 
-### Downloading nightly updates
+### Downloading nightly update files
 
-The PubMed annual baseline files are updated every year. However, they provide additional nightly update files during the year. To download the update files alongside the annual baseline, adjust the config file accordingly:
+To download the update files alongside the annual baseline, adjust the config file accordingly:
 
  1. Set "get_nightly_update_files" to "true"
- 2. Provide a range in the "update_file_range" section. This needs to be set by the user. The file ranges for 2024 can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+ 2. Provide the range of update file numbers to be downloaded in the "update_file_range" section. The files that have been released so far can be seen at https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
 
-* Note that bulk downloading files requires enough storage space in your device and may take several hours to download and process millions of articles. An err file is generated in the end to account for files that are not downloaded. Kindly refer to the err file (same folder as raw_download_path) for missing files.
  ____
 
 ## Named Entity Recognition (NER) 
