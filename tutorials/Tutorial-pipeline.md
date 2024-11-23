@@ -127,29 +127,26 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 ### 2.1.2 PubMed Bulk loader
 
-The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this  [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
+The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
 
+The PubMed bulk loader variant of the dataloader module can download the annual baseline and nightly update files and converts the gz files into JSON files. Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err.txt file is generated to keep track of files that are not downloaded. Missing files can be downloaded in a second EasyNER run or manually from the ftp sites of the baseline and update files.
 
-The PubMed bulk loader variant of the dataloader module can download the annual baseline and nightly update files and converts the files into JSON files. 
-
-Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to false (and data_loader, cord_loader and text_loader to true) and provide the following arguments:
+Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to "false" (and data_loader, cord_loader and text_loader to "true") and provide the following arguments:
 
 ```console
     "output_path": Path to the folder in which the output files are to be saved
-    "baseline": The pubmed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
-    "subset": If a subset of the baseline is to be downloaded, this should be set to "true", otherwise "false" downloads the entire baseline,
-    "subset_range": Specify a range of file numbers if a subset of files is to be downloaded, e.g. to download files numbered 0 to 160 (inclusive) add [0,160],
-    "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range".
-    "update_file_range": if get_nightly_update_files is set to "true", the range of file numbers MUST be specified, e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
-    "count_articles": Set to "true" if the number of articles within each file is to be counted. Otherwise, set to "false"
-    "raw_download_path": temporary folder where files should be downloaded. Defaults to "data/tmp/pubmed/". The err file listing missing files will also be stored here.
+    "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
+    "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
+    "subset_range": Specify a range of file numbers if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
+    "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
+    "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folde. Otherwise, set to "false"
+    "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved.
 ```
 #### example: 
 
 ![](imgs/pubmed_bulk_loader_.png)
 ___
-
-Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. Erors can occur. An err file listing missing files is generated in the end (in the folder listed under raw_download_path). You can then download them in a second run with EasyNER or manually from the ftp site.
 
 ### 2.1.3 CORD loader
 
