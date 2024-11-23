@@ -130,21 +130,19 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this  [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
 
 
-The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+The PubMed bulk loader variant of the dataloader module can download the annual baseline and nightly update files and converts the files into JSON files. 
 
-Similar to other data loader modules, to run the text_loader script turn "pubmed_bulk_loader" in the ignore section to false (and data_loader, cord_loader and text_loader to true) and provide the following arguments:
+Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to false (and data_loader, cord_loader and text_loader to true) and provide the following arguments:
 
-
-#### Config file arguments:
 ```console
-    "output_path": path to save processed files in (in JSON format),
-    "baseline": The pubmed annual baseline number, which is the year contained in the file names listed on https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/, e.g. 24 in pubmed24n0001.xml.gz,
-    "subset": if a subset of the baseline is to be downloaded, this should be set to "true", otherwise "false" downloads the entire baseline,
-    "subset_range":Specify a range if a subset of files is to be downloaded, ex: to download files numbered 0 to 160 (inclusive) add [0,160],
-    "get_nightly_update_files": set "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set false. Note that a range must be provided.
-    "update_file_range": if get_nightly_update_files is set to true, a range must be provided, ex: [1167,1298] to download files 1167 to 1298 (inclusive). This MUST be provided by the user. To see the available range of files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
-    "count_articles": "true" if number of articles within each file is to be counted. Set "false" otherwise.
-    "raw_download_path": temporary folder where files should be downloaded. Defaults to "data/tmp/pubmed/"
+    "output_path": Path to the folder in which the output files are to be saved
+    "baseline": The pubmed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
+    "subset": If a subset of the baseline is to be downloaded, this should be set to "true", otherwise "false" downloads the entire baseline,
+    "subset_range": Specify a range of file numbers if a subset of files is to be downloaded, e.g. to download files numbered 0 to 160 (inclusive) add [0,160],
+    "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range".
+    "update_file_range": if get_nightly_update_files is set to "true", the range of file numbers MUST be specified, e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+    "count_articles": Set to "true" if the number of articles within each file is to be counted. Otherwise, set to "false"
+    "raw_download_path": temporary folder where files should be downloaded. Defaults to "data/tmp/pubmed/". The err file listing missing files will also be stored here.
 ```
 #### example: 
 
