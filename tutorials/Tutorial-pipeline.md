@@ -127,6 +127,9 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 ### 2.1.2 PubMed Bulk loader
 
+The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and nightly update files. You can read more about this here: [https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt](https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt)/. The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
+
+
 The PubMed bulk loader variant of the dataloader module downloads the annual baseline of the complete abstract collection from PubMed database and converts it into multiple, pre-batched JSON files. The user can also specify to download nightly update files alongside the annual baseline. Similar to the other loader modules, the output_path should be provided in the config files. The file structure can be seen here: https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
 
 Similar to other data loader modules, to run the text_loader script turn "pubmed_bulk_loader" in the ignore section to false (and data_loader, cord_loader and text_loader to true) and provide the following arguments:
@@ -148,7 +151,7 @@ Similar to other data loader modules, to run the text_loader script turn "pubmed
 ![](imgs/pubmed_bulk_loader_.png)
 ___
 
-
+Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. Erors can occur. An err file listing missing files is generated in the end (in the folder listed under raw_download_path). You can then download them in a second run with EasyNER or manually from the ftp site.
 
 ### 2.1.3 CORD loader
 
