@@ -33,5 +33,5 @@ The metrics are saved in a file called "metrics.tsv" in your data folder
 ### PubTator format schema:
 pubmed or document id|t|title text<br>
 pubmed or document id|a|abstract text<br>
-pubmed or document id    start of span     end of span     detected text    entity class    entity identifier or dummy value (-1)
+pubmed or document id&nbsp;&nbsp;&nbsp;&nbsp;start of span&nbsp;&nbsp;&nbsp;&nbsp;end of span&nbsp;&nbsp;&nbsp;&nbsp;detected text&nbsp;&nbsp;&nbsp;&nbsp;entity class&nbsp;&nbsp;&nbsp;&nbsp;entity identifier or dummy value (-1)
 
