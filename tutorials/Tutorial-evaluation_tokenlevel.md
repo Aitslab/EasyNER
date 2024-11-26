@@ -37,7 +37,7 @@ python run_ner.py \
 2. Convert the downloaded CRAFT corpus to PubAnnotation format by following the conversion instructions: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats. This produces individual folders for each entity class.
 3. Convert the corpus in Pubannotation format to IOB2 format so it can be used with BioBERT. This is done with [CRAFT_preprocessing_spacy.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/CRAFT_preprocessing_spacy.py). Run once for each of the three entity classes by changing the input folder and output file
 7.	Prepare each of the three IOB2 files for BioBERT input using the BioBERT preprocessing script ; ;aximum sequence was set to 128.
-8.	evaluate the models by running run_ner.py ; run one model at a time with the IOB2 file for the respective class; maximum sequence length was set to 192
+8.	Proceed with evaluation (see Combined prediction and evaluation procedure for BioBERT models)
 
 When working with other corpora in PubAnnotation format simply start at step 3.
 
