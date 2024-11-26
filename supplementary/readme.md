@@ -18,7 +18,7 @@ This folder contains
 |Simplified Lund-COVID-19 (produced by processing Lund-COVID-19)                                                                             | IOB2           |       |
 |[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                | PubTator       | yes      |
 |[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        | PubTator       |       |
-|Simplified MedMentions                                                                                                                      | PubTator       |       |
+|Simplified MedMentions (produced by processing MedMentions                                                                                  | PubTator       |       |
 |[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |                |       | 
 |[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      | PubTator       |       |
 |[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   | PubTator       |       |
