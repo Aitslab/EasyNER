@@ -41,5 +41,8 @@ python run_ner.py \
 
 When working with other corpora in PubAnnotation format simply start at step 3.
 
-# Evalution of non-BioBERT predictions (e.g. from HunFlair or ScispaCy)
+# Prediction and evaluation procedure for HunFlair
+ADD DESCRIPTION
+
+# Prediction and evaluation procedure for SciSpacy
 ADD DESCRIPTION
