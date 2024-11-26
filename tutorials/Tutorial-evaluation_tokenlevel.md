@@ -18,7 +18,7 @@ $ mkdir -p $SAVE_DIR
 ```console
 export MAX_LENGTH=192
 ```
-6. Run combined prediction and evaluation with run_ner.py. Maximum sequence length was set to 192. 
+6. Run combined prediction and evaluation with run_ner.py. 
 ```console
 
 python run_ner.py \
