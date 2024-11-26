@@ -36,13 +36,21 @@ python run_ner.py \
 1. Download the CRAFT corpus (Version 4.0.0) from https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0.
 2. Convert the downloaded CRAFT corpus to PubAnnotation format by following the conversion instructions: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats. This produces individual folders for each entity class.
 3. Convert the corpus in Pubannotation format to IOB2 format so it can be used with BioBERT. This is done with [CRAFT_preprocessing_spacy.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/CRAFT_preprocessing_spacy.py). Run once for each of the three entity classes by changing the input folder and output file
-7.	Prepare each of the three IOB2 files for BioBERT input using the BioBERT preprocessing script ; ;aximum sequence was set to 128.
+7.	Prepare each of the three IOB2 files for BioBERT input using the BioBERT preprocessing script ; maximum sequence was set to 128.
 8.	Proceed with evaluation (see Combined prediction and evaluation procedure for BioBERT models)
 
 When working with other corpora in PubAnnotation format simply start at step 3.
 
 # Prediction and evaluation procedure for HunFlair
-ADD DESCRIPTION
+1. Download the CRAFT corpus (Version 4.0.0) from https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0.
+2. Convert the downloaded CRAFT corpus to PubAnnotation format by following the conversion instructions: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats. This produces individual folders for each entity class.
+3. Convert the corpus in Pubannotation format to IOB2 format so it can be used with BioBERT. This is done with [CRAFT_preprocessing_spacy.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/CRAFT_preprocessing_spacy.py). Run once for each of the three entity classes by changing the input folder and output file
+4.	Prepare each of the three IOB2 files (train.tsv, devel.tsv, and test.tsv ) using BioBERT preprocessing (Tokenizer) script ; maximum sequence was set to 128.
+5.  Add a new line after each sentence in test.tsv file with following bash command.
+```bash
+!cat test.tsv | sed s/'^\.\tO'/'\.\tO\n'/g
+```   
+6. Proceed with Flair prediction and evaluation function 
 
 # Prediction and evaluation procedure for SciSpacy
 ADD DESCRIPTION
