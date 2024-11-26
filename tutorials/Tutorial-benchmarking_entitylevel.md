@@ -27,8 +27,8 @@ The metrics are saved in a file called "metrics.tsv" in your data folder
 ### PubTator format example:
 0|t|Variation in the CXCR1 gene (IL8RA) is not associated with susceptibility to chronic periodontitis.<br>
 0|a|BACKGROUND: The chemokine receptor 1 CXCR-1 (or IL8R-alpha) is a specific receptor for the interleukin 8 (IL-8), which is chemoattractant for neutrophils and has an important role in the inflammatory response. The polymorphism rs2234671 at position Ex2+860G>C of the CXCR1 gene causes a conservative amino acid substitution (S276T). This single nucleotide polymorphism (SNP) seemed to be functional as it was associated with decreased lung cancer risk. Previous studies of our group found association of haplotypes in the IL8 and in the CXCR2 genes with the multifactorial disease chronic periodontitis. In this study we investigated the polymorphism rs2234671 in 395 Brazilian subjects with and without chronic periodontitis. FINDINGS: Similar distribution of the allelic and genotypic frequencies were observed between the groups (p>0.05). CONCLUSIONS: The polymorphism rs2234671 in the CXCR1 gene was not associated with the susceptibility to chronic periodontitis in the studied Brazilian population.<br>
-0	17	22	CXCR1	Gene	NCBI Gene:3577<br>
-0	29	34	IL8RA	Gene	-1	
+0&nbsp;&nbsp;&nbsp;&nbsp;17&nbsp;&nbsp;&nbsp;&nbsp;22&nbsp;&nbsp;&nbsp;&nbsp;CXCR1&nbsp;&nbsp;&nbsp;&nbsp;Gene&nbsp;&nbsp;&nbsp;&nbsp;NCBI Gene:3577<br>
+0&nbsp;&nbsp;&nbsp;&nbsp;29&nbsp;&nbsp;&nbsp;&nbsp;34&nbsp;&nbsp;&nbsp;&nbsp;IL8RA&nbsp;&nbsp;&nbsp;&nbsp;Gene&nbsp;&nbsp;&nbsp;&nbsp;-1	
 
 ### PubTator format schema:
 pubmed or document id|t|title text<br>
