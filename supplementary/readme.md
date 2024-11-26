@@ -5,23 +5,23 @@ This folder contains
 2. all info and scripts to reproduce the experiments for the EasyNER article
 
 ## Acquired and produced corpora
-| Corpus                                                                                                                                     | Format      | Preprocessing | 
-|--------------------------------------------------------------------------------------------------------------------------------------------|-------------|-------|
-|[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                                   | IOB2        |       |
-|[Bio-ID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)                                      |PubTator             |       |
-|[Bio-ID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)                   |PubTator     |       |
-|[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                                                         |             |       |
-|[CRAFT (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                         | PubAnnotation^ | yes |
-|[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                            | IOB2        |               |
-|[Lund-COVID-19 (plain text)](https://github.com/Aitslab/corona/blob/master/manuscript_v2/Supplemental_file4.csv)                            | IOB2        | yes |
-|[Lund-COVID-19 (plain text)](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                 | Plain text  | yes |
-|Simplified Lund-COVID-19 (produced by processing Lund-COVID-19)                                                                             | IOB2        |       |
-|[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                | PubTator    | yes      |
-|[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        | PubTator    |       |
-|Simplified MedMentions                                                                                                                      | PubTator    |       |
-|[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |             |       | 
-|[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |PubTator             |       |
-|[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator     |       |
+| Corpus                                                                                                                                     | Format        |Preprocessing | 
+|--------------------------------------------------------------------------------------------------------------------------------------------|----------------|-------|
+|[BC5CDR_Disease](http://nlp.dmis.korea.edu/projects/biobert-2020-checkpoints/NERdata.zip)                                                   | IOB2           |       |
+|[Bio-ID](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/bioid.txt)                                      | PubTator       |       |
+|[Bio-ID Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/bioid.txt)                   | PubTator       |       |
+|[BIORED.zip](https://ftp.ncbi.nlm.nih.gov/pub/lu/BioRED/BIORED.zip)                                                                         | PubTator       |       |
+|[CRAFT (Version 4.0.0)](https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0)                                                          | PubAnnotation^ | yes |
+|[HUNER](https://github.com/hu-ner/huner/tree/master/ner_scripts)                                                                            | IOB2           |      |
+|[Lund-COVID-19 (plain text)](https://github.com/Aitslab/corona/blob/master/manuscript_v2/Supplemental_file4.csv)                            | IOB2           | yes |
+|[Lund-COVID-19 (plain text)](https://github.com/Aitslab/EasyNER/blob/main/data/Lund-COVID-19_plaintext.txt)                                 | Plain text     | yes |
+|Simplified Lund-COVID-19 (produced by processing Lund-COVID-19)                                                                             | IOB2           |       |
+|[MedMentions](https://github.com/chanzuckerberg/MedMentions)                                                                                | PubTator       | yes      |
+|[MedMentions Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/medmentions.txt)        | PubTator       |       |
+|Simplified MedMentions                                                                                                                      | PubTator       |       |
+|[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |                |       | 
+|[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      | PubTator       |       |
+|[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   | PubTator       |       |
 
 ^ Follow these instructions to obtain the CRAFT corpus in PubAnnotation format: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats
 
