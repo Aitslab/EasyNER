@@ -8,15 +8,28 @@ The script calculates precision, recall and F1 scores on token-level.
 1. Convert the corpus to IOB2 format, if needed (see below an example conversion procedure for the CRAFT corpus that can be used for PubAnnotation format corpora as well)
 2. Convert the IOB2 file to BioBERT input format by running the [BioBERT preprocess.sh script](https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/preprocess.sh). We used a max sequence length at the default value of 128, which splits sentences larger than this length into two. If the corpus is not in IOB2 format
 3. The evaluation is run for model and a single class at a time. Make an empty input folder and place your file in it (no othe files should be in the folder).
-4. Specify the input and output folder like this and make the output folder
+4. Specify the input (DATA_DIR) and output folder (SAVE_DIR) like this and create the output folder
 ```console
-$ export NER_DIR=./YOUR_INPUT_FOLDER
-$ export OUTPUT_DIR=./YOUR_OUTPUT_FOLDER
-$ mkdir -p $OUTPUT_DIR
+export SAVE_DIR=/save/directory/for/the/model/
+export DATA_DIR=/path/to/training/datasets/
+$ mkdir -p $SAVE_DIR
 ```
-4. Run combined prediction and evaluation with run_ner.py. Maximum sequence length was set to 192. 
+4. Specify the maximum sequence length. We set it to 192.
 ```console
-$ python run_ner.py --do_train=false --do_predict=true --do_eval=true --output_dir=$OUTPUT_DIR
+export MAX_LENGTH=192
+```
+6. Run combined prediction and evaluation with run_ner.py. Maximum sequence length was set to 192. 
+```console
+
+python run_ner.py \
+    --data_dir ${DATA_DIR}/${ENTITY}/ \
+    --labels ${DATA_DIR}/${ENTITY}/labels.txt \
+    --model_name_or_path dmis-lab/biobert-base-cased-v1.1 \
+    --output_dir ${SAVE_DIR}/${ENTITY}\
+    --max_seq_length ${MAX_LENGTH} \
+    --do_eval \
+    --do_predict \
+    --overwrite_output_dir
 ```
 
 # Preprocessing to IOB2 format for CRAFT corpus and other corpora in PubAnnotation format
