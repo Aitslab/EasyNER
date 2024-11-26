@@ -22,6 +22,7 @@ This folder contains
 |[OSIRIS](https://github.com/Rostlab/nala/tree/develop/resources/corpora/osiris)                                                             |             |       | 
 |[tmVar (Version 3.0)](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/goldstandard/tmvar_v3.txt)                      |PubTator             |       |
 |[tmVar (Version 3.0) Hunflair2 predictions](https://github.com/hu-ner/hunflair2-experiments/blob/main/annotations/hunflair2/tmvar_v3.txt)   |PubTator     |       |
+
 ^ Follow these instructions to obtain the CRAFT corpus in PubAnnotation format: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats
 
   
