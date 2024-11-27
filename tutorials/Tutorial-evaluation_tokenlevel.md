@@ -50,7 +50,7 @@ When working with other corpora in PubAnnotation format simply start at step 3.
 ```bash
 !cat test.tsv | sed s/'^\.\tO'/'\.\tO\n'/g
 ```   
-6. Proceed with Flair prediction and evaluation function 
+6. Proceed with Flair prediction and evaluation script in (https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/Flair_prediction_evaluation.py) 
 
 # Prediction and evaluation procedure for SciSpacy
 ADD DESCRIPTION
