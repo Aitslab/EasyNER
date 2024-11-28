@@ -143,6 +143,9 @@ Similar to other data loader modules, to run this data loader turn "pubmed_bulk_
     "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
     "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved.
 ```
+
+If you only want to download the update files, set subset and get_nightly_update_files to "true" and subset_range to [0,0]. Then define the range of update files under update_file_range.
+
 #### example: 
 
 ![](imgs/pubmed_bulk_loader_.png)
