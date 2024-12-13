@@ -137,6 +137,9 @@ def load_pubtator(path: str, entity_classes: List[str]) -> dict:
                 if a.type == "CellLine":
                     a.type = "cell"
 
+                if a.type == "cell_type":
+                    a.type = "cell"
+
                 if a.type == "protein":
                     a.type = "gene"
 

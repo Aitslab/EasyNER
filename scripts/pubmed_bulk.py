@@ -48,7 +48,7 @@ def bulk_download(n_start=0, n_end=10000, nupdate=False, u_start=1167, u_end=300
             try:
                 urllib.request.urlretrieve(url, filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz")
             except:
-                f.write(f"{i}\n")
+                f.write(f"update_{i}\n")
                 continue
             if i%3==0:
                 time.sleep(0.1)
