@@ -127,7 +127,7 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 ### 2.1.2 PubMed Bulk loader
 
-The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and [nightly update files](https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/). You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number without the starting zeros is the file number, e.g. pubmed24n0001.xml.gz has the baseline version 24 and the file number 1.
+The entire PubMed abstract collection is available for download in the form of an annual baseline, updated only once per year, and [nightly update files](https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/). You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.txt) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number **without the starting zeros** is the file number, e.g. pubmed24n0001.xml.gz has the baseline version 24 and the file number 1.
 
 The PubMed bulk loader variant of the dataloader module can download the annual baseline and nightly update files and converts the gz files into JSON files. In addition a list of the downloaded PMIDs is generated (pmid.txt) and the number of files in each gz file can be counted automatically. Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err.txt file is generated to keep track of files that are not downloaded. Missing files can be downloaded in a second EasyNER run or manually from the ftp sites of the baseline and update files. If the err.txt file is empty no errors occured.
 
@@ -137,7 +137,7 @@ Similar to other data loader modules, to run this data loader turn "pubmed_bulk_
     "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved
     "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
     "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
-    "subset_range": Specify a range of file numbers if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
+    "subset_range": Specify a range of file numbers (**without the starting zeros**) if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
     "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
     "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
     "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
