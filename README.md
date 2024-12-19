@@ -188,6 +188,9 @@ We have included a result inspection module to search a list of entities occurin
 python main.py
 ```
 
+## Logging time
+The runtime for EasyNER and the modules can be obtained by selecting "TIMEKEEP": true in the config file.
+
 ## Citation
 If you use any of the material in this repository, please cite the following article:
 
