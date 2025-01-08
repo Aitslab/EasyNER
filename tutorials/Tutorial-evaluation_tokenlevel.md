@@ -41,6 +41,7 @@ python run_ner.py \
 
 When working with other corpora in PubAnnotation format simply start at step 3.
 
+
 # Prediction and evaluation procedure for HunFlair
 1. Download the CRAFT corpus (Version 4.0.0) from https://github.com/UCDenver-ccp/CRAFT/releases/tag/v4.0.0.
 2. Convert the downloaded CRAFT corpus to PubAnnotation format by following the conversion instructions: https://github.com/UCDenver-ccp/CRAFT/wiki/Alternative-annotation-file-formats. This produces individual folders for each entity class.
@@ -52,5 +53,8 @@ When working with other corpora in PubAnnotation format simply start at step 3.
 ```   
 6. Proceed with Flair prediction and evaluation script in (https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/Flair_prediction_evaluation.py) 
 
+
 # Prediction and evaluation procedure for SciSpacy
-ADD DESCRIPTION
+
+1. In order to run and evaluate Scispacy models, open a command line terminal, activate easyner_env environment and run a jupyter-notebook instance.
+2.  Open and follow the instructions of the following notebook: https://github.com/Aitslab/EasyNER/tree/main/tutorials/Tutorial_run_and_evaluate_scispacy_models.ipynb 
