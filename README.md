@@ -70,6 +70,7 @@ python main.py
 
 The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv), a graph of the most frequent entities [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
+NOTE: If you want to merge entities on the same corpus, make sure the same batch size is used for all runs.
 
 A reproducable capsule for EasyNER is available on Code Ocean: https://doi.org/10.24433/CO.6908880.v1
 
