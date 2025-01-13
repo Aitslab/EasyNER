@@ -230,9 +230,8 @@ The NER module performs NER on JSON files containing texts split into sentences 
 
 ![](imgs/ner_.png)
 
-#### models and dictionaries
 
-##### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
+### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 
 1. Cell-lines: biobert_huner_cell_v1 
 2. Chemical: biobert_huner_chemical_v1
@@ -250,7 +249,7 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 "model_name": "biobert_huner_chemical_v1"
 ```
 
-##### Dictionary-based NER
+### 2.3.2 Dictionary-based NER
 [Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
 Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. 
 
