@@ -176,11 +176,10 @@ The text_loader variant of the dataloader module processess a file with free tex
 
 
 #### Config file arguments:
-```console
-    "input_path": input file path with free text. The folder may contain one or several .txt files.
-    "output_path": output file (JSON format)
-    "prefix": Prefix for the free-text files. 
-```
+- "input_path": input file path with free text. The folder may contain one or several .txt files.
+- "output_path": output file (JSON format)
+- "prefix": Prefix for the free-text files. 
+
 #### example: 
 
 ![](imgs/text_loader_.png)
@@ -194,16 +193,14 @@ The text_loader variant of the dataloader module processess a file with free tex
 This module loads a JSON file (normally the file produced by the data loader module) and splits the text(s) into sentences with the spaCy or NLTK sentence splitter. The output is stored in one or several JSON files. To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to choose the model: "en_core_web_sm" or "en_core_web_trf". The number of texts that is processed together and stored in the same JSON output file is specified under "batch size". 
 
 #### Config file arguments:
-```console
-    "input_path": input file path of document collection
-    "output_folder": output folder path where each bach will be saved
-    "output_file_prefix": user-set prefix for output files
-    "tokenizer": "spacy" or "nltk"
-    "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write "" 
-    "batch_size": number of texts to be processed together and saved in the same JSON file
-    "pubmed_bulk": make "true" if pubmed_bulk_loader is used, otherwise use "false"
+- "input_path": input file path of document collection
+- "output_folder": output folder path where each bach will be saved
+- "output_file_prefix": user-set prefix for output files
+- "tokenizer": "spacy" or "nltk"
+- "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write "" 
+- "batch_size": number of texts to be processed together and saved in the same JSON file
+- "pubmed_bulk": make "true" if pubmed_bulk_loader is used, otherwise use "false"
 
-```
 #### example: 
 
 ![](imgs/splitter_.png)
@@ -216,20 +213,19 @@ ___
 The NER module performs NER on JSON files containing texts split into sentences (normally the output files from the sentence splitter module). The user can use deep learning models or use the spaCy phrasematcher with dictionaries for NER. Setveral BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
 #### Config file arguments:
-```console
-    "input_path": input folder path where all JSON batch files with texts split into sentences are located
-    "output_folder": output folder path where each batch will be saved
-    "output_file_prefix": user-set prefix for tagged output files
-    "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-    "model_folder": folder where model is located. For huggingface models use the repo name instead. Eg. "aitslab"
-    "model_name": name of the model file located in the model folder or repository.
-    "vocab_path": path to dictionary (if this option is used)
-    "store_tokens":"no",
-    "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
-    "clear_old_results": overwrite old results
-    "article_limit": if user decides to only choose a range of articles to run the model on, default [-1,9000]
-    "entity_type": type of extracted entity, e.g. "gene"
-```
+- "input_path": input folder path where all JSON batch files with texts split into sentences are located
+- "output_folder": output folder path where each batch will be saved
+- "output_file_prefix": user-set prefix for tagged output files
+- "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
+- "model_folder": folder where model is located. For huggingface models use the repo name instead. Eg. "aitslab"
+- "model_name": name of the model file located in the model folder or repository.
+- "vocab_path": path to dictionary (if this option is used)
+- "store_tokens":"no",
+- "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
+- "clear_old_results": overwrite old results
+- "article_limit": if user decides to only choose a range of articles to run the model on, default [-1,9000]
+- "entity_type": type of extracted entity, e.g. "gene"
+
 #### example: 
 
 ![](imgs/ner_.png)
@@ -244,7 +240,9 @@ The NER module performs NER on JSON files containing texts split into sentences 
 4. Gene/protein: biobert_huner_gene_v1
 5. Species: biobert_huner_species_v1
 
-The BioBERT models above have been fine-tuned using the [HUNER corpora](https://github.com/hu-ner/huner) and uploaded to [huggingface hub](https://huggingface.co/aitslab). These and similar models can be loaded from the huggingface hub by setting the "model_path" to "aitslab" and "model_name" to the model intended for use in the NER section of the config file. For example:
+The BioBERT models above have been fine-tuned using the [HUNER corpora](https://github.com/hu-ner/huner) and uploaded to [huggingface hub](https://huggingface.co/aitslab). These and similar models can be loaded from the huggingface hub by setting the "model_path" to "aitslab" and "model_name" to the model intended for use in the NER section of the config file.
+
+#### example:
 
 ```console
 "model_type": "biobert_finetuned",
@@ -254,7 +252,9 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 
 ##### Dictionary-based NER
 [Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
-Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. For example:
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. 
+
+#### example:
 
 ```console
 "model_type": "spacy_phrasematcher",
@@ -270,13 +270,11 @@ ___
 This section uses the extracted entities to generate a file of ranked entities and frequency plots. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
-```console
-    "input_path": input folder path where all batches of NER are located,
-    "output_path": output folder path where the analysis files will be saved,
-    "entity_type": type of entity, this will be added as a prefix to the output file and bar graph,
-    "plot_top_n": plot top n entities. defaults to 50. Note that plotting more than 100 entities can result in a distorted graph
+- "input_path": input folder path where all batches of NER are located,
+- "output_path": output folder path where the analysis files will be saved,
+- "entity_type": type of entity, this will be added as a prefix to the output file and bar graph,
+- "plot_top_n": plot top n entities. defaults to 50. Note that plotting more than 100 entities can result in a distorted graph
 
-```
 #### example: 
 
 ![](imgs/Analysis_.png)
@@ -315,14 +313,12 @@ ___
 The metrics module can be used to get precision, recall and F1 scores of between a true and a prediction file, as long as both are in IOB2 format. Note that BioBERT raw test prediction file is in IOB2 format. To run metrics, set ignore metrics to false in the config file. Then use the following input and output config arguments:
 
 #### Config file arguments:
-```console
-    "predictions_file": file containing predictions by the chosen model (in IOB2 format),
-    "true_file": file containing true (annotated) values (also in IOB2 format),
-    "output_file": file containing precision, recall and f1 scores,
-    "pred_sep": seperator for predictions file, default is " ",
-    "true_sep": seperator for true annotations file, default is " " 
+- "predictions_file": file containing predictions by the chosen model (in IOB2 format),
+- "true_file": file containing true (annotated) values (also in IOB2 format),
+- "output_file": file containing precision, recall and f1 scores,
+- "pred_sep": seperator for predictions file, default is " ",
+- "true_sep": seperator for true annotations file, default is " " 
 
-```
 
 #### Output
 
@@ -344,13 +340,11 @@ ___
 
 The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
-#### Config file argument:
-```console
-    "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]
-    
-    "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
-    "output_path": output path where the medged file will be saved
-```
+#### Config file arguments:
+- "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
+- "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
+- "output_path": output path where the medged file will be saved
+
 ___
 
 # 3. Run EasyNER pipeline
