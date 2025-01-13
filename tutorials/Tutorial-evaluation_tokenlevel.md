@@ -18,7 +18,7 @@ $ mkdir -p $SAVE_DIR
 ```console
 export MAX_LENGTH=192
 ```
-6. Run combined prediction and evaluation with run_ner.py. 
+6. Run combined prediction and evaluation with the [run_ner.py](https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/run_ner.py) script released with BioBERT. 
 ```console
 
 python run_ner.py \
