@@ -172,7 +172,7 @@ ___
 
 ### 2.1.4 Freetext loader
 
-The text_loader variant of the dataloader module processess a file with free text and converts it into a JSON file. Similar to data_loader and cord_loader, the file path should be provided in the config files. The output JSON file will contain entries with prefix and a number as IDs and the filename as title. The number randomly assigned. To run the text_loader script, turn "text_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and cord_loader to true) and provide the following arguments:
+The text_loader variant of the dataloader module processess a file with plain text and converts it into a JSON file. Similar to data_loader and cord_loader, the file path should be provided in the config files. The output JSON file will contain entries with prefix and a number as IDs and the filename as title. The number randomly assigned. To run the text_loader script, turn "text_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and cord_loader to true) and provide the following arguments:
 
 
 #### Config file arguments:
