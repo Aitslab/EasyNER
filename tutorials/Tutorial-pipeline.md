@@ -114,11 +114,11 @@ As example for the input, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-A
 To run the Downloader module, change "downloader" in the ignore section of the config file to false (cord_loader, text_loader and pubmed_bulk_loader to true) and provide the following arguments in the "downloader" section of the config file:
 
 #### Config file arguments:
-```console
-    "input_path": path to file with pubmed IDs 
-    "output_path": path to storage location for output
-    "batch_size": number of article records downloaded in each call to API. Note that a too large batch size may result in invalid download requests.
-```
+
+- "input_path": path to file with pubmed IDs 
+- "output_path": path to storage location for output
+- "batch_size": number of article records downloaded in each call to API. Note that a too large batch size may result in invalid download requests.
+
 #### example: 
 
 ![](imgs/downloader_.png)
@@ -133,16 +133,15 @@ The PubMed bulk loader variant of the dataloader module can download the annual 
 
 Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to "false" (and data_loader, cord_loader and text_loader to "true") and provide the following arguments:
 
-```console
-    "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved
-    "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
-    "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
-    "subset_range": Specify a range of file numbers (without the starting zeros) if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
-    "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
-    "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
-    "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
-    "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved.
-```
+#### Config file arguments:
+- "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved
+- "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
+- "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
+- "subset_range": Specify a range of file numbers (without the starting zeros) if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
+- "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
+- "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
+- "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
+- "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved.
 
 If you only want to download the update files, set subset and get_nightly_update_files to "true" and subset_range to [0,0]. Then define the range of update files under update_file_range.
 
@@ -158,12 +157,12 @@ ___
 [CORD-19 dataset](https://github.com/allenai/cord19) is a large collection of SARS-CoV2-related articles updated until 2022-06-02. The cord_loader variant of the data loader module processes titles and abstracts in the CORD-19 metadata.csv file. To use the cord_cord loader, CORD-19 needs to be downloaded manually ([direct download link](https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/historical_releases/cord-19_2022-06-02.tar.gz)). The downloaded gz file should then be unpacked and the metadata.csv file placed in the desired input folder. The file path to the metadata.csv file should then be provided in the config file as input path. By default, the module will process all titles and abstracts in the CORD-19 dataset (approximately 700 000 records). If a smaller subset is to be processed, a .txt file with the selected cord UIDs, which can be extracted from the metadata.csv file, needs to be provided. To run the CORD loader script, turn "cord_loader" in the ignore section to false (and downloader, pubmed_bulk_loader and text_loader to true) and provide the following arguments:
 
 #### Config file arguments:
-```console
-    "input_path": input file path for CORD-19 metadata.csv file
-    "output_path": path to storage location for output files
-    "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
-    "subset_file": input file path to a file with cord UIDs if subset option is set to true
-```
+
+- "input_path": input file path for CORD-19 metadata.csv file
+- "output_path": path to storage location for output files
+- "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
+- "subset_file": input file path to a file with cord UIDs if subset option is set to true
+
 #### example: 
 
 
