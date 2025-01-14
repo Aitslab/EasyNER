@@ -147,6 +147,8 @@ If you only want to download the update files, set subset and get_nightly_update
 
 If not all the files you defined were downloaded, there might be an issue with the PubMed server. Try again later.
 
+If the script gets interrupted you can restart the download by specifying the remaining batch as a subset. For this, you use the number of the last file that was downloaded in the first batch as start number for the subset of the second batch and the last file number as the end number of the subset. As long as you keep all of the already downloaded files of the first batch in the same folder as the second batch, both batches will be converted to JSON together in the second part of the script.
+
 #### example: 
 
 ![](imgs/pubmed_bulk_loader_.png)
