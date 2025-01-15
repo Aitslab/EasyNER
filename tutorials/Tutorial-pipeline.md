@@ -32,7 +32,7 @@ Alternatively, you can download the repository from github page https://github.c
 
 ![](imgs/github.png)
 
-## 1.3 Install the conda environment
+## 1.3 Create the conda environment
 
 Conda environments make it possible to install and manage specific versions of software and their dependencies without interfering with other project. It is best to install EasyNER in a new environment. To install the necessary packages for running the environment, open a conda terminal (called "Anaconda prompt" in the Windows program list) and navigate to the EasyNER folder you downloaded using the change directory command (cd). For example:
 ```bash
@@ -53,6 +53,11 @@ After installation, load the environment in the conda terminal with this:
 conda activate easyner_env
 ```
 
+Then download the spacy models like this:
+```bash
+python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_trf
+```
 ___
 
 
@@ -209,6 +214,10 @@ This module loads a JSON file (normally the file produced by the data loader mod
 
 ___
 
+If you get this error you forgot to dowload the spacy models when creating the conda environment (see step 1.3):
+```bash
+OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+```
 
 ## 2.3 Named Entity Recognition module
 
