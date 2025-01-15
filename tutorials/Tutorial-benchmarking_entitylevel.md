@@ -3,7 +3,7 @@ This is a step by step guide to evaluating the performance of EasyNER and other 
 The evaluation script calculates false-positives and -negatives, single class precision, recall and F1 score, and micro, macro and weighted averages of the precision, recall and F1 score across all entity classes.
 
 # Conversion of PubTator format to EasyNER input and prediction
-1. Place corpora files in PubTator format in a folder and convert to single JSON files by running [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). 
+1. Place corpora files in PubTator format in a folder and convert to single JSON files by running [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). Note the converted file does not contain the PubTator annotations.
 2. Use the converted file as input for the EasyNER Sentence Splitter and then run the output through the NER module. If you want to evaluate the effect of the Postprocessing module also run this on the output of the NER module.
 3. After the EasyNER run, convert the EasyNER output JSON file back to PubTator format by running [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py)
 
