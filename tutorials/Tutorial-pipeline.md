@@ -104,7 +104,7 @@ The EasyNER pipeline has four diffent modules for data loading, which handle dif
 - CORD-19 metadata.csv file => CORD loader module
 - Plain text => Text loader module
 
-There is also a free-standing script to convert PubTator files.
+There is also a free-standing script to convert PubTator files. When you want to process JSON files as input, you can jump over the Data loader step.
 
 The data loader modules convert the respective input files to one or several JSON files (depending on which data loader module you are using) containing the document collection. These will be placed in the designated output folder and can be processed further by the other EasyNER modules. If the other modules are not run directly, the downloaded files can be saved and the pipeline can be started at the sentence splitter module later.
 
