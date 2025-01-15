@@ -266,7 +266,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "output_file_prefix": first part of the output file name, e.g. "ner_disease"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
 - "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models; not relevant when using model_type "spacy_phrasematcher"
-- "model_name": name of the model (e.g. "biobert_bc5cdr_disease_v1") or name of the dictionary (same as the dictionary file without ".txt", e.g. covid-19_synonyms_v2)
+- "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is in the file name or on HuggingFace (e.g. "biobert_bc5cdr_disease_v1"); when using a dictionary for NER use the same spaCy model that was used in the Sentence splitter (en_core_web_sm or en_core_web_trf)
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens":"no",
 - "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
