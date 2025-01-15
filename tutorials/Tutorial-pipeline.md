@@ -90,6 +90,8 @@ In a standard pipeline run, the following modules should be set to false (and th
 3. ner
 4. analysis
 
+The runtime for EasyNER and the modules can be obtained by setting "TIMEKEEP" on top of the config file to "true". The runtime will be storerd in seconds in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
+
 When the config file is updated, save it and start the run (see step 3.).
 
 The following sections will provide more detail on each of the modules and instructions for the config file.
