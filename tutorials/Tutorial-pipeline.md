@@ -106,7 +106,7 @@ The EasyNER pipeline has four diffent modules for data loading, which handle dif
 
 There is also a free-standing script to convert PubTator files.
 
-The data loader modules convert the respective input files to one or several JSON files (depending on the number of texts your are processing). These will be placed in the designated output folde and can be processed further by the other EasyNER modules. If the other modules are not run directly, the downloaded files can be saved and the pipeline can be started at the sentence splitter module later.
+The data loader modules convert the respective input files to one or several JSON files (depending on which data loader module you are using). These will be placed in the designated output folder and can be processed further by the other EasyNER modules. If the other modules are not run directly, the downloaded files can be saved and the pipeline can be started at the sentence splitter module later.
 
 Example of the generated JSON file:
 ![](imgs/output_downloader.png)
