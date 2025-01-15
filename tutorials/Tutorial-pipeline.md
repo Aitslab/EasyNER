@@ -247,26 +247,27 @@ If you get this error you forgot to dowload the spaCy models when creating the c
 OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
 ```
 
-```bash
+
 If you get this error you forgot to set pubmed_bulk to "true" but used a folder instead of a single json file in the "input_path"
+```bash
 PermissionError: [Errno 13] Permission denied: 'data/splitter/input/'
 ```
 ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or use the spaCy Phrasematcher with dictionaries for NER. Several BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. The models can be loaded directly from HuggingFace or placed in the "model" subfolder of the EasyNER folder. 
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or use the spaCy Phrasematcher with dictionaries for NER. Several BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. The models can be loaded directly from HuggingFace or placed in a folder, e.g. the "model" subfolder of the EasyNER folder. Dictionaries are txt files with one term per line.
 
 To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
 #### Config file arguments:
 - "input_path": input folder path where all JSON batch files (typically the output folder of the Sentence Splitter) with texts split into sentences are located
-- "output_folder": output folder path where each batch will be saved
+- "output_folder": output folder path where each batch will be saved, e.g. you can create a new subfolder in the EasyNER "results" subfolder
 - "output_file_prefix": first part of the output file name, e.g. "ner"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
 - "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models
 - "model_name": name of the model file located in the model folder or repository, e.g. "biobert_bc5cdr_disease_v1"
-- "vocab_path": path to dictionary (if this option is used)
+- "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens":"no",
 - "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
 - "clear_old_results": overwrite old results
