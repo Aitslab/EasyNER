@@ -222,9 +222,11 @@ To run the sentence splitter module set the ignore parameter for splitter in the
 - "batch_size": number of texts to be saved in each JSON output file, typically between 100 and 1000; only relevant when using a single JSON file as input (when using a folder as input each file in the input folder will produce a corresponding JSON output file).
 
 
-#### example: 
+#### examples: 
 
-![](imgs/splitter_.png)
+![](imgs/splitter_1.png)
+
+![](imgs/splitter_2.png)
 
 The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch size". 
 
