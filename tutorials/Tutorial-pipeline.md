@@ -104,6 +104,8 @@ The EasyNER pipeline has four diffent modules for data loading, which handle dif
 - CORD-19 metadata.csv file => CORD loader module
 - Plain text => Text loader module
 
+There is also a free-standing script to convert PubTator files.
+
 The data loader modules convert the respective input files to one or several JSON files (depending on the number of texts your are processing). These will be placed in the designated output folde and can be processed further by the other EasyNER modules. If the other modules are not run directly, the downloaded files can be saved and the pipeline can be started at the sentence splitter module later.
 
 Example of the generated JSON file:
@@ -191,8 +193,11 @@ The text_loader variant of the dataloader module processess a file with plain te
 
 ![](imgs/text_loader_.png)
 
+### 2.1.5 PubTator files
+When using the pipeline with PubTator files, a separate script is used instead of a Data Loader to produce a EasyNER json file that can then be processed by the Sentence Splitter module. Place the PubTator files in a folder and then run the script [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). Note the converted JSON file does not retain the PubTator annotations.
 
-
+### 2.1.6 Json files
+Files that are already in the json format produced by the EasyNER Data Loaders can be used directly as input for the Sentence Splitter module.
 
 
 ## 2.2 Sentence Spliter module
