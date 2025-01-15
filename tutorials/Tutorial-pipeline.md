@@ -33,7 +33,7 @@ Alternatively, you can download the repository from github page https://github.c
 ![](imgs/github.png)
 
 The EasyNER folder is where you can find everything needed to use EasyNER.
-![](easyner_folder.png)
+![](imgs/easyner_folder.png)
 
 ## 1.3 Create the conda environment
 
