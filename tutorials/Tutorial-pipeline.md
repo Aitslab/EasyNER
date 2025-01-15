@@ -256,7 +256,7 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or dictionaries for NER. When using a deep learning model, you can either select one of the BioBERT-based models fine-tuned on the HUNER corpora collections which are published with EasyNER or your own model in the same format. The models can be accessed directly at the HuggingFace repository or placed in the "model" subfolder or another suitable folder. The dictionary option makes use of the spaCy Phrasematcher. You can either use one of the dictionaries that are included with EasyNER in the "dictionaries" subfolder or create your own dictionary in the form of a .txt file with one term per line. 
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models (see section 2.3.1) or dictionaries (see section 2.3.2) for NER. 
 
 To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
@@ -265,10 +265,10 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "output_folder": output folder path where each batch will be saved, e.g. you can create a new subfolder in the EasyNER "results" subfolder
 - "output_file_prefix": first part of the output file name, e.g. "ner_disease"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-- "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models; not relevant when using model_type "spacy_phrasematcher"
-- "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is in the file name or on HuggingFace (e.g. "biobert_bc5cdr_disease_v1"); when using a dictionary for NER use the same spaCy model that was used in the Sentence splitter (en_core_web_sm or en_core_web_trf)
+- "model_folder": path to folder where the model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models
+- "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is on HuggingFace (e.g. "biobert_bc5cdr_disease_v1") or in the file name for a locally stored model; when using a dictionary for NER, enter the name of a spaCy model, normally the same that was used in the Sentence splitter ("en_core_web_sm" or "en_core_web_trf")
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
-- "store_tokens":"no",
+- "store_tokens": default is "no"; choose "yes" if all tokens produced from the sentence should be stored in the JSON output files (which can help with error analysis)
 - "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
 - "clear_old_results": set to "true" to overwrite old results
 - "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,9000]
@@ -280,14 +280,17 @@ To run this module, the ignore argument for ner should be set to false and the f
 
 
 ### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
+When using a deep learning model, you can use one of the BioBERT-based pytorch models we fine-tuned on the [HUNER corpora](https://github.com/hu-ner/huner), which are available from the [Aitslab Huggingface repository](https://huggingface.co/aitslab). Alternatively, you can use other models from HuggingFace repositories or your own model stored in the EasyNER "model" folder (as long as it is in the same format).
 
-1. Cell-lines: biobert_huner_cell_v1 
-2. Chemical: biobert_huner_chemical_v1
-3. Disease: biobert_huner_disease_v1
+Recommended models:
+1. Cells/cell lines: biobert_huner_cell_v1 
+2. Chemicals (including drugs): biobert_huner_chemical_v1
+3. Disease (including symptoms): biobert_huner_disease_v1
 4. Gene/protein: biobert_huner_gene_v1
 5. Species: biobert_huner_species_v1
 
-The BioBERT models above have been fine-tuned using the [HUNER corpora](https://github.com/hu-ner/huner) and uploaded to [huggingface hub](https://huggingface.co/aitslab). These and similar models can be loaded from the huggingface hub by setting the "model_path" to "aitslab" and "model_name" to the model intended for use in the NER section of the config file.
+When loading models from HuggingFace set the "model_path" to the repo name (i.e. "aitslab" for our BioBERT_HUNER models) and "model_name" to the model name as it is spelled on HuggingFace in the NER section of the config file. When using a model stored locally on the computer, specify the path to the model in "model_path".
+
 
 #### example:
 
@@ -298,8 +301,14 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 ```
 
 ### 2.3.2 Dictionary-based NER
-[Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
-Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. 
+The dictionary option makes use of the [spaCy Phrasematcher](https://spacy.io/api/phrasematcher). You can either use one of the dictionaries that are included with EasyNER in the ["dictionaries"](dictionaries/) subfolder or create your own dictionary in the form of a .txt file with one term per line. 
+
+The EasyNER dictionary folder contains dictionaries for the following:
+- COVID-19 and its synonyms
+- SARS-CoV2 and its synonyms
+- SARS-CoV2 variant names
+ 
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (ideally use the same model as for the splitter,  "en_core_web_sm" or "en_core_web_trf") and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. 
 
 #### example:
 
