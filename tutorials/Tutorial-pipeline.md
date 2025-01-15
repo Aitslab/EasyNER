@@ -256,22 +256,22 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or use the spaCy Phrasematcher with dictionaries for NER. Several BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. The models can be loaded directly from HuggingFace or placed in a folder, e.g. the "model" subfolder of the EasyNER folder. Dictionaries are txt files with one term per line.
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or dictionaries for NER. When using a deep learning model, you can either select one of the BioBERT-based models fine-tuned on the HUNER corpora collections which are published with EasyNER or your own model in the same format. The models can be accessed directly at the HuggingFace repository or placed in the "model" subfolder or another suitable folder. The dictionary option makes use of the spaCy Phrasematcher. You can either use one of the dictionaries that are included with EasyNER in the "dictionaries" subfolder or create your own dictionary in the form of a .txt file with one term per line. 
 
 To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
 #### Config file arguments:
 - "input_path": input folder path where all JSON batch files (typically the output folder of the Sentence Splitter) with texts split into sentences are located
 - "output_folder": output folder path where each batch will be saved, e.g. you can create a new subfolder in the EasyNER "results" subfolder
-- "output_file_prefix": first part of the output file name, e.g. "ner"
+- "output_file_prefix": first part of the output file name, e.g. "ner_disease"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-- "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models
-- "model_name": name of the model file located in the model folder or repository, e.g. "biobert_bc5cdr_disease_v1"
+- "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models; not relevant when using model_type "spacy_phrasematcher"
+- "model_name": name of the model (e.g. "biobert_bc5cdr_disease_v1") or name of the dictionary (same as the dictionary file without ".txt", e.g. covid-19_synonyms_v2)
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens":"no",
 - "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
-- "clear_old_results": overwrite old results
-- "article_limit": if user decides to only choose a range of articles to run the model on, default [-1,9000]
+- "clear_old_results": set to "true" to overwrite old results
+- "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,9000]
 - "entity_type": type of extracted entity, e.g. "gene"
 
 #### example: 
