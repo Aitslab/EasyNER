@@ -188,7 +188,7 @@ The text_loader variant of the dataloader module processess a file with plain te
 #### Config file arguments:
 - "input_path": input file path with free text. The folder may contain one or several .txt files.
 - "output_path": output file (JSON format)
-- "prefix": name to be used as document identifier in the output JSON file (instead of the PMID or CORD ID)
+- "prefix": name to be used as document identifier in the output JSON file (instead of the PMID or CORD UID)
 
 #### example: 
 
