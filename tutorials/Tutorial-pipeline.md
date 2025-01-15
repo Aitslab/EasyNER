@@ -216,7 +216,7 @@ To run the sentence splitter module set the ignore parameter for splitter in the
 - "output_folder": output folder path where the produced JSON files will be saved
 - "output_file_prefix": first part of the output file name, e.g. "sentences" or "pubmed25n"
 - "pubmed_bulk": set to "true" if the PubMed Bulk Downloader is used before the Splitter module or if a folder with JSON files in the same format is to be processed; if one of the other data loaders is used before the Splitter module or a single JSON file is to be processed set to "false"
-- "file_limit": when using a folder, each JSON file has to have a number like the PubMed bulk file numbers.
+- "file_limit": when using a folder specify the number of the files that are to be processed (PubMed bulk file numbers)
 - "tokenizer": "spacy" or "nltk"
 - "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write "" 
 - "batch_size": number of texts to be saved in each JSON output file, typically between 100 and 1000; only relevant when using a single JSON file as input (when using a folder as input each file in the input folder will produce a corresponding JSON output file).
