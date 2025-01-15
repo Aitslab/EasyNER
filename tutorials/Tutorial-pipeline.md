@@ -276,7 +276,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 
 #### example: 
 
-![](imgs/ner_.png)
+![](imgs/ner_1.png)
 
 
 ### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
