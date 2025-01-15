@@ -32,7 +32,8 @@ Alternatively, you can download the repository from github page https://github.c
 
 ![](imgs/github.png)
 
-The EasyNER folder is where you can find everything needed to use EasyNER.
+The EasyNER folder includes subfolders with the scripts, data and dictionaries needed to run EasyNER and subfolders for your models and results.
+
 ![](imgs/easyner_folder.png)
 
 ## 1.3 Create the conda environment
