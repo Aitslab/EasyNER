@@ -90,7 +90,11 @@ In a standard pipeline run, the following modules should be set to false (and th
 3. ner
 4. analysis
 
+#### Runtime measurements
 The runtime for EasyNER and the modules can be obtained by setting "TIMEKEEP" on top of the config file to "true". The runtime will be storerd in seconds in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
+
+#### CPU limit:
+You can specify the number of CPUs to be used in the case of parallel runs by setting the "CPU_LIMIT" on top of the config file to the desired number. If the number is higher than the available CPUS, one less CPU than those available is used.
 
 When the config file is updated, save it and start the run (see step 3.).
 
@@ -232,9 +236,16 @@ To run the sentence splitter module set the ignore parameter for splitter in the
 
 The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch size". 
 
+#### common errors:
+
 If you get this error you forgot to dowload the spaCy models when creating the conda environment (see step 1.3):
 ```bash
 OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+```
+
+```bash
+If you get this error you forgot to set pubmed_bulk to "true" but used a folder instead of a single json file in the "input_path"
+PermissionError: [Errno 13] Permission denied: 'data/splitter/input/'
 ```
 ___
 
