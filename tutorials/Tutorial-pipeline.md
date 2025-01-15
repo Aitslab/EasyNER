@@ -53,7 +53,7 @@ After installation, load the environment in the conda terminal with this:
 conda activate easyner_env
 ```
 
-Then download the spacy models like this:
+Then download the spaCy models like this:
 ```bash
 python -m spacy download en_core_web_sm
 python -m spacy download en_core_web_trf
@@ -214,7 +214,7 @@ This module loads a JSON file (normally the file produced by the data loader mod
 
 ___
 
-If you get this error you forgot to dowload the spacy models when creating the conda environment (see step 1.3):
+If you get this error you forgot to dowload the spaCy models when creating the conda environment (see step 1.3):
 ```bash
 OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
 ```
