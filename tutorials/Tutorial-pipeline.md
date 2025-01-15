@@ -256,7 +256,7 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models (see section 2.3.1) or dictionaries (see section 2.3.2) for NER. 
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models (see section 2.3.1) or dictionaries (see section 2.3.2) for NER. The dictionary option is much faster but only recognizes the exact terms provided in the dictionary file.
 
 To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
@@ -269,7 +269,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is on HuggingFace (e.g. "biobert_bc5cdr_disease_v1") or in the file name for a locally stored model; when using a dictionary for NER, enter the name of a spaCy model, normally the same that was used in the Sentence splitter ("en_core_web_sm" or "en_core_web_trf")
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens": default is "no"; choose "yes" if all tokens produced from the sentence should be stored in the JSON output files (which can help with error analysis)
-- "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
+- "labels": if specific lavels are to be provided, these should be given as a Python list (encased in [] brackets without quotation marks around them) e.g. "labels": ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]", "[MASK]", "[UNK]"]
 - "clear_old_results": set to "true" to overwrite old results
 - "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,9000]
 - "entity_type": type of extracted entity, e.g. "gene"
