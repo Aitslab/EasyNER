@@ -207,7 +207,7 @@ When using the pipeline with PubTator files, a separate script is used instead o
 
 [Example the PubTator format](https://www.ncbi.nlm.nih.gov/research/bionlp/APIs/format/)
 
-### 2.1.6 Json files
+### 2.1.6 JSON files
 When processing a single JSON file or a folder of JSON files the data loader step can be skipped and the file(s) can be used directly as input for the Sentence Splitter module.
 ___
 
