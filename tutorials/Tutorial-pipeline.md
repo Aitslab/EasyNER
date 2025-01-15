@@ -188,13 +188,13 @@ The text_loader variant of the dataloader module processess a file with plain te
 #### Config file arguments:
 - "input_path": input file path with free text. The folder may contain one or several .txt files.
 - "output_path": output file (JSON format)
-- "prefix": Prefix for the free-text files. 
+- "prefix": name to be used as document identifier in the output JSON file (instead of the PMID or CORD ID)
 
 #### example: 
 
 ![](imgs/text_loader_.png)
 
-The output of the freetext loader is a single JSON file with the document collection.
+The output of the freetext loader is a single JSON file with the text in the document collection format.
 
 ### 2.1.5 PubTator files
 When using the pipeline with PubTator files, a separate script is used instead of a Data Loader to produce the document collection that can then be processed by the Sentence Splitter module. Place the PubTator files in a folder and then run the script [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). The output of this script is a single JSON file with the document collection without any of the PubTator annotations.
