@@ -159,7 +159,6 @@ If the script gets interrupted you can restart the download by specifying the re
 #### example: 
 
 ![](imgs/pubmed_bulk_loader_.png)
-___
 
 The output of the PubMed Bulk loader is a folder with JSON files, each file containing the document collection from a its corresponding PubMed bulk file and named with the same number, e.g. pubmed25n1280.json.
 
@@ -202,7 +201,7 @@ When using the pipeline with PubTator files, a separate script is used instead o
 
 ### 2.1.6 Json files
 Files that are already in the document collection JSON format produced by the EasyNER Data Loaders (either a single JSON file or a folder of JSON files) can be used directly as input for the Sentence Splitter module.
-
+___
 
 ## 2.2 Sentence Splitter module
 
@@ -229,6 +228,7 @@ If you get this error you forgot to dowload the spaCy models when creating the c
 ```bash
 OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
 ```
+___
 
 ## 2.3 Named Entity Recognition module
 
