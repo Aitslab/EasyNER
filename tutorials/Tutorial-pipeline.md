@@ -220,7 +220,7 @@ To run the sentence splitter module set the ignore parameter for splitter in the
 #### Config file arguments:
 - "input_path": input file path to the document collection (either a single JSON file or a folder of JSON files produced by the data loaders or a file/folder in the same format). 
 - "output_folder": output folder path where the produced JSON files will be saved
-- "output_file_prefix": first part of the output file name, e.g. "sentences" or "pubmed25n"
+- "output_file_prefix": first part of the output file name, e.g. "sentences"
 - "pubmed_bulk": set to "true" if the PubMed Bulk Downloader is used before the Splitter module or if a folder with JSON files in the same format is to be processed; if one of the other data loaders is used before the Splitter module or a single JSON file is to be processed set to "false"
 - "file_limit": when using a folder specify the number of the files that are to be processed (PubMed bulk file numbers)
 - "tokenizer": "spacy" or "nltk"
@@ -251,15 +251,17 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing texts split into sentences (normally the output files from the sentence splitter module). The user can use deep learning models or use the spaCy phrasematcher with dictionaries for NER. Setveral BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models or use the spaCy Phrasematcher with dictionaries for NER. Several BioBERT-based models fine-tuned on the HUNER corpora collections and several dictionaries are available with the pipeline but the user can also provide their own. The models can be loaded directly from HuggingFace or placed in the "model" subfolder of the EasyNER folder. 
+
+To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
 #### Config file arguments:
-- "input_path": input folder path where all JSON batch files with texts split into sentences are located
+- "input_path": input folder path where all JSON batch files (typically the output folder of the Sentence Splitter) with texts split into sentences are located
 - "output_folder": output folder path where each batch will be saved
-- "output_file_prefix": user-set prefix for tagged output files
+- "output_file_prefix": first part of the output file name, e.g. "ner"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-- "model_folder": folder where model is located. For huggingface models use the repo name instead. Eg. "aitslab"
-- "model_name": name of the model file located in the model folder or repository.
+- "model_folder": path to folder where model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models
+- "model_name": name of the model file located in the model folder or repository, e.g. "biobert_bc5cdr_disease_v1"
 - "vocab_path": path to dictionary (if this option is used)
 - "store_tokens":"no",
 - "labels": if specific lavels are to be provided, e.g. ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]"],
