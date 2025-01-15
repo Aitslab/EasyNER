@@ -130,7 +130,7 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 ![](imgs/downloader_.png)
 
-
+The output of the Downloader is a single JSON file with the document collection.
 
 ### 2.1.2 PubMed Bulk loader
 
@@ -160,6 +160,8 @@ If the script gets interrupted you can restart the download by specifying the re
 
 ![](imgs/pubmed_bulk_loader_.png)
 ___
+
+The output of the PubMed Bulk loader is a folder with JSON files, each file containing the document collection form the corresponding PubMed bulk file and named with the same number, e.g. pubmed25n1280.json.
 
 ### 2.1.3 CORD loader
 
