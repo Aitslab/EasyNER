@@ -271,7 +271,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "store_tokens": default is "no"; choose "yes" if all tokens produced from the sentence should be stored in the JSON output files (which can help with error analysis)
 - "labels": if specific lavels are to be provided, these should be given as a Python list (encased in [] brackets without quotation marks around them) e.g. "labels": ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]", "[MASK]", "[UNK]"]
 - "clear_old_results": set to "true" to overwrite old results
-- "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,9000]
+- "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,90000]
 - "entity_type": type of extracted entity, e.g. "gene"
 
 #### example: 
