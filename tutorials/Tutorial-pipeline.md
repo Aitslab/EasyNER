@@ -367,13 +367,15 @@ ___
 
 ## 2.5 Metrics module
 
-The metrics module can be used to get precision, recall and F1 scores of between a true and a prediction file, as long as both are in IOB2 format. Note that BioBERT raw test prediction file is in IOB2 format. To run metrics, set ignore metrics to false in the config file. Then use the following input and output config arguments:
+The metrics module is used to evaluate the performance of the NER models. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity.
+
+To run the metrics module, set ignore metrics to false in the config file. Then use the following input and output config arguments:
 
 #### Config file arguments:
 - "predictions_file": file containing predictions by the chosen model (in IOB2 format),
 - "true_file": file containing true (annotated) values (also in IOB2 format),
-- "output_file": file containing precision, recall and f1 scores,
-- "pred_sep": seperator for predictions file, default is " ",
+- "output_file": file to store precision, recall and f1 scores,
+- "pred_sep": seperator for predictions file which separates the tokens and labels, default is " ",
 - "true_sep": seperator for true annotations file, default is " " 
 
 
