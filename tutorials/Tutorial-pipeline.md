@@ -265,14 +265,17 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "output_folder": output folder path where each batch will be saved, e.g. you can create a new subfolder in the EasyNER "results" subfolder
 - "output_file_prefix": first part of the output file name, e.g. "ner_disease"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-- "model_folder": path to folder where the model is located. For HuggingFace models use the repo name instead, e.g. "aitslab" for our BioBERT_HUNER models
+- "model_folder": For HuggingFace models use the repo name, e.g. "aitslab" for our BioBERT_HUNER models. For locally stored models, add the path to folder where the model is located. 
 - "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is on HuggingFace (e.g. "biobert_bc5cdr_disease_v1") or in the file name for a locally stored model; when using a dictionary for NER, enter the name of a spaCy model, normally the same that was used in the Sentence splitter ("en_core_web_sm" or "en_core_web_trf")
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens": default is "no"; choose "yes" if all tokens produced from the sentence should be stored in the JSON output files (which can help with error analysis)
-- "labels": if specific lavels are to be provided, these should be given as a Python list (encased in [] brackets without quotation marks around them) e.g. "labels": ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]", "[MASK]", "[UNK]"]
+- "labels": if specific lavels are to be provided, these should be given as a Python list (encased in [] brackets without quotation marks around them) e.g. "labels": ["[PAD]", "B", "I", "O", "X", "[CLS]", "[SEP]", "[MASK]", "[UNK]"]; only relevant for ONNX models
 - "clear_old_results": set to "true" to overwrite old results
 - "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,90000]
 - "entity_type": type of extracted entity, e.g. "gene"
+- "multiprocessing": set to "true" to use CPUs and multiprocessing; when set to "false" GPU is used if available
+
+If # is removed from the start of line 84 of the [ner_main.py script](https://github.com/Aitslab/EasyNER/blob/main/scripts/ner_main.py) before running the pipeline the term specified as "entity_type" will be added to each annotation in the JSON files. This increases file size and memory requirments and is thus not used by default.
 
 #### example: 
 
