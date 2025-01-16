@@ -166,6 +166,6 @@ def postprocess_ner_entities(input_folder):
 
 
 # Example usage
-input_folder = 'C:/Users/sonja/python_runs/easyner_predictions/'  # Replace with your actual input folder path
+input_folder = 'path/to/folder/with/easyner_json_files/'  # Replace with your actual input folder path
 postprocess_ner_entities(input_folder)
 
