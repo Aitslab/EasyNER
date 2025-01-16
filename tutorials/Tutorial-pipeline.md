@@ -365,9 +365,21 @@ The generated output file contains the following columns:
 
 ___
 
-## 2.5 Metrics module
+## 2.5 Merger module
 
-The metrics module is used to evaluate the performance of the NER models. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity.
+The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+
+#### Config file arguments:
+- "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
+- "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
+- "output_path": output path where the medged file will be saved
+
+___
+
+
+## 2.6 Metrics module
+
+The metrics module can be used to evaluate the performance of NER models/dictionaries on token level. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity.
 
 To run the metrics module, set ignore metrics to false in the config file. Then use the following input and output config arguments:
 
@@ -395,15 +407,12 @@ weighted avg    0.67557   0.65274   0.66396      1627
 ___
 
 
-## 2.6 Merger module (optional)
+## 2.7 Postprocessing module (free-standing script)
+For entities containing a hyphen or brackets (regular, square or curly) which were incorrectly fragmented in the NER process, a separate [post-processing script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/postprocess_separator_merging.py) is available which processes the EasyNER output files and merges the fragments.  
 
-The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+___
 
-#### Config file arguments:
-- "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
-- "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
-- "output_path": output path where the medged file will be saved
-
+## 2.8 EasyNER JSON to PubTator conversion module (free-standing script)
 ___
 
 # 3. Run EasyNER pipeline
