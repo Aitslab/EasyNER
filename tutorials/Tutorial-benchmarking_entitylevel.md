@@ -12,11 +12,12 @@ If you then want to combine the EasyNER JSON files for multiple classes into a s
 
 # Evaluation of annotated files in PubTator format
 
-1. Make sure that the gold standard and prediction files have entity identifiers. If they are missing, you can add the dummy identifier "-1" by running the preprocessing script.
-2. Create a data folder for your input and output (e.g. called "evaluation") and subfolders for the gold standard files ("goldstandard") and one for each tool you want to evaluate named with the name of the tool (e.g. "easyner")
-3. Name the gold standard file with the corpus name and place it in the goldstandard subfolder (e.g. PATH/evaluation/goldstandard/medmentions.txt)
-4. Name the prediction file for each tool also with the corpus name and place it in the respective tool subfolder (e.g. PATH/evaluation/easyner/medmentions.txt)
-5. Run the evaluation script with the following input arguments:
+1. Make sure that the gold standard and prediction files contain both the raw texts and the annotation. If the raw texts are missing, as was the case for the [BERN2 annotations](https://github.com/hu-ner/hunflair2-experiments/tree/main/annotations/bern) from the HunFlair2 repo, add them following this [Jupyter notebook](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/preprocess_BERN2_into_evaluation_ready_format.ipynb)
+2. Make sure that the gold standard and prediction files have entity identifiers in their annotations. If they are missing, you can add the dummy identifier "-1" by running the [preprocessing script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/preprocess_pubtatorformat.py). In the same script, entity classes can be remapped to suitable class names, as was done for the MedMentions corpus for our experiments.
+3. Create a data folder for your input and output (e.g. called "evaluation") and subfolders for the gold standard files ("goldstandard") and one for each tool you want to evaluate named with the name of the tool (e.g. "easyner")
+4. Name the gold standard file with the corpus name and place it in the goldstandard subfolder (e.g. PATH/evaluation/goldstandard/medmentions.txt)
+5. Name the prediction file for each tool also with the corpus name and place it in the respective tool subfolder (e.g. PATH/evaluation/easyner/medmentions.txt)
+6. Run the [evaluation script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/evaluate_ner_pubtatorformat.py) with the following input arguments:
     - corpora: A Python dictionary containing the names of the corpora as keys and the and a list with the entity classes to be evaluated as values. The names need to match the PubTator format txt files from step 3/4
     - tools: A Python list of tool names to be evaluated. The names need to match the names of the subfolders you created in step 2
     - data_folder: Folder for input and output files. The path needs to match the data folder you created in step 2 (e.g. PATH/evaluation/)
