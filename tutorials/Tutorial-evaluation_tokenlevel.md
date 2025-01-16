@@ -7,7 +7,7 @@ The script calculates precision, recall and F1 scores on token-level.
 # Combined prediction and evaluation procedure for BioBERT models
 1. Convert the corpus to IOB2 format, if needed (see below an example conversion procedure for the CRAFT corpus that can be used for PubAnnotation format corpora as well)
 2. Convert the IOB2 file to BioBERT input format by running the [BioBERT preprocess.sh script](https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/preprocess.sh). We used a max sequence length at the default value of 128, which splits sentences larger than this length into two. 
-3. The evaluation is run for one model and a single class at a time. Make an empty input folder and place your file in it (no othe files should be in the folder).
+3. The evaluation is run for one model and a single class at a time. Make an empty input folder and place your file in it (no other files should be in the folder).
 4. Specify the input (DATA_DIR) and output folder (SAVE_DIR) like this and create the output folder
 ```console
 export SAVE_DIR=/save/directory/for/the/model/
