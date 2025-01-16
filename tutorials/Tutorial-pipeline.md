@@ -67,7 +67,7 @@ ___
 
 # 2. Modify the Config file
 
-EasyNER consists of several modules which are run in a sequential manner. It is also possible to run the modules individually. 
+EasyNER consists of several modules which are run in a sequential manner using the main.py script (see section 3). It is also possible to run the modules individually. For example, when two NER models are to be used, the first run typically includes a data loader, the Sentence splitter, the NER module and analysis module for the first model and the subsequent run includes only the NER module and analysis module for the second model.
 
 For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
 
