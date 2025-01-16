@@ -392,7 +392,12 @@ To run the metrics module, set ignore metrics to false in the config file. Then 
 - "true_file": file containing true (annotated) values (also in IOB2 format),
 - "output_file": file to store precision, recall and f1 scores,
 - "pred_sep": seperator for predictions file which separates the tokens and labels, default is " ",
-- "true_sep": seperator for true annotations file, default is " " 
+- "true_sep": seperator for true annotations file, e.g. " " or "\t" (for tab-separated file)
+
+#### example:
+
+![](imgs/metrics.png)
+
 
 
 #### Output
@@ -408,6 +413,10 @@ To run the metrics module, set ignore metrics to false in the config file. Then 
 weighted avg    0.67557   0.65274   0.66396      1627
 
 ```
+
+#### errors:
+ValueError: max() arg is an empty sequence
+This error is caused by incorrect separators specified in pred_sep and true_sep.
 ___
 
 
