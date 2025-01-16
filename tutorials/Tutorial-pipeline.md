@@ -278,7 +278,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 
 ![](imgs/ner_1.png)
 
-The output is one or several JSON files with the document collection split into sentences and detected entities and their position (starting character and end character) listed for each sentence. An example output file (no tokens and labels stored) is [here](results/sample_output/ner_huner_gene-1.json).
+The output is one or several JSON files with the document collection split into sentences and detected entities and their position (starting character and end character) listed for each sentence. An example output file is [here](https://github.com/Aitslab/EasyNER/blob/main/results/sample_output/ner_huner_gene-1.json).
 
 ### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 When using a deep learning model, you can use one of the BioBERT-based pytorch models we fine-tuned on the [HUNER corpora](https://github.com/hu-ner/huner), which are available from the [Aitslab Huggingface repository](https://huggingface.co/aitslab). Alternatively, you can use other models from HuggingFace repositories or your own model stored in the EasyNER "model" folder (as long as it is in the same format).
