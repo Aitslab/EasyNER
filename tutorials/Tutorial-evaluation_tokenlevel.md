@@ -56,5 +56,5 @@ When working with other corpora in PubAnnotation format simply start at step 3.
 
 # Prediction and evaluation procedure for SciSpacy
 
-1. In order to run and evaluate Scispacy models, open a command line terminal, activate easyner_env environment and run a jupyter-notebook instance.
+1. In order to run and evaluate Scispacy models, open a command line terminal, activate easyner_env environment and run a jupyter-notebook instance or run the Jupyter notebook in colab (see [colab tutorial](https://github.com/Aitslab/training/blob/master/tutorials/colab.md))
 2.  Open and follow the instructions of the following notebook: https://github.com/Aitslab/EasyNER/tree/main/tutorials/Tutorial_run_and_evaluate_scispacy_models.ipynb 
