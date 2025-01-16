@@ -1,4 +1,4 @@
-This is a step by step guide to evaluating model predictions with the run_ner.py script provided with BioBERT, which can be used for both NER prediction and evaluation.
+This is a step by step guide to evaluating model predictions with the run_ner.py script provided with BioBERT, which can be used for both NER prediction and evaluation. This evaluation procedure was used for the token-level evaluation in the article.
 
 https://github.com/dmis-lab/biobert-pytorch/blob/master/named-entity-recognition/run_ner.py
 
@@ -57,4 +57,7 @@ When working with other corpora in PubAnnotation format simply start at step 3.
 # Prediction and evaluation procedure for SciSpacy
 
 1. In order to run and evaluate Scispacy models, open a command line terminal, activate easyner_env environment and run a jupyter-notebook instance or run the Jupyter notebook in colab (see [colab tutorial](https://github.com/Aitslab/training/blob/master/tutorials/colab.md))
-2.  Open and follow the instructions of the following notebook: https://github.com/Aitslab/EasyNER/tree/main/tutorials/Tutorial_run_and_evaluate_scispacy_models.ipynb 
+2.  Open and follow the instructions of the following notebook: https://github.com/Aitslab/EasyNER/tree/main/tutorials/Tutorial_run_and_evaluate_scispacy_models.ipynb
+
+# Metrics module
+The EasyNER pipeline also includes a metrics module which can be used as an alternative approach to compare IOB2 files with predictions to ground truth IOB2 files. It is descibed in section 2.6 of the [pipeline tutorial](https://github.com/Aitslab/EasyNER/blob/main/tutorials/Tutorial-pipeline.md).
