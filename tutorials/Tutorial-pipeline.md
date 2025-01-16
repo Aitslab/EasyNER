@@ -209,7 +209,7 @@ The output of the freetext loader is a single JSON file with the text in the doc
 ### 2.1.5 PubTator files
 When using the pipeline with PubTator files, a separate script is used instead of a Data Loader to produce the document collection that can then be processed by the Sentence Splitter module. Place the PubTator files in a folder and then run the script [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). The output of this script is a single JSON file with the document collection without any of the PubTator annotations.
 
-[Example the PubTator format](https://www.ncbi.nlm.nih.gov/research/bionlp/APIs/format/)
+[Example of the PubTator format](https://github.com/Aitslab/EasyNER/blob/main/tutorials/Tutorial-benchmarking_entitylevel.md)
 
 ### 2.1.6 JSON files
 When processing a single JSON file or a folder of JSON files the data loader step can be skipped and the file(s) can be used directly as input for the Sentence Splitter module.
