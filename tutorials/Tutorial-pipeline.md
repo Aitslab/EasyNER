@@ -238,7 +238,7 @@ To run the sentence splitter module set the ignore parameter for splitter in the
 
 ![](imgs/splitter_2.png)
 
-The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch size". 
+The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch_size". 
 
 #### common errors:
 
@@ -377,6 +377,7 @@ The merger module combines results from multiple NER module runs into a single f
 - "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
 - "output_path": output path where the medged file will be saved
 
+Note that only files that contain the same document collection (i.e. files produced with the same batch_size in the Sentence Splitter) can be merged.
 ___
 
 
