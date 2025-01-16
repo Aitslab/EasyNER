@@ -408,11 +408,22 @@ ___
 
 
 ## 2.7 Postprocessing module (free-standing script)
-For entities containing a hyphen or brackets (regular, square or curly) which were incorrectly fragmented in the NER process, a separate [post-processing script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/postprocess_separator_merging.py) is available which processes the EasyNER output files and merges the fragments.  
+For entities containing a hyphen or brackets (regular, square or curly) which were incorrectly fragmented in the NER process, a separate [post-processing script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/postprocess_separator_merging.py) is available which processes the EasyNER output files and merges the fragments. To process EasyNER JSON files with annotations with the script follow these steps:
+
+1. Open the script file and in the bottom in line 169 replace 'path/to/folder/with/easyner_json_files/' with the correct input folder to your JSON files
+2. Use the cd command in the Anaconda prompt to navigate from the EasyNER main folder to the subfolder containing the modified postprocess_separator_merging.py script
+```console
+cd supplementary\experiment_scripts
+```
+2. Run the script by typing
+```console
+python postprocess_separator_merging.py 
+```
 
 ___
 
 ## 2.8 EasyNER JSON to PubTator conversion module (free-standing script)
+The annotated EasyNER JSON files can be converted to PubTator annotation files with the free-standing script [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py).
 ___
 
 # 3. Run EasyNER pipeline
