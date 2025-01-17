@@ -368,7 +368,7 @@ The generated output file contains the following columns:
 
 ___
 
-## 2.5 Merger module
+## 2.5 File Merger module
 
 The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
