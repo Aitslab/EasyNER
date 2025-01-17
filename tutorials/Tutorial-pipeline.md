@@ -281,7 +281,7 @@ If # is removed from the start of line 84 of the [ner_main.py script](https://gi
 
 ![](imgs/ner_1.png)
 
-The output is one or several JSON files with the document collection split into sentences and detected entities and their position (starting character and end character) listed for each sentence. An example output file is [here](https://github.com/Aitslab/EasyNER/blob/main/results/sample_output/ner_huner_gene-1.json).
+The output is one or several document collection JSON files, in which the texts are split into sentences and annotated entities and their position (starting character and end character) are listed for each sentence. An example output file is [here](https://github.com/Aitslab/EasyNER/blob/main/results/sample_output/ner_huner_gene-1.json).
 
 ### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 When using a deep learning model, you can use one of the BioBERT-based pytorch models we fine-tuned on the [HUNER corpora](https://github.com/hu-ner/huner), which are available from the [Aitslab Huggingface repository](https://huggingface.co/aitslab). Alternatively, you can use other models from HuggingFace repositories or your own model stored in the EasyNER "model" folder (as long as it is in the same format).
@@ -327,7 +327,7 @@ ___
 
 ## 2.4 Analysis module
 
-This section uses the extracted entities to generate a file of ranked entities and frequency plots. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+This section quantifies the annotated entities from a single class (does not run of merged files with mutliple classes!) and produces a list of ranked entities and frequency plot. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
 - "input_path": input folder path where all batches of NER are located,
@@ -370,21 +370,21 @@ ___
 
 ## 2.5 File Merger module
 
-The merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+The File Merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
 - "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
 - "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
 - "output_path": output path where the medged file will be saved
 
-Note that only files that contain the same document collection (i.e. files produced with the same batch_size in the Sentence Splitter) can be merged.
+Note that only files that contain the same document collection (i.e. files produced with the same batch_size in the Sentence Splitter) can be merged and that these are matched by the numeric suffix. Merged files with multiple entity classes cannot be run in the analysis module.
 ___
 
 
 ## 2.6 Metrics module
 ![](imgs/pipeline_metrics.png)
 
-The metrics module can be used to evaluate the performance of NER models/dictionaries on token level. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity. As an example for IOB2 files, you can look at the files in the [Simplified Lund COVID-19 corpus](https://github.com/Aitslab/EasyNER/blob/main/data/Simplified%20Lund%20COVID19%20corpus.zip).
+The metrics module is not part of the NER annotation workflow but can instead be used to evaluate the performance of NER models/dictionaries on token level. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity. As an example for IOB2 files, you can look at the files in the [Simplified Lund COVID-19 corpus](https://github.com/Aitslab/EasyNER/blob/main/data/Simplified%20Lund%20COVID19%20corpus.zip).
 
 To run the metrics module, set ignore metrics to false in the config file. Then use the following input and output config arguments:
 
@@ -422,7 +422,7 @@ This error is caused by incorrect separators specified in pred_sep and true_sep.
 ___
 
 
-## 2.7 Postprocessing module (free-standing script)
+## 2.7 Post-processing module (free-standing script)
 For entities containing a hyphen or brackets (regular, square or curly) which were incorrectly fragmented in the NER process, a separate [post-processing script](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/postprocess_separator_merging.py) is available which processes the EasyNER output files and merges the fragments. To process EasyNER JSON files with annotations with the script follow these steps:
 
 1. Open the script file and in the bottom in line 169 replace 'path/to/folder/with/easyner_json_files/' with the correct input folder to your JSON files
@@ -438,7 +438,7 @@ python postprocess_separator_merging.py
 ___
 
 ## 2.8 EasyNER JSON-to-PubTator conversion module (free-standing script)
-The annotated EasyNER JSON files can be converted to PubTator annotation files with the free-standing script [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py).
+The annotated JSON document collection files poduced by the EasyNER pipeline can be converted to annotated PubTator files with the JSON-to-PubTator conversion script:[convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py).
 ___
 
 # 3. Run EasyNER pipeline
