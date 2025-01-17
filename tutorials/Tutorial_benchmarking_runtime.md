@@ -1,5 +1,22 @@
 This tutorial explains how to repeat the runtime experiments in the article. Runtimes were measured for multiple corpora and then normalized to corpus character count.
 
+Following are the corpora and their character counts
+
+<center>
+
+| Corpus                      |    Characters |
+|:---------------------------|---------:|
+| BioID             |  4620590 |
+| BioRED            |   156351 |
+| Lund Autophagy 1                    |  1451436 |
+| Lund Autophagy 2                    | 12287696 |
+| Lund COVID-19            |    13060 |
+| medmentions        |  6464070 |
+| tmvar3             |   753565 |
+
+</center>
+
+
 # EasyNER runtimes
 1. Set the "TIMEKEEP" parameter on top of the config file to "true"
 2. Run the EasyNER pipeline repeatedly with different corpora, tokenizers and NER options using the following modules (set them to "false" in the config file)
