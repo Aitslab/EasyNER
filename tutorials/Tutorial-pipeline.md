@@ -1,6 +1,6 @@
 # EasyNER Installation and Useage
 
-![](imgs/pipeline3.png)
+![](imgs/pipeline.png)
 
 The end-to-end NER pipeline for information extraction is designed to process text provided by the user and extract a list of entities. The figure above describes how the given text is processed through the pipeline. Following are step-by-step instructions on installing and running the NER pipeline.
 
@@ -382,6 +382,7 @@ ___
 
 
 ## 2.6 Metrics module
+![](imgs/pipeline_metrics.png)
 
 The metrics module can be used to evaluate the performance of NER models/dictionaries on token level. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity. As an example for IOB2 files, you can look at the files in the [Simplified Lund COVID-19 corpus](https://github.com/Aitslab/EasyNER/blob/main/data/Simplified%20Lund%20COVID19%20corpus.zip).
 
@@ -436,7 +437,7 @@ python postprocess_separator_merging.py
 
 ___
 
-## 2.8 EasyNER JSON to PubTator conversion module (free-standing script)
+## 2.8 EasyNER JSON-to-PubTator conversion module (free-standing script)
 The annotated EasyNER JSON files can be converted to PubTator annotation files with the free-standing script [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py).
 ___
 
