@@ -1,4 +1,4 @@
-This tutorial explains how to repeat the runtime experiments in the article.
+This tutorial explains how to repeat the runtime experiments in the article. Runtimes were measured for multiple corpora and then normalized to corpus character count.
 
 # EasyNER runtimes
 1. Set the "TIMEKEEP" parameter on top of the config file to "true"
@@ -7,27 +7,29 @@ This tutorial explains how to repeat the runtime experiments in the article.
    - Sentence Splitter with spaCy or with nltk tokenizer
    - NER with BioBERT model or dictionary
    - Analysis
-3. Record runtimes from the timekeep.txt document. Note that the timekeep.txt file will be updated each time EasyNER is run. Therefore, either rename the file and/or move it to a different location to avoid overwriting.
-4. Subtract/add module runtimes for individual modules to obtain total runtimes
-5. Normalize runtimes by dividing with character count
-
+3. Runtimes are recorded in the timekeep.txt document in the main EasyNER folder (same folder as the config file) in seconds.
+4. Rename the timekeep.txt file after each run and/or move it to a different location as the next run will overwrite it.
+5. Subtract/add module runtimes for individual modules to obtain total runtimes.
      
 # HunFlair2 runtimes
-HunFLair2 returns the time taken when the predict.sh file is run on a terminal. When you run the predict.sh script(s), you will see the runtime in miliseconds for each run.
-
+1. Run the HunFLair2 the predict.sh file on a terminal with different corpora
+2. Record the runtime in milliseconds which is shown in the terminal after the run.
+   
 # BERN2 web demo runtimes
-The web demo runtime is displayed on the BERN2 website (https://bern2.korea.ac.kr/) when a text or list of PMIDs are run. 
+1. Run the web demo runtime on the BERN2 website (https://bern2.korea.ac.kr/) with plain text or list of PMIDs.
+2. Record the runtime in milliseconds which is shown in the web browser with the results after the run.
 
 # BERN2 API runtimes
-BERN2 API runtimes can be calculated by using the python time module as follows:
+1. BERN2 API runtimes can be calculated by using the python time module as follows:
 ```python
 import time
 
 start = time.time()
 
-YOUR CODE HERE
+CODE FOR RUNNING THE API
 
 end = time.time()
 
 print(end-start)
 ```
+2. Record the untime which is shown in the terminal after the run.
