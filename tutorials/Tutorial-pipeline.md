@@ -374,7 +374,7 @@ ___
 
 ## 2.5 File Merger module
 
-The File Merger module merges corresponding files from multiple NER module runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+The File Merger module merges corresponding JSON files from multiple NER module runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
 - "input_paths": list of input folder paths where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
@@ -387,6 +387,17 @@ Note that only files which contain the same document collection (i.e. files prod
 If you get ValueError: invalid literal for int() with base 10: 'gene_0' your files are not named correctly with a hyphen and number in the end.
 ___
 
+
+## 2.7 Result Inspection module
+The Result Inspection module filters out text sections containing specific entities of interest and places them into a new file in the same format.
+
+#### Config file arguments:
+- "input_folder": path to input folder where the files are saved
+- "output_file": output path where the filtered file is saved
+- "entities": list of search terms in form of a Python list (in square brackets), e.g. ["rapamycin", "sirolimus"]
+
+
+___
 
 ## 2.6 Metrics module
 ![](imgs/pipeline_metrics.png)
