@@ -4,10 +4,10 @@
 
   "ignore": {
     "cord_loader": true,
-    "downloader": true,
+    "downloader": false,
     "text_loader":true,
-    "pubmed_bulk_loader":false,
-    "splitter": true,
+    "pubmed_bulk_loader":true,
+    "splitter": false,
     "ner": true,
     "analysis": true,
     "merger": true,
@@ -49,7 +49,7 @@
 	  "file_limit":[0,100],
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
-    "batch_size": 100
+    "batch_size": 1000
   },
   "ner": {
     "input_path": "results/splitter/",
