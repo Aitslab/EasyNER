@@ -374,14 +374,17 @@ ___
 
 ## 2.5 File Merger module
 
-The File Merger module combines results from multiple NER module runs into a single file for analysis. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+The File Merger module merges corresponding files from multiple NER module runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
-- "input_paths": list of input folder path where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
+- "input_paths": list of input folder paths where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
 - "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
-- "output_path": output path where the medged file will be saved
+- "output_path": output path where the medged files will be saved
 
-Note that only files that contain the same document collection (i.e. files produced with the same batch_size in the Sentence Splitter) can be merged and that these are matched by the numeric suffix. Merged files with multiple entity classes cannot be run in the analysis module.
+Note that only files which contain the same document collection (i.e. files produced with the same batch_size in the Sentence Splitter) can be merged and that these are matched by the numeric suffix. Therefore, all file name have to end with hyphen and a number (e.g. ner_chemical-1, ner_gene-1). Merged files with multiple entity classes cannot be run in the analysis module.
+
+#### errors:
+If you get ValueError: invalid literal for int() with base 10: 'gene_0' your files are not named correctly with a hyphen and number in the end.
 ___
 
 
