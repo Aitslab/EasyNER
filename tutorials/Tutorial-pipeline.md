@@ -250,7 +250,7 @@ OSError: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Pytho
 ```
 
 
-If you get this error you forgot to set pubmed_bulk to "true" but used a folder instead of a single json file in the "input_path"
+If you get this error you used a folder in the "input_path" but forgot to set pubmed_bulk to "true"
 ```bash
 PermissionError: [Errno 13] Permission denied: 'data/splitter/input/'
 ```
