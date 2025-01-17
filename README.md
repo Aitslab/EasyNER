@@ -2,7 +2,7 @@
 
 EasyNER is a easy to use, customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.  
 
-![](tutorials/imgs/pipeline3.png)
+![](tutorials/imgs/pipeline.png)
 
 
 ## What are the folders in this repo?
