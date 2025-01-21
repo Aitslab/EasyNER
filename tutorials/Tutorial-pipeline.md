@@ -242,7 +242,7 @@ The output is one or several JSON files with the document collection split into 
 
 #### common errors:
 
-If the Splitter module runs but no output file is generated, the input files are most likely not named in the expected manner, see above.
+If the Splitter module runs but no output file is generated, the input files are most likely not named in the expected manner, see above. Alternatively, if you are using pubmed_bulk set to "true", your input path may not be correct, e.g. lack / in the end.
 
 If you get this error you forgot to dowload the spaCy models when creating the conda environment (see step 1.3):
 ```bash
