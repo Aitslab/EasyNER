@@ -388,18 +388,22 @@ If you get ValueError: invalid literal for int() with base 10: 'gene_0' your fil
 ___
 
 
+## 2.6 Named Entity Linking (NEL) module
+This module adds unique identifiers to the entities in the annotated JSON document collection files by matching entities to a lookup table. Only exact matches receive an identifier. The lookup table should be a .tsv file with the columns "term" and "ID", separated by "/t" (tab).
+___
+
 ## 2.7 Result Inspection module
 The Result Inspection module filters out text sections containing specific entities of interest and places them into a new file in the same format.
-
+___
 #### Config file arguments:
 - "input_folder": path to input folder where the files are saved
 - "output_file": output path where the filtered file is saved
-- "entities": list of search terms in form of a Python list (in square brackets), e.g. ["rapamycin", "sirolimus"]
+- "entities": list of entities of interest in form of a Python list (in square brackets), e.g. ["rapamycin", "sirolimus"]
 
 
 ___
 
-## 2.6 Metrics module
+## 2.8 Metrics module
 ![](imgs/pipeline_metrics.png)
 
 The metrics module is not part of the NER annotation workflow but can instead be used to evaluate the performance of NER models/dictionaries on token level. It calculates precision, recall and F1 scores by comparing an IOB2-formatted file with predictions with an IOB2-formatted file with the true annotations (ground truth). An IOB2 file contains one token per line, followed by a separator and a label (B, I or O). B is the label for the first token of the entity, I is the label of the subsequent tokens of the entity and O is for tokens that do not belong to an entitity. As an example for IOB2 files, you can look at the files in the [Simplified Lund COVID-19 corpus](https://github.com/Aitslab/EasyNER/blob/main/data/Simplified%20Lund%20COVID19%20corpus.zip).
