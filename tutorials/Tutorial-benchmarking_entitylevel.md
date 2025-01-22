@@ -4,7 +4,7 @@ The evaluation script calculates false-positives and -negatives, single class pr
 
 # Conversion of PubTator format to EasyNER input and prediction
 1. Place the MedMention, tmVar 3.0 or BioRED corpus in PubTator format in a folder
-2. Modify [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). First, enter the correct path for infile and outfile in the bottom. Then, change the last line to either of these depending on the input:
+2. Modify [convert_hunflair2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). First, enter the correct path for infile and outfile in the bottom. Then, change the last line to either of these depending on the input:
   
    convert_bioid_to_json(infile,outfile)
 
