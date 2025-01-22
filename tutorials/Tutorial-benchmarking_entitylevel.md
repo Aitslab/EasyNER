@@ -3,9 +3,19 @@ This is a step by step guide to evaluating the performance of EasyNER and other 
 The evaluation script calculates false-positives and -negatives, single class precision, recall and F1 score, and micro, macro and weighted averages of the precision, recall and F1 score across all entity classes.
 
 # Conversion of PubTator format to EasyNER input and prediction
-1. Place corpora files in PubTator format in a folder and convert to single JSON files by running [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). Note the converted file does not contain the PubTator annotations.
-2. Use the converted file as input for the EasyNER Sentence Splitter and then run the output through the NER module. If you want to evaluate the effect of the Postprocessing module also run this on the output of the NER module.
-3. After the EasyNER run, convert the EasyNER output JSON file back to PubTator format by running [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py)
+1. Place corpus file in PubTator format in a folder
+2. Convert the corpus file to a single JSON files by running [convert_hunfliar2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). For this, open the script first and then enter the correct path for infile and outfile in the bottom. The last line should be changed to either of these depending on the input:
+  
+   convert_biored_to_json(infile,outfile)
+   
+   convert_medmention_to_json(infile, outfile)
+   
+   convert_tmvar3_to_json(infile, outfile)
+
+3. Then run the script in the Anaconda prompt by navigating to its folder and typing the following: python convert_hunflair2_pubtator_to_json.py
+4. The output will be a JSON file in the same format as the EasyNER data loaders produce, i.e. it does not contain the PubTator annotations.
+5. Use the converted JSON file as input for the EasyNER Sentence Splitter and then run the output through the NER module. If you want to evaluate the effect of the Postprocessing module also run this on the output of the NER module.
+6. After the EasyNER run, convert the EasyNER output JSON file back to PubTator format by running [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py)
 
 If you want to evaluate predictions for multiple entity classes, you have to repeat the above procedure for each class.
 If you then want to combine the EasyNER JSON files for multiple classes into a single JSON file, you run the [entity_merger2 script](https://github.com/Aitslab/EasyNER/blob/main/experiments/experiment_scripts/entity_merger2.py). For this you will have to define an order of priority in case of overlapping annotations. Alternatively, you can evaluate each class separately as we have done in the article.
