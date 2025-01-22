@@ -4,7 +4,7 @@ The evaluation script calculates false-positives and -negatives, single class pr
 
 # Conversion of PubTator format to EasyNER input and prediction
 1. Place the MedMention, tmVar 3.0 or BioRED corpus in PubTator format in a folder
-2. Modify [convert_hunflair2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). First, enter the correct path for infile and outfile in the bottom. Then, change the last line to either of these depending on the input:
+2. Modify [convert_hunflair2_pubtator-to-json.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_hunflair2_pubtator_to_json.py). First, enter the correct path for infile and outfile in the bottom. The outfile path must consist of the path to a folder that already exists followed by the JSON file name, e.g. to create the file medmentions.json in the folder C:/Users/sonja/Documents/REPOS/EasyNER/results/ the path should be C:/Users/sonja/Documents/REPOS/EasyNER/results/medmentions.json. Then, change the last line in the .py file to either of these depending on the input:
   
    convert_bioid_to_json(infile,outfile)
 
@@ -13,8 +13,10 @@ The evaluation script calculates false-positives and -negatives, single class pr
    convert_medmention_to_json(infile, outfile)
    
    convert_tmvar3_to_json(infile, outfile)
+   
+4. Then run the script in the Anaconda prompt by navigating to its folder (from EasyNER main folder type cd supplementary/experiment_scripts/) and typing the following:   python convert_hunflair2_pubtator_to_json.py
 
-4. Then run the script in the Anaconda prompt by navigating to its folder (from EasyNER main folder type cd supplementary/experiment_scripts/) and typing the following: python convert_hunflair2_pubtator_to_json.py
+   If you get "Error FileNotFoundError: [Errno 2] No such file or directory" your outfile path was for a folder that did not exist yet.
 5. The output will be a JSON file in the same format as the EasyNER data loaders produce, i.e. it does not contain the PubTator annotations.
 6. Use the converted JSON file as input for the EasyNER Sentence Splitter and then run the output through the NER module. If you want to evaluate the effect of the Postprocessing module also run this on the output of the NER module.
 7. After the EasyNER run, convert the EasyNER output JSON file back to PubTator format by running [convert_easyner_output_json_to_pubtator.py](https://github.com/Aitslab/EasyNER/blob/main/supplementary/experiment_scripts/convert_easyner_output_json_to_pubtator.py)
