@@ -151,7 +151,7 @@ The PubMed bulk loader variant of the dataloader module can download the annual 
 Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to "false" (and data_loader, cord_loader and text_loader to "true") and provide the following arguments:
 
 #### Config file arguments:
-- "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved
+- "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved. Note that this should be an empty folder as files that are already present and converted to json from a previous download will otherwise be converted again causing long processing times.
 - "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
 - "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
 - "subset_range": Specify a range of file numbers (without the starting zeros) if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
