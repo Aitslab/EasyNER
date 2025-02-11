@@ -151,14 +151,14 @@ The PubMed bulk loader variant of the dataloader module can download the annual 
 Similar to other data loader modules, to run this data loader turn "pubmed_bulk_loader" in the ignore section to "false" (and data_loader, cord_loader and text_loader to "true") and provide the following arguments:
 
 #### Config file arguments:
-- "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved. Note that this should be an empty folder as files that are already present and converted to json from a previous download will otherwise be converted again causing long processing times.
+- "output_path": Path to the folder in which the output files (JSON files, PMID list and the files with counts (optional) are to be saved. Note that this should be an empty folder.
 - "baseline": The PubMed annual baseline version listed in the file names, e.g. 24 in pubmed24n0001.xml.gz
 - "subset": Set tp "true" if a subset of the baseline is to be downloaded, otherwise "false" downloads the entire baseline.
 - "subset_range": Specify a range of file numbers (without the starting zeros) if a subset of files is to be downloaded, e.g. to download files numbered 1 to 160 (inclusive) add [1,160],
 - "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
 - "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
 - "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
-- "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved.
+- "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved. Note that this should be an empty folder.
 
 If you only want to download the update files, set subset and get_nightly_update_files to "true" and subset_range to [0,0]. Then define the range of update files under update_file_range.
 
