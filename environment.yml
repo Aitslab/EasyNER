@@ -13,6 +13,7 @@ dependencies:
   - numpy-base=1.23.3
   - onnxruntime=1.12.1
   - openssl=1.1.1t
+  - orjson
   - pandas=1.4.4
   - pillow=9.2.0
   - pip=22.2.2
