@@ -1,4 +1,4 @@
-# encoding = uf8
+# encoding = utf-8
 # author: Sonja Aits
 
 # Named Entity Linking module
