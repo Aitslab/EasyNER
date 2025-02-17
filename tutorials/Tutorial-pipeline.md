@@ -1,6 +1,6 @@
 # EasyNER Installation and Useage
 
-<img src="pipeline.png" alt="Descriptive text" style="max-width: 100%; display: block;">
+<img src="imgs/pipeline.png" alt="pipeline flowchart" style="max-width: 100%; display: block;">
 
 The end-to-end NER pipeline for information extraction is designed to process text provided by the user and extract a list of entities. The figure above describes how the given text is processed through the pipeline. Following are step-by-step instructions on installing and running the NER pipeline.
 
