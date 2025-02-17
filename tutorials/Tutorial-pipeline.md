@@ -372,9 +372,23 @@ The generated output file contains the following columns:
 
 ___
 
-## 2.5 File Merger module
 
-The File Merger module merges corresponding JSON files from multiple NER module runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+## 2.5 Named Entity Linking (NEL) module
+This module adds unique identifiers to the entities in the annotated JSON document collection files by matching entities to a lookup table. Only exact matches receive the identifier. The lookup table should be a .tsv file with the columns "entity", "id" and "name", separated by "/t" (tab) where entity is the text discovered in the document, id is the identifier for a knowledge base, e.g. an ontology, and name is the standard name used in the knowledge base. Entities not present in the lookup table, instead receive a dummy identifier, i.e. "easyner:number". Consecutive numbers are used for each new encountered entity and each occurence of the entity receives the same dummy identifier which are stored in the new_entities.tsv output file which can be used as lookup table in the future. 
+The output files have the same name as the input files with the prefix "nel_".
+
+
+#### Config file arguments:
+- "input_path": input folder paths where the files are saved. for example: "path/to/cell/model/files/"
+- "output_path": input folder paths where the files are saved. for example: "path/to/cell/model/files/output"
+- "lookup_table": path to lookup tsv file. for example: "data/lookup_table.tsv"
+
+
+___
+
+## 2.6 File Merger module
+
+The File Merger module merges corresponding JSON files from multiple NER module or NEL runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
 - "input_paths": list of input folder paths where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
@@ -385,11 +399,6 @@ Note that only files which contain the same document collection (i.e. files prod
 
 #### errors:
 If you get ValueError: invalid literal for int() with base 10: 'gene_0' your files are not named correctly with a hyphen and number in the end.
-___
-
-
-## 2.6 Named Entity Linking (NEL) module
-This module adds unique identifiers to the entities in the annotated JSON document collection files by matching entities to a lookup table. Only exact matches receive an identifier. The lookup table should be a .tsv file with the columns "term" and "ID", separated by "/t" (tab).
 ___
 
 ## 2.7 Result Inspection module
