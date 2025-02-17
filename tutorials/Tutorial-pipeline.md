@@ -331,10 +331,10 @@ ___
 
 ## 2.4 Analysis module
 
-This section quantifies the annotated entities from a single class (does not run of merged files with mutliple classes!) and produces a list of ranked entities and frequency plot. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
+This section quantifies the annotated entities from a single class (does not run of merged files with mutliple classes!) and produces a list of ranked entities and frequency plot. It can work on output files from the NER or NEL module. If NEL files are used, result files are created for the detected entities (files with suffix _entities) or for the normalized entities (files with suffix _ids). In the normalized counts, all counts for synonyms that link to the same identifier have been aggregated. As in all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
-- "input_path": input folder path where all batches of NER are located,
+- "input_path": input folder path where all files are located,
 - "output_path": output folder path where the analysis files will be saved,
 - "entity_type": type of entity, this will be added as a prefix to the output file and bar graph,
 - "plot_top_n": plot top n entities. defaults to 50. Note that plotting more than 100 entities can result in a distorted graph
@@ -352,7 +352,9 @@ The generated output file contains the following columns:
 
 | Column | Description |
 | --- | ---|
-| entity | Name of the entity |
+| (no header) | Name of the entity (in _entities table) or ID of the entity (in _ids table, only when using NEL files)|
+| name | Standard name of the entity in the knowledge base used for entity linking (in _ids table, only when using NEL files)|
+|entities_list| list of synonyms that were normalized to this ID|
 | total_count | total occurances in the entire document collection (across all processed files) |
 | articles_spanned | number of documents (abstracts) in which the entity is found |
 | batches_spanned | number of batches in which the entity is found |
