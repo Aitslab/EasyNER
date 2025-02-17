@@ -1,8 +1,6 @@
 # encoding = utf-8
 # author: Sonja Aits
 
-# Named Entity Linking module
-
 """
 This script processes output files from the ner module and adds names and identifiers from a lookup table (tsv file) for each entity.
 It creates a corresponding json file with this information added as output file. The prefix "nel" is added to the file name for the output file.
@@ -18,12 +16,12 @@ import orjson
 import pandas as pd
 
 
-# Function to load the lookup table from a TSV file into a dictionary and its keys into a set for fast lookup
+# Function to load the lookup table from a TSV file into a dictionary
 def load_lookup_dict(tsv_path):
     """Load the entity lookup table from a TSV file."""
     df = pd.read_csv(tsv_path, sep='\t', dtype=str)
     lookup_dict = {row['entity']: {'id': row['id'], 'name': row['name']} for _, row in df.iterrows()}
-    lookup_keys = set(lookup_dict.keys())  
+    lookup_keys = set(lookup_dict.keys())  # Keys for fast lookup
     return lookup_dict, lookup_keys
 
 # Function to process a batch of JSON files
