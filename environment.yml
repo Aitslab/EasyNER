@@ -13,7 +13,6 @@ dependencies:
   - numpy-base=1.23.3
   - onnxruntime=1.12.1
   - openssl=1.1.1t
-  - orjson
   - pandas=1.4.4
   - pillow=9.2.0
   - pip=22.2.2
@@ -36,6 +35,7 @@ dependencies:
   - yaml=0.2.5
   - pip:
     - nltk==3.8.1
+    - orjson
     - pubmed-parser==0.3.1
     - pytest==7.2.1
     - pytest-cov==4.0.0
