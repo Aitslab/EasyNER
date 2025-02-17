@@ -14,7 +14,7 @@ def get_sorted_files(filepath):
     '''
     get a list of sorted file paths using glob
     '''
-    return sorted(glob(f'{filepath}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]))
+    return sorted(glob(f'{filepath}/*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]))
 
 
 def process_articles(articles: dict, entity_tag:str):
