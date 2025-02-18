@@ -67,9 +67,19 @@ ___
 
 # 2. Modify the Config file
 
-EasyNER consists of several modules which are run in a sequential manner using the main.py script (see section 3). It is also possible to run the modules individually. For example, when two NER models are to be used, the first run typically includes a data loader, the Sentence splitter, the NER module and analysis module for the first model and the subsequent run includes only the NER module and analysis module for the second model.
+EasyNER consists of several modules which are run in a sequential manner using the main.py script (see section 3.). It is also possible to run the modules individually. For example, when two NER models are to be used, the first run typically includes a data loader, the Sentence splitter, the NER module and analysis module for the first model and the subsequent run includes only the NER module and analysis module for the second model. 
 
-For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor. First, the modules that you want to run, should be switched to "false" in the ignore section. Then, the sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
+For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor. 
+
+#### CPU limit:
+You can specify the number of CPUs to be used in the case of multiprocessing runs on several CPU nodes by setting the "CPU_LIMIT" on top of the config file to the desired number. If the number is higher than the available CPUS, one less CPU than those available is used. If you encounter "Memory Error", it helps to reduce the CPU limit or switch to running on GPU.
+
+#### Runtime measurements
+The runtime for EasyNER and the modules can be obtained by setting "TIMEKEEP" on top of the config file to "true". The runtime will be storerd in seconds in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
+
+#### Module specification:
+
+In the next section, the modules that you want to run, should be switched to **"false"** in the ignore section. Then, the individual sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
 
 ```bash
 {
@@ -94,11 +104,6 @@ In a standard pipeline run, the following modules should be set to false (and th
 3. ner
 4. analysis
 
-#### Runtime measurements
-The runtime for EasyNER and the modules can be obtained by setting "TIMEKEEP" on top of the config file to "true". The runtime will be storerd in seconds in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
-
-#### CPU limit:
-You can specify the number of CPUs to be used in the case of parallel runs by setting the "CPU_LIMIT" on top of the config file to the desired number. If the number is higher than the available CPUS, one less CPU than those available is used.
 
 When the config file is updated, save it and start the run (see step 3.).
 
@@ -277,7 +282,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "clear_old_results": set to "true" to overwrite old results
 - "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,90000]
 - "entity_type": type of extracted entity, e.g. "gene"
-- "multiprocessing": set to "true" to use CPUs and multiprocessing; when set to "false" GPU is used if available
+- "multiprocessing": set to "true" to use CPUs and multiprocessing; when set to "false" GPU is used if available. Whether CPU or GPU is faster depends on the size of the document collection and the number of nodes available for multiprocessing. In general, GPU is preferable for BioBERT runs.
 
 If # is removed from the start of line 84 of the [ner_main.py script](https://github.com/Aitslab/EasyNER/blob/main/scripts/ner_main.py) before running the pipeline the term specified as "entity_type" will be added to each annotation in the JSON files. This increases file size and memory requirments and is thus not used by default.
 
@@ -286,6 +291,7 @@ If # is removed from the start of line 84 of the [ner_main.py script](https://gi
 ![](imgs/ner_1.png)
 
 The output is one or several document collection JSON files, in which the texts are split into sentences and annotated entities and their position (starting character and end character) are listed for each sentence. An example output file is [here](https://github.com/Aitslab/EasyNER/blob/main/results/sample_output/ner_huner_gene-1.json).
+
 
 ### 2.3.1 [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 When using a deep learning model, you can use one of the BioBERT-based pytorch models we fine-tuned on the [HUNER corpora](https://github.com/hu-ner/huner), which are available from the [Aitslab Huggingface repository](https://huggingface.co/aitslab). Alternatively, you can use other models from HuggingFace repositories or your own model stored in the EasyNER "model" folder (as long as it is in the same format).
@@ -326,6 +332,10 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 "model_name": "en_core_web_sm",
 "vocab_path": "dictionaries/sars-cov-2_synonyms_v2.txt"
 ```
+
+
+#### common errors:
+Memory Error can be encountered with this module when using multiprocessing: true, e.g. when running very large dictionaries with over millions of words, as each node will initialize a spacy model and Phrasematcher. To avoid this reduce the CPU_LIMIT on top of the config file or switch to GPU. If this is not sufficient, consider splitting the dictionary.
 ___
 
 
