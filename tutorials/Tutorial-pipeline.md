@@ -265,7 +265,7 @@ ___
 
 ## 2.3 Named Entity Recognition module
 
-The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models (see section 2.3.1) or dictionaries (see section 2.3.2) for NER. The dictionary option is much faster but only recognizes the exact terms provided in the dictionary file.
+The NER module performs NER on JSON files containing document collections split into sentences (normally the output files from the Sentence Splitter module). The user can use deep learning models (see section 2.3.1) or dictionaries (see section 2.3.2) for NER. The dictionary option is much faster but only recognizes the exact terms provided in the dictionary file. Whether CPU or GPU is faster depends on the size of the document collection and the number of nodes available for multiprocessing. In general, GPU is preferable for BioBERT runs. For smaller document collections multiprocessing:True is actually slower for the spaCy Phrasematcher due to the overhead from the multiprocessing so use multiprocessing:False for these cases.
 
 To run this module, the ignore argument for ner should be set to false and the following config arguments should be specified in the config file:
 
@@ -282,7 +282,9 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "clear_old_results": set to "true" to overwrite old results
 - "article_limit": if user decides to only choose a range of articles in the input_folder to process, default [-1,90000]
 - "entity_type": type of extracted entity, e.g. "gene"
-- "multiprocessing": set to "true" to use CPUs and multiprocessing; when set to "false" GPU is used if available. Whether CPU or GPU is faster depends on the size of the document collection and the number of nodes available for multiprocessing. In general, GPU is preferable for BioBERT runs.
+- "multiprocessing": set to "true" to use CPUs and multiprocessing; when set to "false" GPU is used if available.
+- "file_batch_size": the number of json files passed in a batch to each node in multiprocessing. Default is 15. Reduce in case of memory issues.
+- "sentence_batch_size": the number of sentences processed in bulk by spaCy Phasematcher nlp.pipe(). Default is 500. Increase to speed up and reduce in case of memory issues.
 
 If # is removed from the start of line 84 of the [ner_main.py script](https://github.com/Aitslab/EasyNER/blob/main/scripts/ner_main.py) before running the pipeline the term specified as "entity_type" will be added to each annotation in the JSON files. This increases file size and memory requirments and is thus not used by default.
 
