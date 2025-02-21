@@ -337,7 +337,9 @@ Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher
 
 
 #### common errors:
-Memory Error can be encountered with this module when using multiprocessing: true, e.g. when running very large dictionaries with over millions of words, as each node will initialize a spacy model and Phrasematcher. To avoid this reduce the CPU_LIMIT on top of the config file or switch to GPU. If this is not sufficient, consider splitting the dictionary.
+Memory Error can be encountered with this module when using multiprocessing: true, e.g. when running very large dictionaries with over millions of words, as each node will initialize a spacy model and Phrasematcher. To avoid this reduce the CPU_LIMIT on top of the config file or switch to GPU. If this is not sufficient, consider splitting the dictionary or reducing file_batch_size or sentence_batch_size.
+
+ValueError("Number of processes must be at least 1"): You likely have an incorrect input path, e.g. missing an / in the end. check that the input path is correct by reading its print out in the Anaconda prompt.
 ___
 
 
