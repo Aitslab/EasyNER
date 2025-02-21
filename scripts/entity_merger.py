@@ -14,7 +14,7 @@ def get_sorted_files(filepath):
     '''
     get a list of sorted file paths using glob
     '''
-    return sorted(glob(f'{filepath}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]))
+    return sorted(glob(f'{filepath}/*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]))
 
 
 def process_articles(articles: dict, entity_tag:str):
@@ -27,9 +27,13 @@ def process_articles(articles: dict, entity_tag:str):
             if len(sent["entities"])>0:
                 articles[art]["sentences"][i]["entities"] = {entity_tag:articles[art]["sentences"][i]["entities"]}
                 articles[art]["sentences"][i]["entity_spans"] = {entity_tag:articles[art]["sentences"][i]["entity_spans"]}
+                articles[art]["sentences"][i]["ids"] = {entity_tag:articles[art]["sentences"][i]["ids"]}
+                articles[art]["sentences"][i]["names"] = {entity_tag:articles[art]["sentences"][i]["names"]}
             else:
                 articles[art]["sentences"][i]["entities"] = {}
                 articles[art]["sentences"][i]["entity_spans"] = {} 
+                articles[art]["sentences"][i]["ids"] = {} 
+                articles[art]["sentences"][i]["names"] = {} 
 
     return articles
 
@@ -53,6 +57,10 @@ def merge_two_articles(articles_1, articles_2):
                 if len(articles_2[art2]["sentences"][i]["entities"])>0:
                     sent["entities"].update(articles_2[art2]["sentences"][i]["entities"])
                     sent["entity_spans"].update(articles_2[art2]["sentences"][i]["entity_spans"])
+                    if "ids" in articles_2[art2]["sentences"][i]:
+                        sent["ids"].update(articles_2[art2]["sentences"][i]["ids"])
+                    if "names" in articles_2[art2]["sentences"][i]:
+                        sent["names"].update(articles_2[art2]["sentences"][i]["names"])
                     
     return articles_1
 
@@ -108,13 +116,3 @@ def check_match_batch_index(filename1, filename2):
     return get_batch_no_from_filename(filename1) == get_batch_no_from_filename(filename2)
     
     
-if __name__ == "__main__":
-
-    input_folders = ["../../NER_pipeline/results/text-ner_cell_mtorandtsc1-set.json",
-               "../../NER_pipeline/results/text-ner_ft_chem_mtorandtsc1_1000.json",
-               "../../NER_pipeline/results/text-ner_disease_mtorandtsc1-set.json",
-                "../../NER_pipeline/results/text-ner_gene_mtorandtsc1-set.json",
-              "../../NER_pipeline/results/text-ner_gene_mtorandtsc1-set.json"]
-    infile_entity_tags = ["cell", "chemical", "disease","gene", "species"]
-    
-    run_entity_merger(infile_list, infile_tags)

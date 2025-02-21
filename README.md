@@ -2,7 +2,7 @@
 
 EasyNER is a easy to use, customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.  
 
-![](tutorials/imgs/pipeline3.png)
+![](tutorials/imgs/pipeline.png)
 
 
 ## What are the folders in this repo?
@@ -70,6 +70,7 @@ python main.py
 
 The output will consist of a ranked list [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_result_chemical.tsv), a graph of the most frequent entities [(example)](results/sample_output/analysis_mtorandtsc1_chemical/mtorandtsc1_chemical_top_50.png) and files with the annotated text.
 
+NOTE: If you want to merge entities on the same corpus, make sure the same batch size is used for all runs.
 
 A reproducable capsule for EasyNER is available on Code Ocean: https://doi.org/10.24433/CO.6908880.v1
 
@@ -187,6 +188,9 @@ We have included a result inspection module to search a list of entities occurin
 ```python
 python main.py
 ```
+
+## Logging time
+The runtime for EasyNER and the modules can be obtained by selecting "TIMEKEEP": true in the config file. The runtime will be storerd in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
 
 ## Citation
 If you use any of the material in this repository, please cite the following article:

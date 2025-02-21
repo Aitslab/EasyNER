@@ -8,8 +8,8 @@
     "text_loader":true,
     "pubmed_bulk_loader":true,
     "splitter": false,
-    "ner": false,
-    "analysis": false,
+    "ner": true,
+    "analysis": true,
     "merger": true,
     "metrics":true,
     "nel":true,
@@ -35,9 +35,9 @@
     "output_path": "data/pubmed/",
     "baseline": "24",
     "subset": true,
-    "subset_range":[0,3],
-    "get_nightly_update_files": false,
-    "update_file_range":[0,0],
+    "subset_range":[0,0],
+    "get_nightly_update_files": true,
+    "update_file_range":[1500,1504],
     "count_articles": true,
     "raw_download_path": ""
   },
@@ -49,7 +49,7 @@
 	  "file_limit":[0,100],
     "tokenizer": "spacy",
     "model_name": "en_core_web_sm",
-    "batch_size": 100
+    "batch_size": 1000
   },
   "ner": {
     "input_path": "results/splitter/",

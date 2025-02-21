@@ -19,6 +19,7 @@ from scripts import text_loader
 from scripts import search
 from scripts import util
 from scripts import metrics
+from scripts import nel
 from scripts import entity_merger
 from scripts import ner_main
 from scripts import analysis
@@ -244,6 +245,19 @@ def run_metrics(config: dict, ignore: bool):
     
     print("Finished running metrics script.")
 
+def run_nel(config: dict, ignore: bool):
+    if ignore:
+        print("Ignoring script: nel.")
+        return
+
+    print("Running nel script.")
+
+    nel_config = config["nel"]
+    
+    nel.nel_main(nel_config)
+    
+    print("Finished running nel script.")
+
 def run_merger(config: dict, ignore: bool):
     if ignore:
         print("Ignoring script: merger.")
@@ -374,6 +388,10 @@ if __name__ == "__main__":
 
     # Run metrics on models and gold-standard set
     run_metrics(config, ignore=ignore["metrics"])
+    print()
+
+    # Run nel on models and gold-standard set
+    run_nel(config, ignore=ignore["nel"])
     print()
 
     # Run merger on specified output folders
