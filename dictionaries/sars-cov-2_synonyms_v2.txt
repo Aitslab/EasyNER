@@ -800,3 +800,8 @@ wuhancorona virus
 wuhancorona virus 2019
 wuhancoronavirus
 wuhancoronavirus 2019
+NCBI Taxonomy ID: 2697049
+NCBI:txid2697049
+txid2697049
+DiseasesDB:60833
+MeSH:M000679178
