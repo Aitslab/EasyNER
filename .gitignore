@@ -28,3 +28,7 @@ results/ner*
 
 # Profiling files
 **.prof
+
+# Customization files
+config.template.json
+config.json
