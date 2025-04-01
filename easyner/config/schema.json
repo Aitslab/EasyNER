@@ -1,0 +1,520 @@
+{
+  "type": "object",
+  "definitions": {
+    "path": {
+      "type": "string",
+      "pattern": "^.*$",
+      "description": "Path value must be a valid string. Empty strings are allowed but will generate a warning."
+    }
+  },
+  "properties": {
+    "CONFIG_VERSION": {
+      "type": "string",
+      "description": "Version of the configuration schema."
+    },
+    "_comments": {
+      "type": "object",
+      "description": "Optional comments for documentation purposes."
+    },
+    "CPU_LIMIT": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Maximum number of CPU cores to use for processing. Most performance-intensive tasks run with multiprocessing. Set this to as high as possible, but not higher than the number of available cores.",
+      "default": 4
+    },
+    "TIMEKEEP": {
+      "type": "boolean",
+      "description": "Whether to log execution times. If true, runtimes are stored in 'timekeep.txt'.",
+      "default": false
+    },
+    "ignore": {
+      "type": "object",
+      "description": "Controls which modules to run (false) or ignore (true). Set modules to false to include them in the pipeline run.",
+      "properties": {
+        "cord_loader": {
+          "type": "boolean",
+          "description": "Ignore the CORD-19 loader module if true."
+        },
+        "downloader": {
+          "type": "boolean",
+          "description": "Ignore the PubMed ID downloader module if true."
+        },
+        "text_loader": {
+          "type": "boolean",
+          "description": "Ignore the plain text loader module if true."
+        },
+        "pubmed_bulk_loader": {
+          "type": "boolean",
+          "description": "Ignore the PubMed bulk loader module if true."
+        },
+        "splitter": {
+          "type": "boolean",
+          "description": "Ignore the sentence splitter module if true."
+        },
+        "ner": {
+          "type": "boolean",
+          "description": "Ignore the Named Entity Recognition (NER) module if true."
+        },
+        "analysis": {
+          "type": "boolean",
+          "description": "Ignore the analysis module if true."
+        },
+        "merger": {
+          "type": "boolean",
+          "description": "Ignore the file merger module if true."
+        },
+        "metrics": {
+          "type": "boolean",
+          "description": "Ignore the metrics evaluation module if true."
+        },
+        "nel": {
+          "type": "boolean",
+          "description": "Ignore the Named Entity Linking (NEL) module if true."
+        },
+        "result_inspection": {
+          "type": "boolean",
+          "description": "Ignore the result inspection module if true."
+        }
+      },
+      "required": [
+        "cord_loader",
+        "downloader",
+        "text_loader",
+        "pubmed_bulk_loader",
+        "splitter",
+        "ner",
+        "analysis",
+        "merger",
+        "metrics",
+        "nel",
+        "result_inspection"
+      ]
+    },
+    "downloader": {
+      "type": "object",
+      "description": "Downloader module configuration for PubMed IDs.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Path to file containing PubMed IDs to download."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path for downloaded articles."
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "Number of articles per output batch file."
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path",
+        "batch_size"
+      ]
+    },
+    "cord_loader": {
+      "type": "object",
+      "description": "CORD-19 loader module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Path to CORD-19 metadata.csv file."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path for processed CORD-19 data."
+        },
+        "subset": {
+          "type": "boolean",
+          "description": "If true, process only a subset of the CORD-19 data."
+        },
+        "subset_file": {
+          "$ref": "#/definitions/path",
+          "description": "Path to file with CORD UIDs if subset is true."
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path",
+        "subset"
+      ]
+    },
+    "text_loader": {
+      "type": "object",
+      "description": "Plain text loader module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Path to input .txt file or folder."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path for JSON files."
+        },
+        "prefix": {
+          "type": "string",
+          "description": "Prefix for IDs in the output JSON."
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path",
+        "prefix"
+      ]
+    },
+    "pubmed_bulk_loader": {
+      "type": "object",
+      "description": "PubMed bulk loader module configuration.",
+      "properties": {
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder for processed PubMed bulk files."
+        },
+        "baseline": {
+          "type": "string",
+          "description": "PubMed annual baseline version, e.g., '24' for pubmed24n0001.xml.gz."
+        },
+        "subset": {
+          "type": "boolean",
+          "description": "If true, download only a subset of the baseline.",
+          "default": false
+        },
+        "subset_range": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Range of file numbers to download, e.g., [1,160]."
+        },
+        "get_nightly_update_files": {
+          "type": "boolean",
+          "description": "If true, download nightly update files alongside the baseline.",
+          "default": false
+        },
+        "update_file_range": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Range of nightly update files to download, e.g., [1167,1298]."
+        },
+        "count_articles": {
+          "type": "boolean",
+          "description": "If true, count articles in each file and store in count.txt.",
+          "default": false
+        },
+        "raw_download_path": {
+          "$ref": "#/definitions/path",
+          "description": "Folder for raw downloaded files."
+        }
+      },
+      "required": [
+        "output_path",
+        "baseline",
+        "subset",
+        "subset_range",
+        "get_nightly_update_files",
+        "update_file_range",
+        "count_articles"
+      ]
+    },
+    "splitter": {
+      "type": "object",
+      "description": "Sentence splitter module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder path with JSON files to split into sentences."
+        },
+        "output_folder": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder for sentence-split JSON files."
+        },
+        "output_file_prefix": {
+          "type": "string",
+          "description": "Prefix for output file names."
+        },
+        "pubmed_bulk": {
+          "type": "boolean",
+          "description": "If true, input is from PubMed bulk loader.",
+          "default": false
+        },
+        "file_limit": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "ALL"
+              ],
+              "description": "Process all available files."
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Process files with indices between [start, end] inclusive."
+            }
+          ]
+        },
+        "tokenizer": {
+          "type": "string",
+          "description": "Tokenizer to use, e.g., 'spacy' or 'nltk'.",
+          "default": "spacy"
+        },
+        "model_name": {
+          "type": "string",
+          "description": "spaCy model name, e.g., 'en_core_web_sm'.",
+          "default": "en_core_web_sm"
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "Number of texts per output JSON file.",
+          "default": 1000
+        }
+      },
+      "required": [
+        "input_path",
+        "output_folder",
+        "output_file_prefix",
+        "pubmed_bulk",
+        "file_limit",
+        "tokenizer",
+        "model_name",
+        "batch_size"
+      ]
+    },
+    "ner": {
+      "type": "object",
+      "description": "Named Entity Recognition (NER) module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder path containing JSON batch files with texts split into sentences."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path where processed batches will be saved."
+        },
+        "output_file_prefix": {
+          "type": "string",
+          "description": "Prefix for output file names, e.g., 'ner_disease'."
+        },
+        "model_type": {
+          "type": "string",
+          "description": "Type of model to use: 'biobert_finetuned' for deep learning or 'spacy_phrasematcher' for dictionary-based NER.",
+          "default": "biobert_finetuned"
+        },
+        "model_folder": {
+          "$ref": "#/definitions/path",
+          "description": "For HuggingFace models, the repo name; for local models, the path to the model folder."
+        },
+        "model_name": {
+          "type": "string",
+          "description": "Name of the model on HuggingFace or local file name; for dictionary-based NER, the spaCy model name."
+        },
+        "vocab_path": {
+          "$ref": "#/definitions/path",
+          "description": "Path to dictionary file for dictionary-based NER, e.g., 'dictionaries/covid-19_synonyms_v2.txt'."
+        },
+        "store_tokens": {
+          "type": "string",
+          "description": "'yes' to store all tokens in the output for error analysis (only for dictionary-based NER); default is 'no'.",
+          "default": "no"
+        },
+        "labels": {
+          "type": "string",
+          "description": "Path to a file with label definitions, if required by the model."
+        },
+        "clear_old_results": {
+          "type": "boolean",
+          "description": "If true, clears previous results in the output folder before running.",
+          "default": false
+        },
+        "article_limit": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Array of two integers specifying the range of articles to process: [start, end]."
+        },
+        "entity_type": {
+          "type": "string",
+          "description": "Entity class to be recognized, e.g., 'gene' or 'disease'."
+        },
+        "multiprocessing": {
+          "type": "boolean",
+          "description": "If true, enables multiprocessing for faster processing.",
+          "default": true
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path",
+        "output_file_prefix",
+        "model_type",
+        "model_folder",
+        "model_name",
+        "store_tokens",
+        "clear_old_results",
+        "article_limit",
+        "entity_type",
+        "multiprocessing"
+      ]
+    },
+    "analysis": {
+      "type": "object",
+      "description": "Analysis module configuration for quantifying and plotting entity frequencies.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder path where all files are located."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path where the analysis files will be saved."
+        },
+        "entity_type": {
+          "type": "string",
+          "description": "Type of entity; used as a prefix for output files and plots."
+        },
+        "plot_top_n": {
+          "type": "integer",
+          "description": "Number of top entities to plot. Defaults to 50.",
+          "default": 50
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path",
+        "entity_type",
+        "plot_top_n"
+      ]
+    },
+    "merger": {
+      "type": "object",
+      "description": "File merger module configuration for merging multiple NER/NEL outputs.",
+      "properties": {
+        "paths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/path"
+          },
+          "description": "List of input folder paths to merge."
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of entity types to merge."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path for merged files."
+        },
+        "output_prefix": {
+          "type": "string",
+          "description": "Prefix for merged output files."
+        }
+      },
+      "required": [
+        "paths",
+        "entities",
+        "output_path",
+        "output_prefix"
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Metrics module configuration for evaluating NER predictions.",
+      "properties": {
+        "predictions_file": {
+          "$ref": "#/definitions/path",
+          "description": "File containing model predictions (in IOB2 format)."
+        },
+        "true_file": {
+          "$ref": "#/definitions/path",
+          "description": "File containing true (annotated) values (in IOB2 format)."
+        },
+        "output_file": {
+          "$ref": "#/definitions/path",
+          "description": "File to store precision, recall, and F1 scores."
+        },
+        "pred_sep": {
+          "type": "string",
+          "description": "Separator for predictions file (default is space)."
+        },
+        "true_sep": {
+          "type": "string",
+          "description": "Separator for true annotations file (e.g., space or tab)."
+        }
+      },
+      "required": [
+        "predictions_file",
+        "true_file",
+        "output_file",
+        "pred_sep",
+        "true_sep"
+      ]
+    },
+    "nel": {
+      "type": "object",
+      "description": "Named Entity Linking (NEL) module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder path for files to link entities."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder path for NEL results."
+        }
+      },
+      "required": [
+        "input_path",
+        "output_path"
+      ]
+    },
+    "result_inspection": {
+      "type": "object",
+      "description": "Result inspection module configuration for searching entities in NER results.",
+      "properties": {
+        "input_folder": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder path containing NER results to inspect."
+        },
+        "output_file": {
+          "$ref": "#/definitions/path",
+          "description": "Output file path for inspection results."
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of entities to search for in the results."
+        }
+      },
+      "required": [
+        "input_folder",
+        "output_file",
+        "entities"
+      ]
+    }
+  },
+  "required": [
+    "CPU_LIMIT",
+    "TIMEKEEP",
+    "ignore"
+  ]
+}

@@ -37,10 +37,15 @@ results/
 # Profiling and performance files
 .profiling
 **.prof
+
 timekeep.txt
+
 profile.html
 profile.json
 
 # Package files
 **.egg-info
 
+# Customization files
+config.template.json
+config.json

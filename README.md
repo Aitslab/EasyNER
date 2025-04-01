@@ -1,6 +1,6 @@
 # EasyNER: A Customizable and Easy-to-Use Pipeline for Deep Learning- and Dictionary-based Named Entity Recognition from Medical Text
 
-EasyNER is a easy to use, customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.  
+EasyNER is a easy to use, customizable end-to-end pipeline for extracting named entities from medicine-related texts. The pipeline comes with pre-trained models and dictionaries that can retrieve many biomedical entities: cells, chemicals, diseases, genes/proteins, species, COVID-19-related terms.
 
 ![](tutorials/imgs/pipeline.png)
 
@@ -22,7 +22,7 @@ A detailed guide, including installation, configuration and inference tutorial c
 ### Quick start guide
 
 Before installation of EasyNER:
-Before you use EasyNER, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/. 
+Before you use EasyNER, you need to install Python. This easiest way to do this is to use Anaconda. For this, download Anaconda and follow this instructions from https://www.anaconda.com/.
 
 1. Transfer the EasyNER repo to your computer by downloading it manually or cloning the EasyNER GitHub repository to your target folder.
 
@@ -59,7 +59,7 @@ python -m spacy download en_core_web_sm
 6. Choose the input file: list of PubMed IDs, CORD19 metadata.csv file, or file with plain text. If you want to download and process the entire PubMed article collection follow the instructions below.
 
 
-7. Add the correct paths to your input file in the [config file](config.json). Choose the modules you want to run in the “ignore” section in the beginning of the file and save the desired settings for these modules in the respective sections. 
+7. Add the correct paths to your input file in the [config file](config.json). Choose the modules you want to run in the “ignore” section in the beginning of the file and save the desired settings for these modules in the respective sections.
 
 
 10. Run the pipeline with the following command:
@@ -79,7 +79,7 @@ ___
 
 ## PubMed Bulk Download
 
-The EasyNER pipeline includes a data loader module that can download, process and convert (to JSON files) the entire PubMed abstract collection. This is provided as the annual baseline, updated only once per year, and nightly update files. You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz. 
+The EasyNER pipeline includes a data loader module that can download, process and convert (to JSON files) the entire PubMed abstract collection. This is provided as the annual baseline, updated only once per year, and nightly update files. You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
 
 Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err.txt file is generated in the end (in the folder specified under "raw_download_path") to keep track of files that are not downloaded. Missing files can be downloaded in a second EasyNER run or manually from the ftp sites of the baseline and update files.
 
@@ -101,12 +101,12 @@ The pubmed_bulk_loader section of the config file is as follows:
 When using this module you need to make the following changes in the config file:
 
 1. In the ignore section, make sure that the downloader, cord_loader and text_loader parameters are set to "true", and pubmed_bulk_loader section is set to "false".
-2. In the pubmed_bulk_loader section, specify the desired output path. 
+2. In the pubmed_bulk_loader section, specify the desired output path.
 3. In the pubmed_bulk_loader section, specify the baseline version
 4. In the splitter section Specify the pubmed folder path in the "input_path" parameter ("data/pubmed/" from the above example).
 5. In the splitter section, set "pubmed_bulk" to "true".
 
-Then run the pipeline. 
+Then run the pipeline.
 
 
 ### Downloading a subset of the PubMed annual baseline
@@ -135,13 +135,13 @@ To download the update files alongside the annual baseline, adjust the config fi
 
  ____
 
-## Named Entity Recognition (NER) 
+## Named Entity Recognition (NER)
 
 EasyNER can identify entities with BioBERT models (or other models in the same format) or dictionaries (= long lists of the words which are to be detected). Five BioBERT models and three dictionaries are included but the use can also provide their own models or dictionaries.
 
 ### [BioBERT](https://github.com/dmis-lab/biobert-pytorch)-based NER
 
-1. Cell-lines: biobert_huner_cell_v1 
+1. Cell-lines: biobert_huner_cell_v1
 2. Chemical: biobert_huner_chemical_v1
 3. Disease: biobert_huner_disease_v1
 4. Gene/protein: biobert_huner_gene_v1
@@ -157,7 +157,7 @@ The BioBERT models above have been fine-tuned using the [HUNER corpora](https://
 
 ### Dictionary-based NER
 
-[Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/). 
+[Spacy Phrasematcher](https://spacy.io/api/phrasematcher) is used to load dictionaries and run NER. COVID-19 related disease and virus dictionaries are provided [here](dictionaries/).
 Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (like, "en_core_web_sm" model) and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. For example:
 
 ```console
@@ -191,6 +191,67 @@ python main.py
 
 ## Logging time
 The runtime for EasyNER and the modules can be obtained by selecting "TIMEKEEP": true in the config file. The runtime will be storerd in the file "timekeep.txt" in the main EasyNER folder (same folder as the config file).
+
+
+## Configuration Management
+
+EasyNER uses a configuration-based approach to control all aspects of the pipeline. The configuration is stored in a `config.json` file in the root directory.
+
+
+### Configuration Template and Schema
+
+To avoid tracking sensitive or machine-specific information in version control, we use a template-based approach:
+
+1. `config.template.json` - Contains the structure of the configuration with placeholder values for sensitive paths
+2. `config.json` - Your actual configuration file with real paths (excluded from version control)
+
+### Configuration Schema
+
+EasyNER uses a JSON Schema to validate configuration files. The schema provides:
+
+- Type checking for configuration properties
+- Validation of required fields
+- Path format validation
+- Intelligent error messages when configuration is invalid
+
+To include the schema reference in your config file, add this line at the top of your `config.json`:
+
+```json
+"$schema": "./scripts/config/schema.json"
+```
+
+Including this reference provides type hints and validation in compatible editors.
+
+### Creating and Updating Configurations
+
+To generate a template configuration file, run the following command:
+
+```console
+python scripts/config/generator.py
+```
+When setting up a new environment, copy `config.template.json` to `config.json` and update the placeholders:
+
+### Validation
+
+You can validate your configuration files to ensure they conform to the expected schema:
+
+```console
+python scripts/config/validator.py [path/to/config.json]
+```
+
+This validation tool will:
+
+- Check that the schema reference is properly included
+- Verify all required fields are present
+- Ensure all paths are properly formatted
+- Report empty path fields (as informational messages)
+- Detect absolute paths in template files (which should use relative paths)
+
+Running the validator without arguments will check both the main config file and the template:
+
+```console
+python scripts/config/validator.py
+```
 
 ## Citation
 If you use any of the material in this repository, please cite the following article:

@@ -33,6 +33,7 @@ dependencies:
   - transformers=4.24.0
   - urllib3=1.26.12
   - yaml=0.2.5
+  - jsonschema=4.23.0
   - pip:
     - nltk==3.8.1
     - orjson
