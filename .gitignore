@@ -7,8 +7,8 @@
 notebooks/.ipynb_checkpoints/*
 
 # Results
-results/analysis*
-results/ner*
+results/*
+!results/sample_output/
 
 # Test resources and results
 **tests/data**
