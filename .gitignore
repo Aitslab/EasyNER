@@ -26,8 +26,9 @@ results/*
 **.db.*
 **.db-*
 
-# Profiling files
+# Profiling and performance files
 **.prof
+timekeep.txt
 
 # Customization files
 config.template.json
