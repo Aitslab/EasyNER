@@ -1,28 +1,28 @@
+import argparse
 import json
 import re
-import sys
-import argparse
 import subprocess
+import sys
 from pathlib import Path
-from typing import Dict, Any, List, Union, Tuple, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 # Add the project root to sys.path to make scripts package importable
 script_dir = Path(__file__).parent
 project_root = script_dir.parent.parent  # Go up two directories to reach project root
 sys.path.insert(0, str(project_root))
 
+# Import validation function from config package
+from scripts.config.validator import load_schema, validate_config
+
 # Import standard paths directly from infrastructure package
 from scripts.infrastructure.paths import (
-    DEFAULT_CONFIG_PATH,
-    DEFAULT_TEMPLATE_PATH,
-    DEFAULT_SCHEMA_PATH,
-    PROJECT_ROOT,
     DATA_DIR,
+    DEFAULT_CONFIG_PATH,
+    DEFAULT_SCHEMA_PATH,
+    DEFAULT_TEMPLATE_PATH,
+    PROJECT_ROOT,
     RESULTS_DIR,
 )
-
-# Import validation function from config package
-from scripts.config.validator import validate_config, load_schema
 
 
 def format_with_prettier(file_path: Union[str, Path]) -> bool:
@@ -80,18 +80,27 @@ def format_with_prettier(file_path: Union[str, Path]) -> bool:
         return False
 
 
-def create_default_value(schema_property: Dict[str, Any]) -> Any:
-    """Create a default value based on a schema property definition.
-
-    Args:
-        schema_property: The schema property definition
-
-    Returns:
-        A default value appropriate for the property type
-    """
+def create_default_value(
+    schema_property: Dict[str, Any], property_path: str = ""
+) -> Any:
+    """Create a default value based on a schema property definition."""
     if "$ref" in schema_property:
         if schema_property["$ref"] == "#/definitions/path":
             return ""
+
+    # Handle oneOf schema type (used for file_limit which can be array or string)
+    if "oneOf" in schema_property:
+        # Special case for file_limit
+        if property_path.endswith("file_limit"):
+            return "ALL"
+
+        # For other oneOf schemas, use the first option as default
+        for option in schema_property["oneOf"]:
+            if "type" in option:
+                schema_property["type"] = option["type"]
+                if option["type"] == "array" and "items" in option:
+                    schema_property["items"] = option["items"]
+                break
 
     property_type = schema_property.get("type")
 
@@ -102,13 +111,26 @@ def create_default_value(schema_property: Dict[str, Any]) -> Any:
     elif property_type == "number":
         return schema_property.get("minimum", 0.0)
     elif property_type == "boolean":
+        # Default ignore properties to True, all other booleans to False
+        if property_path.startswith("ignore."):
+            return True
         return False
     elif property_type == "array":
         if "items" in schema_property:
             if schema_property["items"].get("type") == "string":
                 return []
             elif schema_property["items"].get("type") == "integer":
-                return [0, 0]
+                # Special handling for range arrays
+                if (
+                    property_path.endswith("subset_range")
+                    or property_path.endswith("update_file_range")
+                    or property_path.endswith("article_limit")
+                ):
+                    return [0, 999999]  # Large range to represent "all"
+                # Use "ALL" for file_limit since it accepts either format
+                elif property_path.endswith("file_limit"):
+                    return "ALL"
+                return [0, 0]  # Default for other integer arrays
             elif (
                 "$ref" in schema_property["items"]
                 and schema_property["items"]["$ref"] == "#/definitions/path"
@@ -177,10 +199,13 @@ def generate_template(
             # Handle nested objects
             nested_obj = {}
             for nested_prop, nested_schema in prop_schema.get("properties", {}).items():
-                nested_obj[nested_prop] = create_default_value(nested_schema)
+                nested_path = f"{prop_name}.{nested_prop}"
+                nested_obj[nested_prop] = create_default_value(
+                    nested_schema, nested_path
+                )
             template[prop_name] = nested_obj
         else:
-            template[prop_name] = create_default_value(prop_schema)
+            template[prop_name] = create_default_value(prop_schema, prop_name)
 
     # Write the template to a file with nice formatting
     with open(template_path, "w") as f:

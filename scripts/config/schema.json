@@ -117,10 +117,20 @@
         "output_file_prefix": { "type": "string" },
         "pubmed_bulk": { "type": "boolean" },
         "file_limit": {
-          "type": "array",
-          "items": { "type": "integer" },
-          "minItems": 2,
-          "maxItems": 2
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": ["ALL"],
+              "description": "Process all available files"
+            },
+            {
+              "type": "array",
+              "items": { "type": "integer" },
+              "minItems": 2,
+              "maxItems": 2,
+              "description": "Process files with indices between [start, end] inclusive"
+            }
+          ]
         },
         "tokenizer": { "type": "string" },
         "model_name": { "type": "string" },
