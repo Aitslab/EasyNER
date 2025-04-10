@@ -13,7 +13,7 @@
     "CPU_LIMIT": {
       "type": "integer",
       "minimum": 1,
-      "description": "Maximum number of CPU cores to use for processing"
+      "description": "Maximum number of CPU cores to use for processing. \n Most performance intensive tasks of the pipeline run multiprocessing \n It is there recommended to set this to as high as possible, but not higher than the number of available cores.  "
     },
     "TIMEKEEP": {
       "type": "boolean",

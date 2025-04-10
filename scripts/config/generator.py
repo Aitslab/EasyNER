@@ -232,6 +232,44 @@ def generate_template(
         return False
 
 
+def ensure_config_exists() -> bool:
+    """Ensure that config.json exists by creating it from the template if necessary.
+
+    Returns:
+        bool: True if config.json exists or was created, False on error
+    """
+    # Check if config.json already exists
+    if DEFAULT_CONFIG_PATH.exists():
+        print(f"Config file already exists at: {DEFAULT_CONFIG_PATH}")
+        return True
+
+    # Check if template exists to copy from
+    if not DEFAULT_TEMPLATE_PATH.exists():
+        print(f"Error: Template file not found at {DEFAULT_TEMPLATE_PATH}")
+        print("Run generator.py first to create the template")
+        return False
+
+    # Copy template to config.json
+    try:
+        print(f"Creating config.json from template...")
+
+        # Read template content
+        with open(DEFAULT_TEMPLATE_PATH, "r") as src:
+            template_content = src.read()
+
+        # Write to config.json
+        with open(DEFAULT_CONFIG_PATH, "w") as dst:
+            dst.write(template_content)
+
+        print(f"✓ Config file created at: {DEFAULT_CONFIG_PATH}")
+        print(f"  Edit this file to customize your configuration")
+        return True
+
+    except Exception as e:
+        print(f"Error creating config file: {e}")
+        return False
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a config template")
     parser.add_argument(
@@ -240,7 +278,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--skip-prettier", action="store_true", help="Skip prettier formatting"
     )
+    parser.add_argument(
+        "--no-config",
+        action="store_true",
+        help="Skip creating config.json even if it doesn't exist",
+    )
     args = parser.parse_args()
 
+    # Generate template first
     result = generate_template(args.output, args.skip_prettier)
+
+    # Automatically create config.json from template if it doesn't exist
+    if not args.no_config and result:
+        ensure_config_exists()
+
     sys.exit(0 if result else 1)
