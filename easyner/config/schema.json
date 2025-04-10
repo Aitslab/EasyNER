@@ -211,6 +211,16 @@
         "raw_download_path": {
           "$ref": "#/definitions/path",
           "description": "Folder for raw downloaded files."
+        },
+        "require_abstract": {
+          "type": "boolean",
+          "description": "If true, only include articles with non-empty abstracts.",
+          "default": false
+        },
+        "skip_download": {
+          "type": "boolean",
+          "description": "If true, skip downloading and only process existing files in raw_download_path.",
+          "default": false
         }
       },
       "required": [

@@ -3,15 +3,13 @@
 # import bulk_downloader_pubmed
 # import parse_xml
 # import count_articles_from_json
-import tqdm
-from glob import glob
-import os
-import argparse
-import pubmed_parser as pp
 import json
-import requests
-import urllib.request
+import os
 import time
+import urllib.request
+from glob import glob
+
+import pubmed_parser as pp
 from tqdm import tqdm, trange
 
 
@@ -35,6 +33,9 @@ def bulk_download(
 
 
     """
+
+    print(f"Downloading files to: {os.path.abspath(save_path)}")
+
     os.makedirs(save_path, exist_ok=True)
 
     f = open(f"{save_path}err.txt", "w", encoding="utf8")
@@ -42,11 +43,17 @@ def bulk_download(
         # url = f'https://data.lhncbc.nlm.nih.gov/public/ii/information/MBR/Baselines/2023/pubmed23n{i:04d}.xml.gz'
         url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed{baseline}n{i:04d}.xml.gz"
         try:
-            urllib.request.urlretrieve(
-                url, filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz"
-            )
-        except:
-            f.write(f"{i}\n")
+            full_path = f"{save_path}pubmed{baseline}n{i:04d}.xml.gz"
+            print(f"Downloading {url} to {os.path.abspath(full_path)}")
+            urllib.request.urlretrieve(url, filename=full_path)
+            # Verify file exists and has size
+            if os.path.exists(full_path):
+                print(f"SUCCESS: {full_path} exists with size: {os.path.getsize(full_path)} bytes")
+            else:
+                print(f"ERROR: File not created: {full_path}")
+        except Exception as e:
+            print(f"ERROR downloading {i}: {str(e)}")
+            f.write(f"{i}\t{str(e)}\n")
             continue
 
         if i % 3 == 0:
@@ -55,7 +62,9 @@ def bulk_download(
     if nupdate:
         print("Downloading Nightly Update Files...")
         for i in trange(u_start, u_end + 1):
-            url = f"https://ftp.ncbi.nlm.nih.gov/pubmsed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
+            url = (
+                f"https://ftp.ncbi.nlm.nih.gov/pubmsed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
+            )
             try:
                 urllib.request.urlretrieve(
                     url, filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz"
@@ -74,7 +83,8 @@ def count_articles(input_path, baseline=23):
     """
     count = 0
     pmids = []
-    # k is used for keyword to split the filename obtained from pubmed. It's different for each annual baseline
+    # k is used for keyword to split the filename obtained from pubmed.
+    # It's different for each annual baseline
     k = str(baseline) + "n"
     count_file = input_path + "counts.txt"
     pmid_file = input_path + "pmid_list.txt"
@@ -106,15 +116,24 @@ def count_articles(input_path, baseline=23):
 
 class PubMedLoader:
 
-    def __init__(self, input_path, output_path, k: str):
+    def __init__(self, input_path, output_path, k: str, require_abstract=False):
         self.input_path = input_path
         self.output_path = output_path
         self.counter = {}
         self.k = k
+        self.require_abstract = require_abstract
+        self.filter_stats = {
+            "total_articles": 0,
+            "no_abstract": 0,
+            "abstract_not_string": 0,
+            "empty_abstract": 0,
+            "included_articles": 0,
+        }
         os.makedirs(output_path, exist_ok=True)
 
     def get_input_files(self, input_path):
-        # k is used for keyword to split the filename obtained from pubmed. It's different for each annual baseline
+        # k is used for keyword to split the filename obtained from pubmed.
+        # It's different for each annual baseline
         input_files = sorted(
             glob(f"{input_path}*.gz"),
             key=lambda x: int(
@@ -129,23 +148,66 @@ class PubMedLoader:
     def load_xml_and_convert(self, input_file):
         data = pp.parse_medline_xml(input_file, year_info_only=False)
 
-        count = 0
         d_main = {}
-        for art in data:
-            if "abstract" in art:
-                if isinstance(art["abstract"], str):
-                    if len(art["abstract"]) > 0:
-                        count += 1
-                        pmid = art["pmid"] if "pmid" in art else count
-                        d_main[pmid] = {
-                            "title": art["title"],
-                            "abstract": art["abstract"],
-                            "mesh_terms": art["mesh_terms"],
-                            "pubdate": art["pubdate"],
-                            "chemical_list": art["chemical_list"],
-                        }
+        local_stats = {
+            "total": len(data),
+            "no_abstract": 0,
+            "abstract_not_string": 0,
+            "empty_abstract": 0,
+            "included": 0,
+        }
 
-        self.counter[input_file] = count
+        for art in data:
+            self.filter_stats["total_articles"] += 1
+            local_stats["total"] += 1
+
+            pmid = art.get("pmid", str(self.filter_stats["total_articles"]))
+
+            # Check if we should include this article based on abstract requirements
+            include_article = True
+
+            if self.require_abstract:
+                if "abstract" not in art:
+                    self.filter_stats["no_abstract"] += 1
+                    local_stats["no_abstract"] += 1
+                    include_article = False
+                elif not isinstance(art["abstract"], str):
+                    self.filter_stats["abstract_not_string"] += 1
+                    local_stats["abstract_not_string"] += 1
+                    include_article = False
+                elif len(art["abstract"]) == 0:
+                    self.filter_stats["empty_abstract"] += 1
+                    local_stats["empty_abstract"] += 1
+                    include_article = False
+
+            if include_article:
+                self.filter_stats["included_articles"] += 1
+                local_stats["included"] += 1
+
+                # Create a default empty abstract if it doesn't exist and we're not requiring it
+                abstract = art.get("abstract", "") if not self.require_abstract else art["abstract"]
+
+                d_main[pmid] = {
+                    "title": art.get("title", ""),
+                    "abstract": abstract,
+                    "mesh_terms": art.get("mesh_terms", ""),
+                    "pubdate": art.get("pubdate", ""),
+                    "chemical_list": art.get("chemical_list", ""),
+                }
+
+                # # Debugging: Check for empty abstract after assignment
+                # if abstract == "":
+                #     print(
+                #         "DEBUG: Empty abstract found after assignment. Successfully included article."
+                #     )
+                #     print("Article PMID:", pmid)
+                #     print("Article Title:", art.get("title", ""))
+                #     print("Full Article Data:", art)  # Print the entire article data for inspection
+                #     import sys  # Import the sys module
+
+                #     sys.exit(1)  # Exit the program
+
+        self.counter[input_file] = local_stats
         return d_main
 
     def write_to_json(self, data, input_file):
@@ -163,10 +225,23 @@ class PubMedLoader:
             data = self.load_xml_and_convert(input_file)
             self.write_to_json(data, input_file)
 
+    def get_filter_statistics(self):
+        """Return statistics about filtered articles"""
+        return self.filter_stats
+
+    def write_statistics_report(self, output_file="filter_statistics.json"):
+        """Write filtering statistics to a JSON file"""
+        report_path = os.path.join(self.output_path, output_file)
+        with open(report_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {"overall": self.filter_stats, "by_file": self.counter},
+                f,
+                indent=2,
+                ensure_ascii=False,
+            )
+
 
 def run_pbl(pbl_config):
-
-    # print("Downloading files...")
 
     download_path = (
         "data/tmp/pubmed/"
@@ -174,57 +249,61 @@ def run_pbl(pbl_config):
         else pbl_config["raw_download_path"]
     )
 
-    if pbl_config["subset"] == True:
-        if pbl_config["get_nightly_update_files"]:
-            bulk_download(
-                n_start=pbl_config["subset_range"][0],
-                n_end=pbl_config["subset_range"][1],
-                nupdate=True,
-                u_start=pbl_config["update_file_range"][0],
-                u_end=pbl_config["update_file_range"][1],
-                save_path=download_path,
-                baseline=pbl_config["baseline"],
-            )
-
+    # Check if we should skip download
+    if not pbl_config.get("skip_download", False):
+        print("Downloading files...")
+        if pbl_config["subset"]:
+            if pbl_config["get_nightly_update_files"]:
+                bulk_download(
+                    n_start=pbl_config["subset_range"][0],
+                    n_end=pbl_config["subset_range"][1],
+                    nupdate=True,
+                    u_start=pbl_config["update_file_range"][0],
+                    u_end=pbl_config["update_file_range"][1],
+                    save_path=download_path,
+                    baseline=pbl_config["baseline"],
+                )
+            else:
+                bulk_download(
+                    n_start=pbl_config["subset_range"][0],
+                    n_end=pbl_config["subset_range"][1],
+                    save_path=download_path,
+                    baseline=pbl_config["baseline"],
+                )
         else:
-            bulk_download(
-                n_start=pbl_config["subset_range"][0],
-                n_end=pbl_config["subset_range"][1],
-                save_path=download_path,
-                baseline=pbl_config["baseline"],
-            )
-
+            if pbl_config["get_nightly_update_files"]:
+                bulk_download(
+                    nupdate=True,
+                    u_start=pbl_config["update_file_range"][0],
+                    u_end=pbl_config["update_file_range"][1],
+                    save_path=download_path,
+                    baseline=pbl_config["baseline"],
+                )
+            else:
+                bulk_download(save_path=download_path, baseline=pbl_config["baseline"])
+        print("Download complete.")
     else:
-        if pbl_config["get_nightly_update_files"]:
-            bulk_download(
-                nupdate=True,
-                u_start=pbl_config["update_file_range"][0],
-                u_end=pbl_config["update_file_range"][1],
-                save_path=download_path,
-                baseline=pbl_config["baseline"],
-            )
-        else:
-            bulk_download(save_path=download_path, baseline=pbl_config["baseline"])
-
-    print("Download complete.")
+        print("Download step skipped based on configuration.")
 
     print("Processing raw files...")
 
+    # Pass the require_abstract option to the loader
     loader = PubMedLoader(
         input_path=download_path,
         output_path=pbl_config["output_path"],
         k=pbl_config["baseline"],
+        require_abstract=pbl_config.get("require_abstract", True),
     )
 
     loader.run_loader()
+    # Generate statistics report
+    loader.write_statistics_report()
 
     if pbl_config["count_articles"]:
-        print("counting articles")
-        count_articles(
-            input_path=pbl_config["output_path"], baseline=pbl_config["baseline"]
-        )
+        print("Counting articles")
+        count_articles(input_path=pbl_config["output_path"], baseline=pbl_config["baseline"])
 
-    print("Pubmed download complete")
+    print("Pubmed processing complete")
 
 
 if __name__ == "__main__":
