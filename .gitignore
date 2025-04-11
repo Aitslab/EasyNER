@@ -2,12 +2,12 @@
 .vscode/**
 
 # Temp and cache files
-**/temp/**
+**/temp/
 **__pycache__**
 notebooks/.ipynb_checkpoints/*
 
 # Results
-results/*
+results/
 !results/sample_output/
 
 # Test resources and results
@@ -15,8 +15,8 @@ results/*
 .coverage
 
 # Logs
-**/logs/*
-**/*logs/*
+**/logs/
+**/*logs/
 **.log
 **.out
 **.err
