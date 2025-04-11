@@ -33,3 +33,6 @@ timekeep.txt
 # Customization files
 config.template.json
 config.json
+
+# Package files
+**.egg-info
