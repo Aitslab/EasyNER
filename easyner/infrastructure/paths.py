@@ -10,14 +10,20 @@ from pathlib import Path
 
 # Base paths
 PROJECT_ROOT = Path(__file__).parent.parent.parent
+PACKAGE_ROOT = Path(__file__).parent.parent
+
+# This is the main directory for scripts and modules
+# which are not part of the package
+# TODO: refactor all into package
 SCRIPTS_DIR = PROJECT_ROOT / "scripts"
-CONFIG_DIR = SCRIPTS_DIR / "config"
-INFRASTRUCTURE_DIR = SCRIPTS_DIR / "infrastructure"
+
+CONFIG_DIR = PACKAGE_ROOT / "config"
+INFRASTRUCTURE_DIR = PACKAGE_ROOT / "infrastructure"
 
 # Config files
-DEFAULT_CONFIG_PATH = PROJECT_ROOT / "config.json"
-DEFAULT_TEMPLATE_PATH = PROJECT_ROOT / "config.template.json"
-DEFAULT_SCHEMA_PATH = CONFIG_DIR / "schema.json"
+CONFIG_PATH = PROJECT_ROOT / "config.json"
+TEMPLATE_PATH = PROJECT_ROOT / "config.template.json"
+SCHEMA_PATH = CONFIG_DIR / "schema.json"
 
 # Data directories
 DATA_DIR = PROJECT_ROOT / "data"

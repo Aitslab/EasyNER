@@ -1,15 +1,8 @@
 import os
-import sys
 import pytest
-from pathlib import Path
-
-# Add the project root to sys.path to make scripts package importable
-script_dir = Path(__file__).parent
-project_root = script_dir.parent  # Go up one directory to reach project root
-sys.path.insert(0, str(project_root))
 
 # Import path constants from the infrastructure package
-from scripts.infrastructure.paths import (
+from easyner.infrastructure.paths import (
     PROJECT_ROOT,
     DATA_DIR,
     RESULTS_DIR,
@@ -19,9 +12,9 @@ from scripts.infrastructure.paths import (
     DATALOADER_RESULTS_DIR,
     SPLITTER_RESULTS_DIR,
     ANALYSIS_RESULTS_DIR,
-    DEFAULT_CONFIG_PATH,
-    DEFAULT_TEMPLATE_PATH,
-    DEFAULT_SCHEMA_PATH,
+    CONFIG_PATH,
+    TEMPLATE_PATH,
+    SCHEMA_PATH,
 )
 
 
@@ -38,9 +31,9 @@ def absolute_paths():
         "DATALOADER_RESULTS_DIR": PROJECT_ROOT / DATALOADER_RESULTS_DIR,
         "SPLITTER_RESULTS_DIR": PROJECT_ROOT / SPLITTER_RESULTS_DIR,
         "ANALYSIS_RESULTS_DIR": PROJECT_ROOT / ANALYSIS_RESULTS_DIR,
-        "DEFAULT_CONFIG_PATH": PROJECT_ROOT / DEFAULT_CONFIG_PATH,
-        "DEFAULT_TEMPLATE_PATH": PROJECT_ROOT / DEFAULT_TEMPLATE_PATH,
-        "DEFAULT_SCHEMA_PATH": DEFAULT_SCHEMA_PATH,  # Already absolute
+        "DEFAULT_CONFIG_PATH": PROJECT_ROOT / CONFIG_PATH,
+        "DEFAULT_TEMPLATE_PATH": PROJECT_ROOT / TEMPLATE_PATH,
+        "DEFAULT_SCHEMA_PATH": SCHEMA_PATH,  # Already absolute
     }
 
 
