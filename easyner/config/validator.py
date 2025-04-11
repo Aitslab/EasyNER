@@ -1,23 +1,17 @@
 import json
 import jsonschema
-import os
-import sys
 import re
+import sys
 import argparse
 from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional, Union, Iterator, Set, TypeVar, cast
+from typing import Dict, List, Any, Tuple, Optional, Union, Iterator
 
-# Add the project root to sys.path to make scripts package importable
-script_dir = Path(__file__).parent
-project_root = script_dir.parent.parent  # Go up two directories to reach project root
-sys.path.insert(0, str(project_root))
+import jsonschema.exceptions
 
-# Import standard paths directly from infrastructure package
-from scripts.infrastructure.paths import (
-    DEFAULT_CONFIG_PATH,
-    DEFAULT_TEMPLATE_PATH,
-    DEFAULT_SCHEMA_PATH,
-    PROJECT_ROOT,
+from easyner.infrastructure.paths import (
+    CONFIG_PATH,
+    TEMPLATE_PATH,
+    SCHEMA_PATH,
 )
 
 
@@ -28,11 +22,11 @@ def load_schema() -> Dict[str, Any]:
         dict: The loaded schema
     """
     try:
-        with open(DEFAULT_SCHEMA_PATH, "r") as f:
+        with open(SCHEMA_PATH, "r") as f:
             schema = json.load(f)
         return schema
     except FileNotFoundError:
-        print(f"Error: Schema file not found at {DEFAULT_SCHEMA_PATH}")
+        print(f"Error: Schema file not found at {SCHEMA_PATH}")
         sys.exit(1)
     except json.JSONDecodeError as e:
         print(f"Error: Invalid JSON in schema file: {e}")
@@ -78,7 +72,8 @@ def validate_config(config_file: Union[str, Path], quiet: bool = False) -> bool:
             )
         elif config_data["$schema"] != "./scripts/config/schema.json":
             warnings.append(
-                f"$schema has unexpected value: '{config_data['$schema']}'. Expected: './scripts/config/schema.json'"
+                f"$schema has unexpected value: '{config_data['$schema']}'. "
+                f"Expected: './scripts/config/schema.json'"
             )
 
         if validation_errors:
@@ -112,6 +107,7 @@ def validate_config(config_file: Union[str, Path], quiet: bool = False) -> bool:
             print(f"RESULT: Configuration validation successful!")
             print(f"{'-'*80}\n")
         return True
+
     except jsonschema.exceptions.ValidationError as e:
         # Create a more informative error message
         error_path = ".".join([str(p) for p in e.path]) if e.path else "root"
@@ -123,13 +119,18 @@ def validate_config(config_file: Union[str, Path], quiet: bool = False) -> bool:
 
         if "pattern" in str(e) and "does not match" in str(e):
             # This is a pattern validation error, likely for a path
-            error_value = get_value_at_path(config_data, e.path)
-            error_type = type(error_value).__name__
+            if 'config_data' in locals():
+                error_value = get_value_at_path(config_data, e.path)
+                error_type = type(error_value).__name__
+            else:
+                print("Unexpected error: config_data not available")
+                return False
 
             if isinstance(error_value, (int, float, bool)):
                 # The value is not even a string
                 print(
-                    f"  Path field '{error_path}' must be a string, but got {error_type}: {error_value}"
+                    f"  Path field '{error_path}' must be a string,"
+                    f" but got {error_type}: {error_value}"
                 )
             elif error_value == "":
                 # Empty strings are allowed with an info message
@@ -167,7 +168,7 @@ def validate_config(config_file: Union[str, Path], quiet: bool = False) -> bool:
 
 
 def check_path_types(
-    data: Any,
+    data: Dict[str, Any],
     schema: Dict[str, Any],
     errors: List[str],
     warnings: List[str],
@@ -202,7 +203,8 @@ def check_path_types(
                 if prop_schema.get("$ref") == "#/definitions/path":
                     if not isinstance(value, str):
                         errors.append(
-                            f"Path field '{path_str}' must be a string, but got {type(value).__name__}: {value}"
+                            f"Path field '{path_str}' must be a string, "
+                            f"but got {type(value).__name__}: {value}"
                         )
                     elif value == "":
                         empty_paths.append(path_str)
@@ -218,7 +220,8 @@ def check_path_types(
                             if not isinstance(item, str):
                                 item_path = path_str + f"[{i}]"
                                 errors.append(
-                                    f"Path field '{item_path}' must be a string, but got {type(item).__name__}: {item}"
+                                    f"Path field '{item_path}' must be a string,"
+                                    f" but got {type(item).__name__}: {item}"
                                 )
                             elif item == "":
                                 item_path = path_str + f"[{i}]"
@@ -338,8 +341,8 @@ def run_validation_tests() -> bool:
         bool: True if all validation tests pass, False otherwise
     """
     # Use the standard path constants from the config package
-    config_file = DEFAULT_CONFIG_PATH
-    template_file = DEFAULT_TEMPLATE_PATH
+    config_file = CONFIG_PATH
+    template_file = TEMPLATE_PATH
 
     # Check if the config file exists
     if not config_file.exists():

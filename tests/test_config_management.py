@@ -1,23 +1,14 @@
 import json
 import shutil
-import sys
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator
 
 import pytest
 
-# Add the project root directory to the path
-PROJECT_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(PROJECT_ROOT))
-
-# Import the modules we want to test using the new namespace
-from scripts.config import (
-    check_absolute_paths,
-    generate_template,
-    load_schema,
-    validate_config,
-)
+from easyner.config.validator import check_absolute_paths, load_schema, validate_config
+from easyner.config.generator import generate_template
+from easyner.infrastructure.paths import PROJECT_ROOT
 
 
 @pytest.fixture
@@ -262,6 +253,9 @@ def test_validate_current_config() -> None:
     # Check if config.json exists
     config_path = PROJECT_ROOT / "config.json"
     assert config_path.exists(), "Current config.json file not found"
+    "Generate using python easyner.config.generate.py"
+
+
 
     # Validate the config file
     result = validate_config(str(config_path))

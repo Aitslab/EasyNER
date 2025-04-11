@@ -1,28 +1,12 @@
 import argparse
 import json
-import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Union
 
-# Add the project root to sys.path to make scripts package importable
-script_dir = Path(__file__).parent
-project_root = script_dir.parent.parent  # Go up two directories to reach project root
-sys.path.insert(0, str(project_root))
-
-# Import validation function from config package
-from scripts.config.validator import load_schema, validate_config
-
-# Import standard paths directly from infrastructure package
-from scripts.infrastructure.paths import (
-    DATA_DIR,
-    DEFAULT_CONFIG_PATH,
-    DEFAULT_SCHEMA_PATH,
-    DEFAULT_TEMPLATE_PATH,
-    PROJECT_ROOT,
-    RESULTS_DIR,
-)
+from easyner.config import validator
+from easyner.infrastructure.paths import CONFIG_PATH, PROJECT_ROOT, SCHEMA_PATH, TEMPLATE_PATH
 
 
 def format_with_prettier(file_path: Union[str, Path]) -> bool:
@@ -169,16 +153,13 @@ def generate_template(
     print(f"Generating template from schema to: {template_path_str}")
 
     # Load the schema
-    schema = load_schema()
+    schema = validator.load_schema()
 
     # Create a template based on the schema
     template = {}
 
     # Add schema reference to enable VS Code validation and autocompletion
-    template["$schema"] = "./scripts/config/schema.json"
-
-    # Process required properties first to maintain order
-    required_props = schema.get("required", [])
+    template["$schema"] = str(SCHEMA_PATH.relative_to(PROJECT_ROOT))
 
     # Process all properties
     for prop_name, prop_schema in schema.get("properties", {}).items():
@@ -191,9 +172,13 @@ def generate_template(
             template[prop_name] = "1.0.0"
         elif prop_name == "_comments":
             template[prop_name] = {
-                "general": "This is a template configuration file. Copy to config.json and update values as needed.",
+                "general":
+                    f"This is a template configuration file. "
+                    f"Copy to config.json and update values as needed.",
                 "paths": "Provide actual file system paths appropriate for your environment",
-                "schema": "The structure of this file follows the schema defined in scripts/config/schema.json. Type hints should be provided in most editors.",
+                "schema":
+                    f"Schema defined in scripts/config/schema.json. "
+                    f"Type hints should be provided in most editors.",
             }
         elif prop_schema.get("type") == "object" and "properties" in prop_schema:
             # Handle nested objects
@@ -221,7 +206,7 @@ def generate_template(
 
     # Step 3: Validate the template against the schema
     # Use quiet=True to suppress warnings about empty path values
-    validation_result = validate_config(template_path, quiet=True)
+    validation_result = validator.validate_config(template_path, quiet=True)
 
     # Final result
     if validation_result:
@@ -239,14 +224,16 @@ def ensure_config_exists() -> bool:
         bool: True if config.json exists or was created, False on error
     """
     # Check if config.json already exists
-    if DEFAULT_CONFIG_PATH.exists():
-        print(f"Config file already exists at: {DEFAULT_CONFIG_PATH}")
+    if CONFIG_PATH.exists():
+        print(f"Config file already exists at: {CONFIG_PATH}")
         return True
 
     # Check if template exists to copy from
-    if not DEFAULT_TEMPLATE_PATH.exists():
-        print(f"Error: Template file not found at {DEFAULT_TEMPLATE_PATH}")
-        print("Run generator.py first to create the template")
+    if not TEMPLATE_PATH.exists():
+        print(f"Error: Template file not found at {TEMPLATE_PATH}")
+        generate_template(
+            TEMPLATE_PATH,
+        )
         return False
 
     # Copy template to config.json
@@ -254,14 +241,14 @@ def ensure_config_exists() -> bool:
         print(f"Creating config.json from template...")
 
         # Read template content
-        with open(DEFAULT_TEMPLATE_PATH, "r") as src:
+        with open(TEMPLATE_PATH, "r") as src:
             template_content = src.read()
 
         # Write to config.json
-        with open(DEFAULT_CONFIG_PATH, "w") as dst:
+        with open(CONFIG_PATH, "w") as dst:
             dst.write(template_content)
 
-        print(f"✓ Config file created at: {DEFAULT_CONFIG_PATH}")
+        print(f"✓ Config file created at: {CONFIG_PATH}")
         print(f"  Edit this file to customize your configuration")
         return True
 
@@ -273,7 +260,7 @@ def ensure_config_exists() -> bool:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a config template")
     parser.add_argument(
-        "--output", default=str(DEFAULT_TEMPLATE_PATH), help="Output template file path"
+        "--output", default=TEMPLATE_PATH, help="Output template file path"
     )
     parser.add_argument(
         "--skip-prettier", action="store_true", help="Skip prettier formatting"
