@@ -1,11 +1,9 @@
 import time
-
-# Use Value directly instead of Manager
+import logging
 from multiprocessing import Queue, Process, Value, cpu_count
 from tqdm import tqdm
 from queue import Empty  # Import Empty exception
-import sys
-import traceback  # Add to imports
+from typing import Union
 
 from .tokenizers import SpacyTokenizer, NLTKTokenizer
 from .writers import JSONWriter
@@ -14,6 +12,8 @@ from .splitter_processor import SplitterProcessor
 
 from easyner.config import load_config
 
+# Get logger for this module
+logger = logging.getLogger("easyner.pipeline.splitter.runner")
 config = load_config()
 
 
@@ -28,19 +28,26 @@ def worker_process(task_queue, result_queue, config, worker_id):
     tokenizer = None
     writer = None
     processor = None
-    print(f"[Worker {worker_id}] Starting")  # Debug print
+    logger.debug(f"[Worker {worker_id}] Starting")  # Debug log instead of print
 
     try:
         # Initialize components for this worker
-        print(f"[Worker {worker_id}] Initializing tokenizer")
+        logger.debug(f"[Worker {worker_id}] Initializing tokenizer")
         if config["tokenizer"].lower() == "spacy":
             tokenizer = SpacyTokenizer(model_name=config.get("model", "en_core_web_sm"))
+            # Set optimal batch size for PubMed documents if using batch processing
+            if config.get("pubmed_bulk", False):
+                # For PubMed, we can use a larger batch size since documents are small
+                tokenizer.nlp.batch_size = config.get("spacy_batch_size", 100)
+                logger.debug(
+                    f"[Worker {worker_id}] Set spaCy batch size to {tokenizer.nlp.batch_size} for PubMed"
+                )
         elif config["tokenizer"].lower() == "nltk":
             tokenizer = NLTKTokenizer()
         else:
             raise ValueError(f"Unknown tokenizer: {config['tokenizer']}")
 
-        print(f"[Worker {worker_id}] Initializing writer")
+        logger.debug(f"[Worker {worker_id}] Initializing writer")
         writer = JSONWriter(
             output_folder=config["output_folder"],
             output_file_prefix=config["output_file_prefix"],
@@ -50,27 +57,29 @@ def worker_process(task_queue, result_queue, config, worker_id):
         def report_progress(batch_idx, processed, total):
             result_queue.put(("PROGRESS", batch_idx, processed, total, worker_id))
 
-        print(f"[Worker {worker_id}] Initializing processor")
+        logger.debug(f"[Worker {worker_id}] Initializing processor")
         processor = SplitterProcessor(
             tokenizer=tokenizer,
             output_writer=writer,
             config=config,
             progress_callback=report_progress,
         )
-        print(f"[Worker {worker_id}] Initialization complete")
+        logger.debug(f"[Worker {worker_id}] Initialization complete")
 
         # Process tasks from the queue
         while True:
-            print(f"[Worker {worker_id}] Waiting for task...")
+            logger.debug(f"[Worker {worker_id}] Waiting for task...")
             task = task_queue.get()
-            print(f"[Worker {worker_id}] Got task from queue")
+            logger.debug(f"[Worker {worker_id}] Got task from queue")
 
             if task is None:  # None is our sentinel value to stop
-                print(f"[Worker {worker_id}] Received sentinel. Exiting.")
+                logger.debug(f"[Worker {worker_id}] Received sentinel. Exiting.")
                 break
 
             batch_idx, batch_data, full_articles = task
-            print(f"[Worker {worker_id}] Processing batch {batch_idx} with {len(batch_data)} items")
+            logger.debug(
+                f"[Worker {worker_id}] Processing batch {batch_idx} with {len(batch_data)} items"
+            )
 
             try:
                 # Add inner try-except to catch errors during processing a specific batch
@@ -82,7 +91,7 @@ def worker_process(task_queue, result_queue, config, worker_id):
                 )
                 processing_time = time.time() - start_time
 
-                print(
+                logger.debug(
                     f"[Worker {worker_id}] Processed batch {batch_idx} in {processing_time:.2f}s, sending result"
                 )
                 # Send results back (batch_idx, num_articles, processing_time)
@@ -95,27 +104,28 @@ def worker_process(task_queue, result_queue, config, worker_id):
                         worker_id,
                     )
                 )
-                print(f"[Worker {worker_id}] Result sent for batch {processed_batch_idx}")
+                logger.debug(f"[Worker {worker_id}] Result sent for batch {processed_batch_idx}")
 
             except Exception as batch_exc:
-                print(f"[Worker {worker_id}] Error processing batch {batch_idx}: {batch_exc}")
-                traceback.print_exc(file=sys.stdout)
+                logger.error(
+                    f"[Worker {worker_id}] Error processing batch {batch_idx}: {batch_exc}",
+                    exc_info=True,
+                )
                 # If an error occurs during batch processing, report it
                 result_queue.put(
                     ("ERROR", f"Error processing batch {batch_idx}: {batch_exc}", worker_id)
                 )
-                print(f"[Worker {worker_id}] Error report sent")
+                logger.debug(f"[Worker {worker_id}] Error report sent")
 
     except Exception as init_exc:
-        print(f"[Worker {worker_id}] Critical error: {init_exc}")
-        traceback.print_exc(file=sys.stdout)
+        logger.error(f"[Worker {worker_id}] Critical error: {init_exc}", exc_info=True)
         # If an error occurs during initialization or getting from queue, report it
         result_queue.put(("ERROR", f"Worker {worker_id} failed: {init_exc}", worker_id))
     finally:
         # Signal that this worker is done, regardless of success or failure
-        print(f"[Worker {worker_id}] Signaling WORKER_DONE")
+        logger.debug(f"[Worker {worker_id}] Signaling WORKER_DONE")
         result_queue.put(("WORKER_DONE", worker_id))
-        print(f"[Worker {worker_id}] Exit complete")
+        logger.debug(f"[Worker {worker_id}] Exit complete")
 
 
 class SplitterRunner:
@@ -141,9 +151,11 @@ class SplitterRunner:
                 key=self.config.get("key", "n"),
             )
             self.is_pubmed = True
+            logger.info(f"Initialized PubMed loader for {self.config['input_path']}")
         else:
             self.loader = StandardLoader(input_path=self.config["input_path"])
             self.is_pubmed = False
+            logger.info(f"Initialized Standard loader for {self.config['input_path']}")
 
     def _stats_updater(
         self,
@@ -191,12 +203,23 @@ class SplitterRunner:
                     f"ETA: {eta}"
                 )
 
+            # Log statistics periodically (every 10 update intervals)
+            if batches_completed % 10 == 0 and batches_completed > 0:
+                logger.info(
+                    f"Progress: {batches_completed}/{total_batches} batches "
+                    f"({(batches_completed/total_batches*100):.1f}%), "
+                    f"{current_articles} articles processed, "
+                    f"{active_processes} active workers, "
+                    f"speed: {speed:.2f} articles/s"
+                )
+
             # Sleep for update interval
             time.sleep(self.update_interval)
 
     def run(self):
         """Run the splitter pipeline"""
         self._initialize_components()
+        logger.info(f"Starting splitter with {self.cpu_limit} CPU cores")
 
         # Create queues for task distribution and result collection
         task_queue = Queue()
@@ -212,7 +235,30 @@ class SplitterRunner:
         batch_progress = {}  # {batch_idx: (processed, total)}
         worker_batch_map = {}  # {worker_id: batch_idx}
 
-        # Start workers
+        # Get the number of batches to process
+        if self.is_pubmed:
+            batch_files = self.loader.load_data()
+            total_batches = len(batch_files)
+            logger.info(f"Found {total_batches} PubMed batch files to process")
+            # Adjust cpu_limit if it's higher than the number of files
+            if total_batches < self.cpu_limit:
+                logger.info(
+                    f"Adjusting CPU limit from {self.cpu_limit} to {total_batches} (number of PubMed files)"
+                )
+                self.cpu_limit = total_batches
+        else:
+            articles = self.loader.load_data()
+            batch_size = self.config.get("batch_size", 100)
+            batches = list(make_batches(list(articles.keys()), batch_size))
+            total_batches = len(batches)
+            logger.info(
+                f"Creating {total_batches} batches from {len(articles)} articles (batch size: {batch_size})"
+            )
+
+        # Re-log the final CPU core count after potential adjustment
+        logger.info(f"Starting splitter workers with {self.cpu_limit} CPU cores")
+
+        # Start workers (moved after potential cpu_limit adjustment)
         processes = []
         for i in range(self.cpu_limit):
             p = Process(target=worker_process, args=(task_queue, result_queue, self.config, i))
@@ -221,16 +267,7 @@ class SplitterRunner:
             processes.append(p)
             with active_processes_val.get_lock():
                 active_processes_val.value += 1
-
-        # Get the number of batches to process
-        if self.is_pubmed:
-            batch_files = self.loader.load_data()
-            total_batches = len(batch_files)
-        else:
-            articles = self.loader.load_data()
-            batch_size = self.config.get("batch_size", 100)
-            batches = list(make_batches(list(articles.keys()), batch_size))
-            total_batches = len(batches)
+            logger.debug(f"Started worker process {i} (PID: {p.pid})")
 
         # Start stats updater in a separate thread
         import threading
@@ -261,14 +298,18 @@ class SplitterRunner:
                     batch_idx = self.loader.get_batch_index(batch_file)
                     batch_data = self.loader.load_batch(batch_file)
                     task_queue.put((batch_idx, batch_data, True))
+                    logger.debug(f"Enqueued PubMed batch {batch_idx}: {batch_file}")
             else:
                 for batch_idx, batch_ids in enumerate(batches, 1):
                     batch_data = {article_id: articles[article_id] for article_id in batch_ids}
                     task_queue.put((batch_idx, batch_data, False))
+                    if batch_idx % 100 == 0 or batch_idx == 1:  # Log first batch and every 100th
+                        logger.debug(f"Enqueued batch {batch_idx} with {len(batch_data)} articles")
 
             # Add sentinel values to signal workers to stop
             for _ in range(self.cpu_limit):
                 task_queue.put(None)
+            logger.debug(f"Added {self.cpu_limit} sentinel values to task queue")
 
             # Process results
             remaining_workers = self.cpu_limit
@@ -294,9 +335,8 @@ class SplitterRunner:
 
                         # Update progress display with both columns
                         pbar.set_description(
-                            f"Files: {batches_completed_val.value}/{total_batches} | "
                             f"Articles: {articles_processed_val.value + in_progress_articles} | "
-                            f"Active: {active_processes_val.value}/{self.cpu_limit}"
+                            f"Active processes: {active_processes_val.value}/{self.cpu_limit}"
                         )
 
                     elif result[0] == "COMPLETE":
@@ -318,9 +358,15 @@ class SplitterRunner:
                         # Update progress bar
                         pbar.update(1)
 
+                        # Log completion of batch at debug level
+                        logger.debug(
+                            f"Completed batch {batch_idx} with {num_articles} articles in {processing_time:.2f}s"
+                        )
+
                     elif result[0] == "ERROR":
                         # Handle error
-                        print(f"Error received: {result[1]}")
+                        error_msg = result[1]
+                        logger.error(f"Error received: {error_msg}")
 
                     elif result[0] == "WORKER_DONE":
                         # Handle worker completion
@@ -328,6 +374,10 @@ class SplitterRunner:
                         with active_processes_val.get_lock():
                             active_processes_val.value = max(0, active_processes_val.value - 1)
                         remaining_workers -= 1
+
+                        logger.debug(
+                            f"Worker {worker_id} has completed all tasks. {remaining_workers} workers remaining."
+                        )
 
                         # Remove from in-progress tracking if needed
                         if worker_id in worker_batch_map:
@@ -337,11 +387,11 @@ class SplitterRunner:
                 except Empty:
                     # Check if workers are still alive but not reporting
                     if time.time() - last_update_time > 10:  # No updates for 10 seconds
-                        print(
-                            "\nWarning: No results received from workers for 10 seconds. Checking status..."
-                        )
                         active_count = sum(1 for p in processes if p.is_alive())
-                        print(f"Active worker processes reported by OS: {active_count}")
+                        logger.warning(
+                            f"No results received from workers for 10 seconds. "
+                            f"Active worker processes reported by OS: {active_count}"
+                        )
                         last_update_time = time.time()  # Reset timeout
 
         # Wait for all processes to finish
@@ -353,13 +403,10 @@ class SplitterRunner:
             running.value = 0
         stats_thread.join(timeout=1.0)
 
-        print(
-            f"\nProcessing complete! Processed {articles_processed_val.value} articles "
+        logger.info(
+            f"Processing complete! Processed {articles_processed_val.value} articles "
             f"in {batches_completed_val.value} batches."
         )
-
-
-from typing import Union  # Add this import at the top of the file if not already present
 
 
 def run_splitter(
@@ -377,11 +424,18 @@ def run_splitter(
         Dict: Empty dict (for compatibility with pipeline architecture)
     """
     if ignore:
-        print("Ignoring script: splitter.")
+        logger.info("Ignoring script: splitter.")
         return {}
 
-    runner = SplitterRunner(splitter_config, cpu_limit or cpu_count())
+    cpu_limit_to_use = min(cpu_limit, cpu_count()) if cpu_limit else cpu_count()
+    logger.info(
+        f"CPU_LIMIT: {cpu_limit} (cpu_count: {cpu_count()}), using {cpu_limit_to_use} cores"
+    )
+
+    logger.info(f"Starting splitter with {cpu_limit_to_use} CPU cores")
+
+    runner = SplitterRunner(splitter_config, cpu_limit_to_use)
     runner.run()
 
-    # print("Finished running splitter script.") # Already printed in run()
+    logger.info("Finished running splitter script.")
     return {}
