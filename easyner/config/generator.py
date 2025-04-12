@@ -64,9 +64,7 @@ def format_with_prettier(file_path: Union[str, Path]) -> bool:
         return False
 
 
-def create_default_value(
-    schema_property: Dict[str, Any], property_path: str = ""
-) -> Any:
+def create_default_value(schema_property: Dict[str, Any], property_path: str = "") -> Any:
     """Create a default value based on a schema property definition."""
     if "$ref" in schema_property:
         if schema_property["$ref"] == "#/definitions/path":
@@ -137,6 +135,7 @@ def generate_template(
     """Generate a template config file from the JSON schema.
 
     This script creates a config.template.json file based on the schema definition.
+    If the template already exists, existing values will be preserved and only missing fields added.
 
     Args:
         template_path: Path where the template file will be saved
@@ -155,11 +154,25 @@ def generate_template(
     # Load the schema
     schema = validator.load_schema()
 
+    # Check if template already exists, if so load existing values
+    existing_template = {}
+    if Path(template_path).exists():
+        try:
+            print(f"Found existing template at {template_path_str}, preserving values...")
+            with open(template_path, "r") as f:
+                existing_template = json.load(f)
+        except json.JSONDecodeError:
+            print(f"Warning: Existing template could not be parsed, creating a new one")
+        except Exception as e:
+            print(f"Warning: Error reading existing template: {e}, creating a new one")
+
     # Create a template based on the schema
     template = {}
 
     # Add schema reference to enable VS Code validation and autocompletion
-    template["$schema"] = str(SCHEMA_PATH.relative_to(PROJECT_ROOT))
+    template["$schema"] = existing_template.get(
+        "$schema", str(SCHEMA_PATH.relative_to(PROJECT_ROOT))
+    )
 
     # Process all properties
     for prop_name, prop_schema in schema.get("properties", {}).items():
@@ -167,27 +180,30 @@ def generate_template(
         if prop_name.startswith("$"):
             continue
 
-        # Create default value
-        if prop_name == "CONFIG_VERSION":
+        # Create default value or use existing value
+        if prop_name in existing_template:
+            template[prop_name] = existing_template[prop_name]
+        elif prop_name == "CONFIG_VERSION":
             template[prop_name] = "1.0.0"
         elif prop_name == "_comments":
             template[prop_name] = {
-                "general":
-                    f"This is a template configuration file. "
-                    f"Copy to config.json and update values as needed.",
+                "general": f"This is a template configuration file. "
+                f"Copy to config.json and update values as needed.",
                 "paths": "Provide actual file system paths appropriate for your environment",
-                "schema":
-                    f"Schema defined in scripts/config/schema.json. "
-                    f"Type hints should be provided in most editors.",
+                "schema": f"Schema defined in scripts/config/schema.json. "
+                f"Type hints should be provided in most editors.",
             }
         elif prop_schema.get("type") == "object" and "properties" in prop_schema:
             # Handle nested objects
             nested_obj = {}
+            existing_nested = existing_template.get(prop_name, {})
+
             for nested_prop, nested_schema in prop_schema.get("properties", {}).items():
                 nested_path = f"{prop_name}.{nested_prop}"
-                nested_obj[nested_prop] = create_default_value(
-                    nested_schema, nested_path
-                )
+                if nested_prop in existing_nested:
+                    nested_obj[nested_prop] = existing_nested[nested_prop]
+                else:
+                    nested_obj[nested_prop] = create_default_value(nested_schema, nested_path)
             template[prop_name] = nested_obj
         else:
             template[prop_name] = create_default_value(prop_schema, prop_name)
@@ -259,12 +275,8 @@ def ensure_config_exists() -> bool:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate a config template")
-    parser.add_argument(
-        "--output", default=TEMPLATE_PATH, help="Output template file path"
-    )
-    parser.add_argument(
-        "--skip-prettier", action="store_true", help="Skip prettier formatting"
-    )
+    parser.add_argument("--output", default=TEMPLATE_PATH, help="Output template file path")
+    parser.add_argument("--skip-prettier", action="store_true", help="Skip prettier formatting")
     parser.add_argument(
         "--no-config",
         action="store_true",
