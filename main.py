@@ -316,10 +316,14 @@ if __name__ == "__main__":
         start_splitter = time.time()
 
     if not ignore["splitter"]:
-        from easyner.pipeline.splitter.run_splitter import run_splitter
+        from easyner.pipeline.splitter import run_splitter
 
-    run_splitter(config["splitter"], ignore=ignore["splitter"])
-        # run_splitter_pubmed(config["splitter_pubmed"], ignore=ignore["splitter_pubmed"])
+    run_splitter(
+        config["splitter"],
+        ignore=ignore["splitter"],
+        cpu_limit=CPU_LIMIT,
+    )
+    # run_splitter_pubmed(config["splitter_pubmed"], ignore=ignore["splitter_pubmed"])
     if TIMEKEEP:
         end_splitter = time.time()
         tkff.write(f"Splitter time: {end_splitter-start_splitter}\n")
