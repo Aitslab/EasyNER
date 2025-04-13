@@ -26,6 +26,14 @@ def temp_pubmed_dir():
     with open(example_file, "r", encoding="utf-8") as src:
         test_data = json.load(src)
 
+        # Add an article with empty abstract for testing empty abstract handling
+        test_data["empty_abstract_article"] = {
+            "title": "Article With Empty Abstract",
+            "abstract": "",  # Empty abstract
+            "pmid": "00000000",  # Dummy PMID
+            "doi": "10.0000/empty.0000",  # Dummy DOI
+        }
+
     with open(input_path, "w", encoding="utf-8") as dest:
         json.dump(test_data, dest)
 
@@ -42,7 +50,15 @@ def expected_output():
     example_file = os.path.join(current_dir, "pubmed_output.json")
 
     with open(example_file, "r", encoding="utf-8") as f:
-        return json.load(f)
+        expected_data = json.load(f)
+
+        # Add expected format for the article with empty abstract
+        expected_data["empty_abstract_article"] = {
+            "title": "Article With Empty Abstract",
+            "sentences": [],  # Empty sentences list
+        }
+
+        return expected_data
 
 
 def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
@@ -113,9 +129,21 @@ def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
                 expected_article["sentences"]
             ), f"Sentence count mismatch for article {article_id}"
 
-            # Compare actual sentence content
+            # Compare actual sentence content for non-empty sentences
             for i, sentence in enumerate(output_data[article_id]["sentences"]):
                 expected_text = expected_article["sentences"][i]["text"]
                 assert (
                     sentence["text"] == expected_text
                 ), f"Sentence content mismatch in article {article_id}, sentence {i}"
+
+    # Specific test for article with empty abstract
+    assert (
+        "empty_abstract_article" in output_data
+    ), "Article with empty abstract was not included in output"
+    empty_article = output_data["empty_abstract_article"]
+    assert (
+        empty_article["title"] == "Article With Empty Abstract"
+    ), "Title mismatch for article with empty abstract"
+    assert (
+        len(empty_article["sentences"]) == 0
+    ), "Article with empty abstract should have empty sentences list"

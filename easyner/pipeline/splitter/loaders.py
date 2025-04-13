@@ -3,6 +3,9 @@ import json
 import os
 from glob import glob
 import logging
+import gc
+from multiprocessing import current_process
+import time
 
 # Get logger for this module
 logger = logging.getLogger("easyner.pipeline.splitter.loaders")
@@ -10,7 +13,7 @@ logger = logging.getLogger("easyner.pipeline.splitter.loaders")
 
 class DataLoaderBase(ABC):
     @abstractmethod
-    def load_data(self):
+    def load_data(self) -> list:
         pass
 
 
@@ -19,7 +22,7 @@ class StandardLoader(DataLoaderBase):
         self.input_path = input_path
         logger.debug(f"Initialized StandardLoader with input path: {input_path}")
 
-    def load_data(self):
+    def load_data(self) -> list:
         logger.info(f"Loading data from {self.input_path}")
         try:
             with open(self.input_path, "r", encoding="utf-8") as f:
@@ -67,15 +70,45 @@ class PubMedLoader(DataLoaderBase):
             return all_files
 
     def load_batch(self, file_path):
-        """Load a single batch file"""
-        logger.debug(f"Loading batch file: {file_path}")
+        """Load a single batch file with memory optimization"""
+        process_id = current_process().name
+        logger.debug(f"[{process_id}] Loading batch file: {file_path}")
+        start_time = time.time()
+
         try:
+            # Try orjson first (much faster and more memory efficient)
+            try:
+                import orjson
+
+                with open(file_path, "rb") as f:
+                    data = orjson.loads(f.read())
+                elapsed = time.time() - start_time
+                logger.debug(
+                    f"[{process_id}] Successfully loaded {len(data)} articles from {file_path} "
+                    f"in {elapsed:.2f}s using orjson"
+                )
+                return data
+            except ImportError:
+                # Standard json with optimizations if orjson not available
+                pass
+
+            # Step 1: Read file with minimal memory overhead
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            logger.debug(f"Successfully loaded {len(data)} articles from {file_path}")
+
+            elapsed = time.time() - start_time
+            logger.debug(
+                f"[{process_id}] Successfully loaded {len(data)} articles from {file_path} "
+                f"in {elapsed:.2f}s ({len(data)} articles)"
+            )
+
+            # Step 2: Explicitly trigger garbage collection
+            gc.collect()
+
             return data
+
         except Exception as e:
-            logger.error(f"Error loading batch file {file_path}: {e}", exc_info=True)
+            logger.error(f"[{process_id}] Error loading batch file {file_path}: {e}", exc_info=True)
             raise
 
     def get_batch_index(self, input_file):
