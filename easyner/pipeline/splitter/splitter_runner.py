@@ -12,6 +12,10 @@ from .tokenizers import SpacyTokenizer, NLTKTokenizer
 from .writers import JSONWriter
 from .loaders import StandardLoader, PubMedLoader
 from .splitter_processor import SplitterProcessor
+from .worker_state import WorkerStateManager
+from .progress import ProgressReporter
+from .message_handler import MessageHandler
+from .stats_manager import StatsManager
 
 from easyner.config import load_config
 
@@ -27,13 +31,21 @@ def make_batches(list_id, n):
 
 
 def worker_process(task_queue, result_queue, config, worker_id):
-    """Worker process that processes tasks from the queue"""
-    tokenizer = None
-    writer = None
-    processor = None
+    """
+    Worker process that processes tasks from the queue.
+    Uses WorkerStateManager for state management and ProgressReporter for progress reporting.
 
+    Args:
+        task_queue: Queue to get tasks from
+        result_queue: Queue to send results to
+        config: Configuration dictionary
+        worker_id: ID of this worker
+    """
     # Add worker_id to config for logging purposes
     config["worker_id"] = worker_id
+
+    # Initialize state manager
+    state_manager = WorkerStateManager(worker_id, result_queue)
 
     logger.debug(f"[Worker {worker_id}] Starting")
 
@@ -61,9 +73,21 @@ def worker_process(task_queue, result_queue, config, worker_id):
             output_file_prefix=config["output_file_prefix"],
         )
 
-        # Define progress callback function
+        # Define progress callback function that uses ProgressReporter
         def report_progress(batch_idx, processed, total):
-            result_queue.put(("PROGRESS", batch_idx, processed, total, worker_id))
+            # Create a progress reporter on-demand if needed
+            if not hasattr(report_progress, "reporters"):
+                report_progress.reporters = {}
+
+            # Get or create reporter for this batch
+            if batch_idx not in report_progress.reporters:
+                report_progress.reporters[batch_idx] = ProgressReporter(
+                    result_queue, worker_id, batch_idx, total
+                )
+
+            # Update progress
+            reporter = report_progress.reporters[batch_idx]
+            reporter.update(processed - reporter.processed_items)
 
         logger.debug(f"[Worker {worker_id}] Initializing processor")
         processor = SplitterProcessor(
@@ -74,15 +98,9 @@ def worker_process(task_queue, result_queue, config, worker_id):
         )
 
         # Signal that worker is initialized and ready
-        result_queue.put(
-            (
-                "WORKER_READY",
-                worker_id,
-                tokenizer.SUPPORTS_BATCH_PROCESSING,
-                tokenizer.SUPPORTS_BATCH_GENERATOR,
-            )
+        state_manager.signal_ready(
+            tokenizer.SUPPORTS_BATCH_PROCESSING, tokenizer.SUPPORTS_BATCH_GENERATOR
         )
-        logger.debug(f"[Worker {worker_id}] Initialization complete")
 
         # Process tasks from the queue
         while True:
@@ -95,55 +113,45 @@ def worker_process(task_queue, result_queue, config, worker_id):
                 break
 
             batch_idx, batch_data, full_articles = task
+
+            # Use state manager to track batch processing
+            state_manager.start_batch(batch_idx, batch_data)
+
             logger.debug(
                 f"[Worker {worker_id}] Processing batch {batch_idx} with {len(batch_data)} items"
             )
 
             try:
-                # Add inner try-except to catch errors during processing a specific batch
-                start_time = time.time()
-
                 # Process the batch
                 processed_batch_idx, num_articles_processed = processor.process_batch(
                     batch_idx, batch_data, full_articles
                 )
-                processing_time = time.time() - start_time
 
-                logger.debug(
-                    f"[Worker {worker_id}] Processed batch {batch_idx} in {processing_time:.2f}s, sending result"
-                )
-                # Send results back (batch_idx, num_articles, processing_time)
-                result_queue.put(
-                    (
-                        "COMPLETE",
-                        processed_batch_idx,
-                        num_articles_processed,
-                        processing_time,
-                        worker_id,
-                    )
-                )
-                logger.debug(f"[Worker {worker_id}] Result sent for batch {processed_batch_idx}")
+                # Mark batch as complete
+                _, processing_time = state_manager.complete_batch(num_articles_processed)
+
+                # If we created a progress reporter for this batch, report 100% completion
+                if hasattr(report_progress, "reporters") and batch_idx in report_progress.reporters:
+                    reporter = report_progress.reporters[batch_idx]
+                    reporter.report_completion(num_articles_processed, processing_time)
+                    # Clean up reporter
+                    del report_progress.reporters[batch_idx]
 
             except Exception as batch_exc:
                 logger.error(
                     f"[Worker {worker_id}] Error processing batch {batch_idx}: {batch_exc}",
                     exc_info=True,
                 )
-                # If an error occurs during batch processing, report it
-                result_queue.put(
-                    ("ERROR", f"Error processing batch {batch_idx}: {batch_exc}", worker_id)
-                )
-                logger.debug(f"[Worker {worker_id}] Error report sent")
+                # Report error using state manager
+                state_manager.report_error(str(batch_exc), batch_idx)
 
     except Exception as init_exc:
         logger.error(f"[Worker {worker_id}] Critical error: {init_exc}", exc_info=True)
-        # If an error occurs during initialization or getting from queue, report it
-        result_queue.put(("ERROR", f"Worker {worker_id} failed: {init_exc}", worker_id))
+        # Report error using state manager
+        state_manager.report_error(str(init_exc))
     finally:
-        # Signal that this worker is done, regardless of success or failure
-        logger.debug(f"[Worker {worker_id}] Signaling WORKER_DONE")
-        result_queue.put(("WORKER_DONE", worker_id))
-        logger.debug(f"[Worker {worker_id}] Exit complete")
+        # Signal that this worker is done
+        state_manager.signal_done()
 
 
 class SplitterRunner:
@@ -155,24 +163,38 @@ class SplitterRunner:
             config: Dictionary containing all configuration parameters
             cpu_limit: Integer specifying the number of CPU cores to use
         """
-        self.cpu_limit = cpu_limit
         self.config = config
-        self.update_interval = config.get("stats_update_interval", 1.0)  # Update stats every second
-        # Add counters for batch processing statistics
-        self.batch_processing_started = 0
-        self.batch_processing_completed = 0
-        self.log_verbosity = config.get("log_verbosity", "normal")  # normal, verbose, quiet
+        self.cpu_limit = cpu_limit
+        self.update_interval = config.get("stats_update_interval", 1.0)
+        self.log_verbosity = config.get("log_verbosity", "normal")
 
-        # Statistics for summary
+        # Initialize counters and state
+        self.is_pubmed = False
+        self.workers_ready = 0
+        self.workers_with_batch_support = 0
+        self.workers_with_generator_support = 0
+        self.remaining_workers = 0
+        self.total_batches = 0
+
+        # Statistics
         self.start_time = None
         self.end_time = None
         self.articles_processed = 0
         self.batches_completed = 0
         self.processing_times = []
-        self.worker_stats = {}
+
+        # Runtime state
+        self.batch_progress = {}  # {batch_idx: (processed, total)}
+        self.worker_batch_map = {}  # {worker_id: batch_idx}
+        self.worker_stats = (
+            {}
+        )  # {worker_id: {'batches': count, 'articles': count, 'time': seconds}}
+
+        # Initialize the stats manager
+        self.stats_manager = StatsManager()
 
     def _initialize_components(self):
-        """Initialize loader component"""
+        """Initialize loader component based on configuration"""
         # Initialize loader based on config
         if self.config.get("pubmed_bulk", False):
             self.loader = PubMedLoader(
@@ -197,11 +219,26 @@ class SplitterRunner:
         total_batches,
         start_time,
     ):
-        """Update statistics in the progress bar using Value objects"""
+        """
+        Update statistics in the progress bar using Value objects
+
+        Args:
+            articles_processed_val: Shared counter for processed articles
+            batches_completed_val: Shared counter for completed batches
+            active_processes_val: Shared counter for active processes
+            pbar: Progress bar to update
+            running: Flag indicating whether processing is ongoing
+            total_batches: Total number of batches to process
+            start_time: Start time of processing
+        """
         last_log_time = time.time()
         log_interval = 30  # seconds between summary logs
+        update_count = 0
 
         while running.value:
+            update_count += 1
+            timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+
             # Read values from shared memory
             current_articles = articles_processed_val.value
             batches_completed = batches_completed_val.value
@@ -211,7 +248,7 @@ class SplitterRunner:
             elapsed = max(0.001, time.time() - start_time)  # Avoid division by zero
             speed = current_articles / elapsed
 
-            # Calculate ETA - this is approximate since we don't know total articles
+            # Calculate ETA
             if batches_completed > 0 and total_batches > 0:
                 articles_per_batch = (
                     current_articles / batches_completed if batches_completed > 0 else 0
@@ -229,23 +266,48 @@ class SplitterRunner:
             else:
                 eta = "calculating..."
 
-            # Update progress bar with clear, concise message
-            if pbar is not None:
-                pbar.set_description(
-                    f"Progress: {batches_completed}/{total_batches} batches | "
-                    f"Articles: {current_articles:,} | "
-                    f"Speed: {speed:.1f} art/s | "
-                    f"ETA: {eta}"
+            # Log current progress every 10 updates for debugging
+            if update_count % 10 == 0:
+                logger.debug(
+                    f"[{timestamp}] Stats updater: batches_completed_val={batches_completed}, "
+                    f"articles_processed_val={current_articles}, "
+                    f"pbar.n={pbar.n}/{pbar.total if pbar else 'N/A'}"
                 )
-                pbar.update(0)  # Force refresh
 
-            # Log statistics periodically to file, only with summary information
+            # Update progress bar with clear, concise message including timestamp
+            if pbar is not None:
+                try:
+                    description = (
+                        f"[{timestamp}] Progress: {batches_completed}/{total_batches} batches | "
+                        f"Articles: {current_articles:,} | "
+                        f"Speed: {speed:.1f} art/s | "
+                        f"ETA: {eta}"
+                    )
+                    pbar.set_description(description)
+
+                    # Ensure position is correct (synchronize tqdm counter with our counter)
+                    if pbar.n != batches_completed:
+                        # Only fix if needed to avoid excessive refreshes
+                        logger.debug(
+                            f"[{timestamp}] Fixing progress bar position: {pbar.n} → {batches_completed}"
+                        )
+
+                        # Reset position to match our counter
+                        pbar.n = batches_completed
+                        # Force refresh
+                        pbar.refresh()
+                except Exception as e:
+                    logger.error(
+                        f"[{timestamp}] Error updating progress bar in stats_updater: {str(e)}"
+                    )
+
+            # Log statistics periodically to file
             current_time = time.time()
             if current_time - last_log_time >= log_interval and batches_completed > 0:
                 # Write a concise progress summary to the log
                 percent_done = (batches_completed / total_batches * 100) if total_batches > 0 else 0
-                logger.debug(
-                    f"Progress: {batches_completed}/{total_batches} batches "
+                logger.info(
+                    f"[{timestamp}] Progress: {batches_completed}/{total_batches} batches "
                     f"({percent_done:.1f}%) | "
                     f"{current_articles:,} articles | "
                     f"{active_processes} workers | "
@@ -256,77 +318,15 @@ class SplitterRunner:
             # Sleep for update interval
             time.sleep(self.update_interval)
 
-    def _print_summary(
-        self, elapsed_time, articles_processed, batches_completed, worker_stats=None
-    ):
-        """Print a formatted summary of the processing run"""
-        # Convert elapsed time to a readable format
-        if elapsed_time < 60:
-            time_str = f"{elapsed_time:.1f} seconds"
-        elif elapsed_time < 3600:
-            time_str = f"{elapsed_time/60:.1f} minutes"
-        else:
-            time_str = f"{elapsed_time/3600:.1f} hours"
-
-        # Calculate articles per second
-        speed = articles_processed / elapsed_time if elapsed_time > 0 else 0
-
-        # Create summary table
-        summary_data = [
-            ["Total runtime", time_str],
-            ["Batches processed", f"{batches_completed:,}"],
-            ["Articles processed", f"{articles_processed:,}"],
-            ["Processing speed", f"{speed:.1f} articles/second"],
-        ]
-
-        # Add average batch size if we have data
-        if batches_completed > 0:
-            avg_batch_size = articles_processed / batches_completed
-            summary_data.append(["Average batch size", f"{avg_batch_size:.1f} articles"])
-
-        # Format as a nice table
-        summary_table = tabulate.tabulate(
-            summary_data, headers=["Metric", "Value"], tablefmt="simple"
-        )
-
-        # Log the summary table
-        logger.info(
-            f"\n===== PROCESSING SUMMARY =====\n{summary_table}\n============================="
-        )
-
-        # Also print to stdout for immediate feedback
-        print(f"\n===== PROCESSING SUMMARY =====\n{summary_table}\n=============================")
-
-        # If we have worker stats, print detailed worker performance
-        if worker_stats and len(worker_stats) > 0:
-            worker_data = [
-                [
-                    f"Worker {worker_id}",
-                    stats["batches"],
-                    f"{stats['articles']:,}",
-                    f"{stats['time']:.1f}s",
-                ]
-                for worker_id, stats in sorted(worker_stats.items())
-            ]
-
-            # Only show this in debug mode as it can be lengthy
-            if logger.level <= logging.DEBUG:
-                worker_table = tabulate.tabulate(
-                    worker_data,
-                    headers=["Worker ID", "Batches", "Articles", "Total Time"],
-                    tablefmt="simple",
-                )
-                logger.debug(
-                    f"\n==== WORKER PERFORMANCE ====\n{worker_table}\n==========================="
-                )
-
     def run(self):
         """Run the splitter pipeline"""
         # Record start time for total execution time
         self.start_time = time.time()
+        self.stats_manager.start_time = self.start_time
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.info(f"Starting splitter processing at {timestamp}")
 
+        # Initialize components
         self._initialize_components()
         logger.info(f"Using {self.cpu_limit} CPU cores")
 
@@ -335,130 +335,102 @@ class SplitterRunner:
         result_queue = Queue()
 
         # Create shared counters for statistics
-        articles_processed_val = Value("i", 0)
-        batches_completed_val = Value("i", 0)
-        active_processes_val = Value("i", 0)
+        self.articles_processed_val = Value("i", 0)
+        self.batches_completed_val = Value("i", 0)
+        self.active_processes_val = Value("i", 0)
         running = Value("i", 1)  # Flag to indicate whether processing is ongoing
 
-        # Keep track of in-progress batches
-        batch_progress = {}  # {batch_idx: (processed, total)}
-        worker_batch_map = {}  # {worker_id: batch_idx}
-        worker_stats = {}  # {worker_id: {'batches': count, 'articles': count, 'time': seconds}}
+        # Initialize message handler
+        message_handler = MessageHandler(self)
 
         # Get the number of batches to process
         if self.is_pubmed:
             batch_files = self.loader.load_data()
-            total_batches = len(batch_files)
-            logger.info(f"Found {total_batches:,} PubMed batch files to process")
+            self.total_batches = len(batch_files)
+            logger.info(f"Found {self.total_batches:,} PubMed batch files to process")
+
             # Adjust cpu_limit if it's higher than the number of files
-            if total_batches < self.cpu_limit:
+            if self.total_batches < self.cpu_limit:
                 logger.info(
-                    f"Adjusting CPU limit from {self.cpu_limit} to {total_batches} (number of PubMed files)"
+                    f"Adjusting CPU limit from {self.cpu_limit} to {self.total_batches} (number of PubMed files)"
                 )
-                self.cpu_limit = total_batches
+                self.cpu_limit = self.total_batches
         else:
             articles = self.loader.load_data()
             batch_size = self.config.get("batch_size", 100)
             batches = list(make_batches(list(articles.keys()), batch_size))
-            total_batches = len(batches)
+            self.total_batches = len(batches)
             logger.info(
-                f"Creating {total_batches:,} batches from {len(articles):,} articles (batch size: {batch_size})"
+                f"Creating {self.total_batches:,} batches from {len(articles):,} articles (batch size: {batch_size})"
             )
-
-        # Re-log the final CPU core count after potential adjustment
-        logger.info(f"Starting splitter workers with {self.cpu_limit} CPU cores")
 
         # Start workers
         processes = []
+        self.remaining_workers = self.cpu_limit
+
         for i in range(self.cpu_limit):
             p = Process(target=worker_process, args=(task_queue, result_queue, self.config, i))
             p.daemon = True
             p.start()
             processes.append(p)
-            with active_processes_val.get_lock():
-                active_processes_val.value += 1
+            with self.active_processes_val.get_lock():
+                self.active_processes_val.value += 1
             logger.debug(f"Started worker process {i} (PID: {p.pid})")
-            # Initialize worker statistics
-            worker_stats[i] = {"batches": 0, "articles": 0, "time": 0.0}
 
-        # Wait for worker initialization and report summary
-        workers_ready = 0
-        workers_with_batch_support = 0
+            # Initialize worker statistics
+            self.worker_stats[i] = {"batches": 0, "articles": 0, "time": 0.0}
+
+        # Wait for worker initialization
         worker_init_start = time.time()
         worker_init_timeout = 60  # seconds
 
         # Process worker initialization messages until all workers are ready
-        while workers_ready < self.cpu_limit:
+        while self.workers_ready < self.cpu_limit:
             try:
                 result = result_queue.get(timeout=0.5)
-
-                if result[0] == "WORKER_READY":
-                    workers_ready += 1
-                    worker_id = result[1]
-
-                    # Check if worker supports batch processing
-                    if len(result) > 2 and result[2]:
-                        workers_with_batch_support += 1
-
-                    # Progress log at intervals
-                    if workers_ready == self.cpu_limit:
-                        logger.info(f"All {self.cpu_limit} workers initialized successfully")
-                    elif workers_ready == 1 or workers_ready % 10 == 0:
-                        # Only log at significant milestones to reduce verbosity
-                        logger.debug(
-                            f"Worker initialization: {workers_ready}/{self.cpu_limit} workers ready"
-                        )
-
-                # Handle any unexpected early messages
-                elif result[0] == "ERROR":
-                    logger.error(f"Error during worker initialization: {result[1]}")
-
+                message_handler.handle(result)
             except Empty:
                 # Check for timeout during initialization
                 if time.time() - worker_init_start > worker_init_timeout:
                     logger.warning(
-                        f"Some workers failed to initialize: {workers_ready}/{self.cpu_limit} ready after {worker_init_timeout}s"
+                        f"Some workers failed to initialize: {self.workers_ready}/{self.cpu_limit} ready after {worker_init_timeout}s"
                     )
                     break
 
-        # Log batch processing capability if PubMed mode
-        if self.is_pubmed:
-            if workers_with_batch_support > 0:
-                logger.info(
-                    f"Using optimized batch processing: {workers_with_batch_support}/{self.cpu_limit} workers support it"
-                )
-            else:
-                logger.warning(
-                    "No workers support batch processing. PubMed processing will be slower."
-                )
+        # Log batch processing capability if in PubMed mode
+        if self.is_pubmed and self.workers_with_batch_support > 0:
+            logger.info(
+                f"Using optimized batch processing: {self.workers_with_batch_support}/{self.cpu_limit} workers support it"
+            )
+        elif self.is_pubmed:
+            logger.warning("No workers support batch processing. PubMed processing will be slower.")
 
         # Start stats updater in a separate thread
         import threading
 
         # Create a clean progress bar with a proper description
         with tqdm(
-            total=total_batches,
+            total=self.total_batches,
             desc="Starting...",
             unit="batch",
             # Make progress bar more log-friendly
             disable=False,  # Force enable the progress bar even if stderr is not a TTY
             miniters=1,  # Update when actual progress is made
-            file=sys.stdout,  # Explicitly write to stderr (which Slurm redirects to .err)
-            dynamic_ncols=True,  # Adjust progress bar width as terminal changes (less relevant for file output)
+            file=sys.stdout,  # Write to stdout
+            dynamic_ncols=True,  # Adjust progress bar width as terminal changes
             bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]",
-        ) as pbar:
+        ) as self.pbar:
             # Start the stats updater thread with the progress bar
-            start_time = time.time()
             stats_thread = threading.Thread(
                 target=self._stats_updater,
                 args=(
-                    articles_processed_val,
-                    batches_completed_val,
-                    active_processes_val,
-                    pbar,
+                    self.articles_processed_val,
+                    self.batches_completed_val,
+                    self.active_processes_val,
+                    self.pbar,
                     running,
-                    total_batches,
-                    start_time,
+                    self.total_batches,
+                    self.start_time,
                 ),
             )
             stats_thread.daemon = True
@@ -486,96 +458,35 @@ class SplitterRunner:
             logger.debug(f"Added {self.cpu_limit} sentinel values to task queue")
 
             # Process results
-            remaining_workers = self.cpu_limit
             last_update_time = time.time()
             last_summary_time = time.time()
             summary_interval = 60  # Create a progress summary every minute
 
-            while remaining_workers > 0:
+            while self.remaining_workers > 0:
                 try:
                     # Wait for a result with timeout
                     result = result_queue.get(timeout=1.0)
                     last_update_time = time.time()
 
-                    # Process different types of messages
-                    if result[0] == "PROGRESS":
-                        # Handle progress update
-                        _, batch_idx, processed, total, worker_id = result
-                        batch_progress[batch_idx] = (processed, total)
-                        worker_batch_map[worker_id] = batch_idx
-
-                    elif result[0] == "COMPLETE":
-                        # Handle completed batch
-                        _, batch_idx, num_articles, processing_time, worker_id = result
-
-                        # Update counters
-                        with articles_processed_val.get_lock():
-                            articles_processed_val.value += num_articles
-                            self.articles_processed = articles_processed_val.value
-                        with batches_completed_val.get_lock():
-                            batches_completed_val.value += 1
-                            self.batches_completed = batches_completed_val.value
-
-                        # Update worker statistics
-                        if worker_id in worker_stats:
-                            worker_stats[worker_id]["batches"] += 1
-                            worker_stats[worker_id]["articles"] += num_articles
-                            worker_stats[worker_id]["time"] += processing_time
-
-                        # Track processing times for summaries
-                        self.processing_times.append(processing_time)
-
-                        # Calculate current stats
-                        elapsed = time.time() - start_time
-                        completed = batches_completed_val.value
-                        total_articles = articles_processed_val.value
-                        speed = total_articles / elapsed if elapsed > 0 else 0
-
-                        # Update progress description with stats
-                        pbar.set_description(
-                            f"Processed: {completed}/{total_batches} | "
-                            f"Articles: {total_articles:,} | "
-                            f"Speed: {speed:.1f} art/s"
-                        )
-
-                        # Update progress bar position - THIS IS CRUCIAL
-                        pbar.update(1)
-
-                    elif result[0] == "ERROR":
-                        # Handle error
-                        error_msg = result[1]
-                        logger.error(f"Error received: {error_msg}")
-
-                    elif result[0] == "WORKER_DONE":
-                        # Handle worker completion
-                        worker_id = result[1]
-                        with active_processes_val.get_lock():
-                            active_processes_val.value = max(0, active_processes_val.value - 1)
-                        remaining_workers -= 1
-
-                        logger.debug(
-                            f"Worker {worker_id} has completed all tasks. {remaining_workers} workers remaining."
-                        )
-
-                        # Remove from in-progress tracking if needed
-                        if worker_id in worker_batch_map:
-                            batch_idx = worker_batch_map[worker_id]
-                            del worker_batch_map[worker_id]
+                    # Process the message using the handler
+                    message_handler.handle(result)
 
                     # Periodically log a concise summary
                     current_time = time.time()
                     if current_time - last_summary_time >= summary_interval:
-                        elapsed = current_time - start_time
-                        completed = batches_completed_val.value
-                        total_articles = articles_processed_val.value
+                        elapsed = current_time - self.start_time
+                        completed = self.batches_completed_val.value
+                        total_articles = self.articles_processed_val.value
 
                         if completed > 0:  # Only log if we have some progress
                             progress_pct = (
-                                completed / total_batches * 100 if total_batches > 0 else 0
+                                completed / self.total_batches * 100
+                                if self.total_batches > 0
+                                else 0
                             )
                             speed = total_articles / elapsed if elapsed > 0 else 0
                             eta_seconds = (
-                                (total_batches - completed) * (elapsed / completed)
+                                (self.total_batches - completed) * (elapsed / completed)
                                 if completed > 0
                                 else 0
                             )
@@ -588,9 +499,9 @@ class SplitterRunner:
                             else:
                                 eta = f"{eta_seconds/3600:.1f} hours"
 
-                            # Log a summary line that's clearly distinguished from the progress bar
+                            # Log a summary line
                             logger.info(
-                                f"PROGRESS SUMMARY: {completed}/{total_batches} batches ({progress_pct:.1f}%), "
+                                f"PROGRESS SUMMARY: {completed}/{self.total_batches} batches ({progress_pct:.1f}%), "
                                 f"{total_articles:,} articles, {speed:.1f} art/s, "
                                 f"ETA: {eta}"
                             )
@@ -601,9 +512,9 @@ class SplitterRunner:
                     # Check if workers are still alive but not reporting
                     if time.time() - last_update_time > 30:  # No updates for 30 seconds
                         active_count = sum(1 for p in processes if p.is_alive())
-                        if active_count < remaining_workers:
+                        if active_count < self.remaining_workers:
                             logger.warning(
-                                f"Some workers seem to have died. Only {active_count}/{remaining_workers} workers active."
+                                f"Some workers seem to have died. Only {active_count}/{self.remaining_workers} workers active."
                             )
                         last_update_time = time.time()  # Reset timeout
 
@@ -616,22 +527,21 @@ class SplitterRunner:
             running.value = 0
         stats_thread.join(timeout=1.0)
 
-        # Record end time and calculate total elapsed time
+        # Record end time
         self.end_time = time.time()
         elapsed_time = self.end_time - self.start_time
 
-        # Print final summary with nice formatting
-        self._print_summary(
-            elapsed_time, articles_processed_val.value, batches_completed_val.value, worker_stats
-        )
+        # Print final summary using the StatsManager
+        for worker_id, stats in self.worker_stats.items():
+            self.stats_manager.update_stats(
+                stats.get("articles", 0), stats.get("time", 0), stats.get("batches", 0)
+            )
 
-        # Also access the statistics handler if available
-        root_logger = logging.getLogger("easyner.pipeline.splitter")
-        if hasattr(root_logger, "stats_handler"):
-            logger.info(root_logger.stats_handler.get_summary())
+        summary = self.stats_manager.format_summary(self.worker_stats)
+        logger.info(summary)
+        print(summary)
 
-        # Save worker statistics
-        self.worker_stats = worker_stats
+        return self.articles_processed_val.value, self.batches_completed_val.value
 
 
 def run_splitter(
