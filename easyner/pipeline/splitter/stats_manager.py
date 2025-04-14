@@ -120,7 +120,7 @@ class StatsManager:
         Get a formatted summary for display.
 
         Args:
-            worker_stats: Optional worker statistics dictionary
+            worker_stats: Optional worker statistics dictionary including 'peak_memory_mb'
 
         Returns:
             str: Formatted summary table
@@ -156,25 +156,32 @@ class StatsManager:
         # Add worker stats if provided
         if worker_stats and len(worker_stats) > 0:
             worker_data = []
-            for worker_id, stats in worker_stats.items():
+            # <-- Add 'Peak Mem (MiB)' to headers -->
+            headers = ["Worker", "Batches", "Articles", "Time", "Art/s", "Peak Mem (MiB)"]
+            for worker_id, stats in sorted(
+                worker_stats.items()
+            ):  # Sort by worker_id for consistent order
+                peak_mem = stats.get("peak_memory_mb", 0.0)  # Get peak memory
                 worker_data.append(
                     [
                         f"Worker {worker_id}",
                         stats.get("batches", 0),
-                        stats.get("articles", 0),
+                        f"{stats.get('articles', 0):,}",  # Format articles with comma
                         f"{stats.get('time', 0):.1f}s",
                         (
                             f"{stats.get('articles', 0) / stats.get('time', 1):.1f}"
                             if stats.get("time", 0) > 0
                             else "N/A"
                         ),
+                        f"{peak_mem:.1f}",  # Add formatted peak memory
                     ]
                 )
 
             worker_table = tabulate.tabulate(
                 worker_data,
-                headers=["Worker", "Batches", "Articles", "Time", "Art/s"],
+                headers=headers,  # Use updated headers
                 tablefmt="simple",
+                floatfmt=".1f",  # Ensure floats are formatted nicely
             )
 
             result += (

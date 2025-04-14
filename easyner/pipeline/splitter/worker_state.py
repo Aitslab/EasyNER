@@ -112,10 +112,18 @@ class WorkerStateManager:
             f"[Worker {self.worker_id}] Signaled ready (batch={supports_batch}, generator={supports_generator})"
         )
 
-    def signal_done(self):
-        """Signal worker has completed all work"""
-        self.result_queue.put(("WORKER_DONE", self.worker_id))
-        logger.debug(f"[Worker {self.worker_id}] Signaled done")
+    def signal_done(self, peak_memory_mb=0.0):
+        """
+        Signal worker has completed all work
+
+        Args:
+            peak_memory_mb (float): Peak memory usage in MiB observed by the worker.
+        """
+        # Include peak_memory_mb in the message tuple
+        self.result_queue.put(("WORKER_DONE", self.worker_id, peak_memory_mb))
+        logger.debug(
+            f"[Worker {self.worker_id}] Signaled done (Peak Mem: {peak_memory_mb:.1f} MiB)"
+        )
 
     def get_stats(self):
         """

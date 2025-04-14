@@ -186,9 +186,24 @@ class MessageHandler:
         Handle worker completion notification.
 
         Args:
-            message: The worker done message (WORKER_DONE, worker_id)
+            message: The worker done message (WORKER_DONE, worker_id, peak_memory_mb)
         """
-        _, worker_id = message
+        # Unpack the message including peak_memory_mb
+        _, worker_id, peak_memory_mb = message
+
+        # Store peak memory in worker stats
+        if worker_id in self.runner.worker_stats:
+            self.runner.worker_stats[worker_id]["peak_memory_mb"] = peak_memory_mb
+        else:
+            # Should not happen if initialized correctly, but handle defensively
+            logger.warning(f"Received WORKER_DONE for unknown worker_id {worker_id}")
+            self.runner.worker_stats[worker_id] = {
+                "peak_memory_mb": peak_memory_mb,
+                "batches": 0,
+                "articles": 0,
+                "time": 0.0,
+            }
+
         with self.runner.active_processes_val.get_lock():
             self.runner.active_processes_val.value = max(
                 0, self.runner.active_processes_val.value - 1
@@ -197,5 +212,7 @@ class MessageHandler:
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         logger.debug(
-            f"[{timestamp}] Worker {worker_id} has completed all tasks. {self.runner.remaining_workers} workers remaining."
+            f"[{timestamp}] Worker {worker_id} has completed all tasks. "
+            f"{self.runner.remaining_workers} workers remaining. "
+            f"(Peak Mem: {peak_memory_mb:.1f} MiB)"  # Log peak memory here too
         )

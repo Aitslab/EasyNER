@@ -7,6 +7,8 @@ from queue import Empty  # Import Empty exception
 from typing import Union
 import tabulate  # Import tabulate for nice tables
 import datetime
+import psutil  # <-- Add psutil
+import os  # <-- Add os
 
 from .tokenizers import SpacyTokenizer, NLTKTokenizer
 from .writers import JSONWriter
@@ -48,6 +50,17 @@ def worker_process(task_queue, result_queue, config, worker_id):
     state_manager = WorkerStateManager(worker_id, result_queue)
 
     logger.debug(f"[Worker {worker_id}] Starting")
+
+    # --- Memory Tracking ---
+    peak_memory_mb = 0
+    try:
+        process = psutil.Process(os.getpid())
+        # Initial memory reading
+        peak_memory_mb = process.memory_info().rss / (1024 * 1024)
+    except Exception as e:
+        logger.warning(f"[Worker {worker_id}] Could not initialize memory tracking: {e}")
+        process = None
+    # --- End Memory Tracking ---
 
     try:
         # Initialize components for this worker
@@ -137,6 +150,20 @@ def worker_process(task_queue, result_queue, config, worker_id):
                     # Clean up reporter
                     del report_progress.reporters[batch_idx]
 
+                # --- Update Peak Memory ---
+                if process:
+                    try:
+                        current_memory_mb = process.memory_info().rss / (1024 * 1024)
+                        peak_memory_mb = max(peak_memory_mb, current_memory_mb)
+                    except psutil.NoSuchProcess:
+                        logger.warning(
+                            f"[Worker {worker_id}] Process disappeared during memory check."
+                        )
+                        process = None  # Stop trying if process is gone
+                    except Exception as mem_e:
+                        logger.warning(f"[Worker {worker_id}] Error getting memory usage: {mem_e}")
+                # --- End Update Peak Memory ---
+
             except Exception as batch_exc:
                 logger.error(
                     f"[Worker {worker_id}] Error processing batch {batch_idx}: {batch_exc}",
@@ -150,8 +177,18 @@ def worker_process(task_queue, result_queue, config, worker_id):
         # Report error using state manager
         state_manager.report_error(str(init_exc))
     finally:
-        # Signal that this worker is done
-        state_manager.signal_done()
+        # --- Final Memory Check ---
+        if process:
+            try:
+                current_memory_mb = process.memory_info().rss / (1024 * 1024)
+                peak_memory_mb = max(peak_memory_mb, current_memory_mb)
+            except Exception:
+                pass  # Ignore errors on final check
+        # --- End Final Memory Check ---
+
+        # Signal that this worker is done, passing peak memory
+        state_manager.signal_done(peak_memory_mb)
+        logger.debug(f"[Worker {worker_id}] Final peak memory: {peak_memory_mb:.2f} MiB")
 
 
 class SplitterRunner:

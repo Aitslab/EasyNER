@@ -70,12 +70,7 @@ class SpacyTokenizer(TokenizerBase):
         # Load only components needed for sentence segmentation
         self.nlp = spacy.load(model_name, exclude=["ner", "attribute_ruler", "lemmatizer"])
 
-        # Example: Add custom component defined elsewhere (conditionally imported)
-        # if "parser" in self.nlp.pipe_names:
-        #     self.nlp.add_pipe(fix_enumeration_boundaries, after="parser") # Assuming fix_enumeration_boundaries is imported
-
-        # Set smaller batch size for small documents
-        self.nlp.batch_size = 128  # Consider making this configurable
+        self.nlp.batch_size = 20
 
     def segement_sentences(self, text: str) -> List[str]:
         """Splits text into sentences using the spaCy pipeline."""
@@ -111,6 +106,7 @@ class SpacyTokenizer(TokenizerBase):
         """
         for doc in self.nlp.pipe(texts):
             yield [sent.text for sent in doc.sents]
+            del doc  # Explicitly delete the doc to free memory
 
     def segement_sentences_generator(self, text: str) -> Iterable[str]:
         """

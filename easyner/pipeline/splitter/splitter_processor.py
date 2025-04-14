@@ -124,7 +124,7 @@ class SplitterProcessor:
             "processing_time": batch_duration,
             "worker_id": self.worker_id,
         }
-        logger.info(f"Batch {batch_idx} complete.", extra={"statistics": stats})
+        logger.debug(f"Batch {batch_idx} complete.", extra={"statistics": stats})
 
         # Explicit garbage collection after processing and writing a batch
         del processed_articles
