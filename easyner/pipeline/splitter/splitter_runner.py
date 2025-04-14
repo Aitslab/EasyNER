@@ -115,7 +115,8 @@ def worker_process(task_queue, result_queue, config, worker_id):
 
         # Signal that worker is initialized and ready
         state_manager.signal_ready(
-            tokenizer.SUPPORTS_BATCH_PROCESSING, tokenizer.SUPPORTS_BATCH_GENERATOR
+            tokenizer.SUPPORTS_BATCH_PROCESSING,
+            tokenizer.SUPPORTS_BATCH_GENERATOR,
         )
 
         # Process tasks from the queue
@@ -417,7 +418,10 @@ class SplitterRunner:
         self.remaining_workers = self.cpu_limit
 
         for i in range(self.cpu_limit):
-            p = Process(target=worker_process, args=(task_queue, result_queue, self.config, i))
+            p = Process(
+                target=worker_process,
+                args=(task_queue, result_queue, self.config, i),
+            )
             p.daemon = True
             p.start()
             processes.append(p)
@@ -582,18 +586,25 @@ class SplitterRunner:
         # Print final summary using the StatsManager
         for worker_id, stats in self.worker_stats.items():
             self.stats_manager.update_stats(
-                stats.get("articles", 0), stats.get("time", 0), stats.get("batches", 0)
+                stats.get("articles", 0),
+                stats.get("time", 0),
+                stats.get("batches", 0),
             )
 
         summary = self.stats_manager.format_summary(self.worker_stats)
         logger.info(summary)
         print(summary)
 
-        return self.articles_processed_val.value, self.batches_completed_val.value
+        return (
+            self.articles_processed_val.value,
+            self.batches_completed_val.value,
+        )
 
 
 def run_splitter(
-    splitter_config: dict, ignore: bool = False, cpu_limit: Union[int, None] = None
+    splitter_config: dict,
+    ignore: bool = False,
+    cpu_limit: Union[int, None] = None,
 ) -> dict:
     """
     Run the splitter pipeline with the given configuration.

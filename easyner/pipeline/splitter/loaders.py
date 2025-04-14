@@ -23,7 +23,8 @@ class StandardLoader(DataLoaderBase):
         self.input_path = input_path
         self.io_format = io_format
         logger.debug(
-            f"Initialized StandardLoader with input path: {input_path}, format: {io_format}"
+            f"Initialized StandardLoader with input path: {input_path}, "
+            f"format: {io_format}"
         )
 
     def load_data(self) -> list:
@@ -32,10 +33,16 @@ class StandardLoader(DataLoaderBase):
             # Use IO handler to read data
             io_handler = get_io_handler(self.io_format)
             data = io_handler.read(self.input_path)
-            logger.info(f"Successfully loaded {len(data)} articles from {self.input_path}")
+            logger.info(
+                f"Successfully loaded {len(data)} articles from "
+                f"{self.input_path}"
+            )
             return data
         except Exception as e:
-            logger.error(f"Error loading data from {self.input_path}: {e}", exc_info=True)
+            logger.error(
+                f"Error loading data from {self.input_path}: {e}",
+                exc_info=True,
+            )
             raise
 
 
@@ -58,7 +65,9 @@ class PubMedLoader(DataLoaderBase):
         all_files = sorted(glob(pattern))
 
         if not all_files:
-            logger.warning(f"No PubMed files found matching pattern: {pattern}")
+            logger.warning(
+                f"No PubMed files found matching pattern: {pattern}"
+            )
             return []
 
         logger.info(f"Found {len(all_files)} PubMed files")
@@ -70,11 +79,14 @@ class PubMedLoader(DataLoaderBase):
             start, end = self.limit
             selected_files = all_files[start:end]
             logger.info(
-                f"Processing PubMed files from index {start} to {end} ({len(selected_files)} files)"
+                f"Processing PubMed files from index {start} to {end} "
+                f"({len(selected_files)} files)"
             )
             return selected_files
         else:
-            logger.warning(f"Invalid limit format: {self.limit}, defaulting to ALL")
+            logger.warning(
+                f"Invalid limit format: {self.limit}, defaulting to ALL"
+            )
             return all_files
 
     def load_batch(self, file_path):
@@ -90,7 +102,8 @@ class PubMedLoader(DataLoaderBase):
 
             elapsed = time.time() - start_time
             logger.debug(
-                f"[{process_id}] Successfully loaded {len(data)} articles from {file_path} "
+                f"[{process_id}] Successfully loaded {len(data)} articles "
+                f"from {file_path} "
                 f"in {elapsed:.2f}s"
             )
 
@@ -100,24 +113,33 @@ class PubMedLoader(DataLoaderBase):
             return data
 
         except Exception as e:
-            logger.error(f"[{process_id}] Error loading batch file {file_path}: {e}", exc_info=True)
+            logger.error(
+                f"[{process_id}] Error loading batch file {file_path}: {e}",
+                exc_info=True,
+            )
             raise
 
     def get_batch_index(self, input_file):
-        """Extract batch index from filename using the pipeline utility function."""
+        """
+        Extract batch index from filename using the pipeline utility
+        function.
+        """
         try:
             # Use the centralized utility function
             return get_batch_index_from_filename(input_file)
         except ValueError as e:  # Catch specific error from utility
             logger.error(
-                f"Error extracting batch index from {input_file}: {e}", exc_info=False
+                f"Error extracting batch index from {input_file}: {e}",
+                exc_info=False,
             )  # Log less verbosely
-            # Decide on fallback behavior - returning 0 might still cause issues.
-            # Consider raising the error or returning None and handling it upstream.
-            # For now, keeping the previous behavior:
+            # Decide on fallback behavior - returning 0 might still cause
+            # issues. Consider raising the error or returning None and
+            # handling it upstream. For now, keeping the previous behavior:
             return 0
         except Exception as e:
             logger.error(
-                f"Unexpected error extracting batch index from {input_file}: {e}", exc_info=True
+                f"Unexpected error extracting batch index from {input_file}: "
+                f"{e}",
+                exc_info=True,
             )
             return 0

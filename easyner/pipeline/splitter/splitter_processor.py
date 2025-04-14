@@ -10,7 +10,13 @@ logger = logging.getLogger("easyner.pipeline.splitter.processor")
 
 
 class SplitterProcessor:
-    def __init__(self, tokenizer: TokenizerBase, output_writer, config, progress_callback=None):
+    def __init__(
+        self,
+        tokenizer: TokenizerBase,
+        output_writer,
+        config,
+        progress_callback=None,
+    ):
         """
         Initialize a processor with the given tokenizer, writer and configuration.
 
@@ -39,7 +45,7 @@ class SplitterProcessor:
 
         self.max_batch_size = self.config.get("max_tokenizer_batch_size", 5000)
         logger.debug(f"[Worker {self.worker_id}] Max tokenizer batch size: {self.max_batch_size}")
-        
+
         # Check for IO format configuration
         self.io_format = self.config.get("io_format", "json")
         logger.debug(f"[Worker {self.worker_id}] Using IO format: {self.io_format}")

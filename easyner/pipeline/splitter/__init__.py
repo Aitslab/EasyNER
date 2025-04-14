@@ -44,7 +44,9 @@ class BatchProcessingFilter(logging.Filter):
 
         current_time = time.time()
         # Only let batch messages through occasionally
-        if current_time - self.last_batch_message_time > 10:  # Every 10 seconds
+        if (
+            current_time - self.last_batch_message_time > 10
+        ):  # Every 10 seconds
             if self.suppressed_count > 0:
                 # Add a summary of suppressed messages
                 logger = logging.getLogger("easyner.pipeline.splitter")
@@ -85,7 +87,9 @@ class SummaryHandler(logging.Handler):
             self.statistics["articles_processed"] += stats.get("articles", 0)
 
             if "processing_time" in stats:
-                self.statistics["processing_times"].append(stats["processing_time"])
+                self.statistics["processing_times"].append(
+                    stats["processing_time"]
+                )
 
             if "batch_size" in stats:
                 self.statistics["batch_sizes"].append(stats["batch_size"])
@@ -101,7 +105,8 @@ class SummaryHandler(logging.Handler):
             self.statistics["processing_times"]
         )
         avg_batch_size = (
-            sum(self.statistics["batch_sizes"]) / len(self.statistics["batch_sizes"])
+            sum(self.statistics["batch_sizes"])
+            / len(self.statistics["batch_sizes"])
             if self.statistics["batch_sizes"]
             else 0
         )
@@ -134,7 +139,9 @@ if not logger.handlers:
         sys.stderr.reconfigure(line_buffering=True)
 
     # Create formatter
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     console_handler.setFormatter(formatter)
 
     # Add batch message filter

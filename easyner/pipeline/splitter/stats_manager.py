@@ -137,13 +137,26 @@ class StatsManager:
 
         # Add batch size info if available
         if "avg_batch_size" in summary:
-            summary_data.append(["Average batch size", f"{summary['avg_batch_size']:.1f} articles"])
+            summary_data.append(
+                [
+                    "Average batch size",
+                    f"{summary['avg_batch_size']:.1f} articles",
+                ]
+            )
 
         # Add processing time info if available
         if "avg_batch_time" in summary:
-            summary_data.append(["Average batch time", f"{summary['avg_batch_time']:.1f} seconds"])
             summary_data.append(
-                ["Median batch time", f"{summary['median_batch_time']:.1f} seconds"]
+                [
+                    "Average batch time",
+                    f"{summary['avg_batch_time']:.1f} seconds",
+                ]
+            )
+            summary_data.append(
+                [
+                    "Median batch time",
+                    f"{summary['median_batch_time']:.1f} seconds",
+                ]
             )
 
         # Format as a nice table
@@ -157,7 +170,14 @@ class StatsManager:
         if worker_stats and len(worker_stats) > 0:
             worker_data = []
             # <-- Add 'Peak Mem (MiB)' to headers -->
-            headers = ["Worker", "Batches", "Articles", "Time", "Art/s", "Peak Mem (MiB)"]
+            headers = [
+                "Worker",
+                "Batches",
+                "Articles",
+                "Time",
+                "Art/s",
+                "Peak Mem (MiB)",
+            ]
             for worker_id, stats in sorted(
                 worker_stats.items()
             ):  # Sort by worker_id for consistent order

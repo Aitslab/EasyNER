@@ -53,7 +53,13 @@ class ProgressReporter:
     def _send_progress_message(self):
         """Send a progress update message to the main process"""
         self.result_queue.put(
-            ("PROGRESS", self.batch_idx, self.processed_items, self.total_items, self.worker_id)
+            (
+                "PROGRESS",
+                self.batch_idx,
+                self.processed_items,
+                self.total_items,
+                self.worker_id,
+            )
         )
         logger.debug(
             f"[Worker {self.worker_id}] Progress report: {self.processed_items}/{self.total_items} "
@@ -74,7 +80,13 @@ class ProgressReporter:
 
         # Report completion
         self.result_queue.put(
-            ("COMPLETE", self.batch_idx, num_articles, processing_time, self.worker_id)
+            (
+                "COMPLETE",
+                self.batch_idx,
+                num_articles,
+                processing_time,
+                self.worker_id,
+            )
         )
         logger.debug(
             f"[Worker {self.worker_id}] Completed batch {self.batch_idx}: "
