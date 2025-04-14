@@ -278,42 +278,27 @@ class SingleDocumentStrategy(BaseProcessingStrategy):
 
                 if text_to_split:
                     sentences = tokenizer.segment_sentences(text_to_split)
-                    # Format output based on pubmed_bulk setting
-                    if is_pubmed:
-                        processed_articles[article_id] = {
-                            "title": title,
-                            "sentences": [{"text": s} for s in sentences],
-                        }
-                    else:
-                        processed_articles[article_id] = {
-                            "sentences": sentences,
-                        }
+                    # Format output - always include title and use consistent sentence format
+                    processed_articles[article_id] = {
+                        "title": title,
+                        "sentences": [{"text": s} for s in sentences],
+                    }
                 else:
                     # Handle empty text
-                    if is_pubmed:
-                        processed_articles[article_id] = {
-                            "title": title,
-                            "sentences": [],
-                        }
-                    else:
-                        processed_articles[article_id] = {
-                            "sentences": [],
-                        }
+                    processed_articles[article_id] = {
+                        "title": title,
+                        "sentences": [],
+                    }
             except Exception as e:
                 logger.error(
                     f"[Worker {worker_id}] Error processing article {article_id} in batch {batch_idx}: {e}",
                     exc_info=True,
                 )
                 # Ensure entry exists even on error
-                if is_pubmed:
-                    processed_articles[article_id] = {
-                        "title": article_data.get("title", ""),
-                        "sentences": [],
-                    }
-                else:
-                    processed_articles[article_id] = {
-                        "sentences": [],
-                    }
+                processed_articles[article_id] = {
+                    "title": article_data.get("title", ""),
+                    "sentences": [],
+                }
 
         elapsed = processor.record_elapsed_time(start_time)
         logger.debug(

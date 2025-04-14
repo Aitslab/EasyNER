@@ -14,7 +14,7 @@ class TokenizerBase(ABC):
     SUPPORTS_BATCH_GENERATOR: bool = False
 
     @abstractmethod
-    def segement_sentences(self, text: str) -> List[str]:
+    def segment_sentences(self, text: str) -> List[str]:
         """Splits a single text into sentences."""
         pass
 
@@ -33,6 +33,20 @@ class TokenizerBase(ABC):
     #         and a (start_char, end_char) tuple indicating its position.
     #     """
     #     pass
+
+    # Optional batch method - subclasses can override if they support it
+    def segment_sentences_batch(self, texts: Iterable[str]) -> List[List[str]]:
+        """Splits multiple texts into sentences in batch mode."""
+        # Default implementation raises error if called but not overridden
+        raise NotImplementedError(f"{self.__class__.__name__} does not support batch processing.")
+
+    # Optional batch generator method - subclasses can override
+    def segment_sentences_batch_generator(self, texts: Iterable[str]) -> Iterable[List[str]]:
+        """Splits multiple texts into sentences in batch mode, yielding results incrementally."""
+        # Default implementation raises error if called but not overridden
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not support batch generator processing."
+        )
 
 
 class SpacyTokenizer(TokenizerBase):
@@ -72,7 +86,7 @@ class SpacyTokenizer(TokenizerBase):
 
         self.nlp.batch_size = 20
 
-    def segement_sentences(self, text: str) -> List[str]:
+    def segment_sentences(self, text: str) -> List[str]:
         """Splits text into sentences using the spaCy pipeline."""
         doc = self.nlp(text)
         return [sent.text for sent in doc.sents]
@@ -108,7 +122,7 @@ class SpacyTokenizer(TokenizerBase):
             yield [sent.text for sent in doc.sents]
             del doc  # Explicitly delete the doc to free memory
 
-    def segement_sentences_generator(self, text: str) -> Iterable[str]:
+    def segment_sentences_generator(self, text: str) -> Iterable[str]:
         """
         Splits a single large text into sentences, yielding them one by one.
         More memory-efficient for very large texts than segmenting_sentences().
@@ -144,7 +158,7 @@ class NLTKTokenizer(TokenizerBase):
 
         self.sent_tokenize = sent_tokenize
 
-    def segement_sentences(self, text: str) -> List[str]:
+    def segment_sentences(self, text: str) -> List[str]:
         """Splits text into sentences using NLTK's sent_tokenize."""
         # Add basic error handling or text type check if needed
         if not isinstance(text, str):

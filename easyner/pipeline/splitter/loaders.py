@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-import json
-import os
 from glob import glob
 import logging
 import gc
 from multiprocessing import current_process
 import time
+
+from easyner.io import get_io_handler
+from easyner.pipeline.utils import get_batch_index_from_filename
 
 # Get logger for this module
 logger = logging.getLogger("easyner.pipeline.splitter.loaders")
@@ -18,15 +19,19 @@ class DataLoaderBase(ABC):
 
 
 class StandardLoader(DataLoaderBase):
-    def __init__(self, input_path):
+    def __init__(self, input_path, io_format="json"):
         self.input_path = input_path
-        logger.debug(f"Initialized StandardLoader with input path: {input_path}")
+        self.io_format = io_format
+        logger.debug(
+            f"Initialized StandardLoader with input path: {input_path}, format: {io_format}"
+        )
 
     def load_data(self) -> list:
         logger.info(f"Loading data from {self.input_path}")
         try:
-            with open(self.input_path, "r", encoding="utf-8") as f:
-                data = json.loads(f.read())
+            # Use IO handler to read data
+            io_handler = get_io_handler(self.io_format)
+            data = io_handler.read(self.input_path)
             logger.info(f"Successfully loaded {len(data)} articles from {self.input_path}")
             return data
         except Exception as e:
@@ -35,18 +40,21 @@ class StandardLoader(DataLoaderBase):
 
 
 class PubMedLoader(DataLoaderBase):
-    def __init__(self, input_folder, limit="ALL", key="n"):
+    def __init__(self, input_folder, limit="ALL", key="n", io_format="json"):
         self.input_folder = input_folder
         self.limit = limit
         self.key = key
+        self.io_format = io_format
         logger.debug(
-            f"Initialized PubMedLoader with input folder: {input_folder}, limit: {limit}, key: {key}"
+            f"Initialized PubMedLoader with input folder: {input_folder}, "
+            f"limit: {limit}, key: {key}, format: {io_format}"
         )
 
     def load_data(self):
         """Load pre-batched PubMed files based on configured limits"""
         logger.info(f"Loading PubMed data from {self.input_folder}")
-        pattern = f"{self.input_folder}/*{self.key}*.json"
+        io_handler = get_io_handler(self.io_format)
+        pattern = f"{self.input_folder}/*{self.key}*.{io_handler.EXTENSION}"
         all_files = sorted(glob(pattern))
 
         if not all_files:
@@ -76,33 +84,17 @@ class PubMedLoader(DataLoaderBase):
         start_time = time.time()
 
         try:
-            # Try orjson first (much faster and more memory efficient)
-            try:
-                import orjson
-
-                with open(file_path, "rb") as f:
-                    data = orjson.loads(f.read())
-                elapsed = time.time() - start_time
-                logger.debug(
-                    f"[{process_id}] Successfully loaded {len(data)} articles from {file_path} "
-                    f"in {elapsed:.2f}s using orjson"
-                )
-                return data
-            except ImportError:
-                # Standard json with optimizations if orjson not available
-                pass
-
-            # Step 1: Read file with minimal memory overhead
-            with open(file_path, "r", encoding="utf-8") as f:
-                data = json.load(f)
+            # Use IO handler to read data
+            io_handler = get_io_handler(self.io_format)
+            data = io_handler.read(file_path)
 
             elapsed = time.time() - start_time
             logger.debug(
                 f"[{process_id}] Successfully loaded {len(data)} articles from {file_path} "
-                f"in {elapsed:.2f}s ({len(data)} articles)"
+                f"in {elapsed:.2f}s"
             )
 
-            # Step 2: Explicitly trigger garbage collection
+            # Explicitly trigger garbage collection
             gc.collect()
 
             return data
@@ -112,10 +104,20 @@ class PubMedLoader(DataLoaderBase):
             raise
 
     def get_batch_index(self, input_file):
-        """Extract batch index from filename"""
+        """Extract batch index from filename using the pipeline utility function."""
         try:
-            index = int(os.path.splitext(os.path.basename(input_file))[0].split(self.key)[-1])
-            return index
+            # Use the centralized utility function
+            return get_batch_index_from_filename(input_file)
+        except ValueError as e:  # Catch specific error from utility
+            logger.error(
+                f"Error extracting batch index from {input_file}: {e}", exc_info=False
+            )  # Log less verbosely
+            # Decide on fallback behavior - returning 0 might still cause issues.
+            # Consider raising the error or returning None and handling it upstream.
+            # For now, keeping the previous behavior:
+            return 0
         except Exception as e:
-            logger.error(f"Error extracting batch index from {input_file}: {e}", exc_info=True)
+            logger.error(
+                f"Unexpected error extracting batch index from {input_file}: {e}", exc_info=True
+            )
             return 0

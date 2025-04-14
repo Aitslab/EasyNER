@@ -81,9 +81,12 @@ def worker_process(task_queue, result_queue, config, worker_id):
             raise ValueError(f"Unknown tokenizer: {config['tokenizer']}")
 
         logger.debug(f"[Worker {worker_id}] Initializing writer")
+        # Get IO format from config
+        io_format = config.get("io_format", "json")
         writer = JSONWriter(
             output_folder=config["output_folder"],
             output_file_prefix=config["output_file_prefix"],
+            io_format=io_format,
         )
 
         # Define progress callback function that uses ProgressReporter
@@ -232,19 +235,27 @@ class SplitterRunner:
 
     def _initialize_components(self):
         """Initialize loader component based on configuration"""
+        # Get IO format from config
+        io_format = self.config.get("io_format", "json")
+
         # Initialize loader based on config
         if self.config.get("pubmed_bulk", False):
             self.loader = PubMedLoader(
                 input_folder=self.config["input_path"],
                 limit=self.config.get("file_limit", "ALL"),
                 key=self.config.get("key", "n"),
+                io_format=io_format,
             )
             self.is_pubmed = True
-            logger.info(f"Initialized PubMed loader for {self.config['input_path']}")
+            logger.info(
+                f"Initialized PubMed loader for {self.config['input_path']} with format {io_format}"
+            )
         else:
-            self.loader = StandardLoader(input_path=self.config["input_path"])
+            self.loader = StandardLoader(input_path=self.config["input_path"], io_format=io_format)
             self.is_pubmed = False
-            logger.info(f"Initialized Standard loader for {self.config['input_path']}")
+            logger.info(
+                f"Initialized Standard loader for {self.config['input_path']} with format {io_format}"
+            )
 
     def _stats_updater(
         self,
@@ -598,6 +609,11 @@ def run_splitter(
     if ignore:
         logger.info("Ignoring script: splitter.")
         return {}
+
+    # Validate tokenizer configuration before spawning processes
+    tokenizer_name = splitter_config.get("tokenizer", "").lower()
+    if tokenizer_name not in ["spacy", "nltk"]:
+        raise ValueError(f"Unknown tokenizer: {tokenizer_name}")
 
     cpu_limit_to_use = min(cpu_limit, cpu_count()) if cpu_limit else cpu_count()
     logger.debug(
