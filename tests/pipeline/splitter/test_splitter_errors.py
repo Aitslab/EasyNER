@@ -57,7 +57,9 @@ def test_invalid_json_handling(temp_invalid_dir):
         run_splitter(config)
         # If it doesn't raise an exception, check if output was created
         output_files = glob(os.path.join(output_dir, "test_invalid_*.json"))
-        assert len(output_files) == 0, "Output file was created with invalid JSON input"
+        assert (
+            len(output_files) == 0
+        ), "Output file was created with invalid JSON input"
     except Exception as e:
         # The error should be specific about JSON parsing issues
         assert (
@@ -88,7 +90,9 @@ def test_empty_file_handling(temp_invalid_dir):
         run_splitter(config)
         # If it doesn't raise an exception, check if output was created
         output_files = glob(os.path.join(output_dir, "test_empty_*.json"))
-        assert len(output_files) == 0, "Output file was created with empty input"
+        assert (
+            len(output_files) == 0
+        ), "Output file was created with empty input"
     except Exception as e:
         # Empty file error should be specific
         assert (
@@ -156,7 +160,15 @@ def test_invalid_tokenizer(temp_invalid_dir):
     # Create a simple valid JSON file
     valid_path = os.path.join(temp_invalid_dir, "valid.json")
     with open(valid_path, "w", encoding="utf-8") as f:
-        json.dump({"article1": {"title": "Test Article", "text": "This is test content."}}, f)
+        json.dump(
+            {
+                "article1": {
+                    "title": "Test Article",
+                    "text": "This is test content.",
+                }
+            },
+            f,
+        )
 
     # Set up output directory
     output_dir = os.path.join(temp_invalid_dir, "output_tokenizer")
@@ -178,6 +190,6 @@ def test_invalid_tokenizer(temp_invalid_dir):
         run_splitter(config)
 
     # Error should mention the tokenizer
-    assert "tokenizer" in str(excinfo.value).lower() or "non_existent_tokenizer" in str(
+    assert "tokenizer" in str(
         excinfo.value
-    )
+    ).lower() or "non_existent_tokenizer" in str(excinfo.value)
