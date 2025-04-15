@@ -35,8 +35,8 @@ packages = ["easyner"]
 testpaths = ["tests"]
 
 [tool.black]
-line-length = 100
-target-version = ['py38']
+line-length = 79
+target-version = ['py39']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -54,4 +54,43 @@ exclude = '''
 
 [tool.isort]
 profile = "black"
-line_length = 100
+line_length = 79
+
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+follow_imports = "skip"
+exclude = '''(?x)(
+  ^venv/|
+  ^\.venv/|
+  ^build/|
+  ^dist/
+)'''
+overrides = [
+    { module = "numpy.*", follow_imports = "silent" },
+    { module = "pandas.*", follow_imports = "silent" },
+]
+
+
+[tool.flake8]
+max-line-length = 79
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "*.egg-info",
+    ".venv",
+    "venv",
+    "**/temp/**"
+]
+select = "E,W,F,N"
+ignore = "E203,W503,E501"
+per-file-ignores = """
+    __init__.py:F401
+"""
