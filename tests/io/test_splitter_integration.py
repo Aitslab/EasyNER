@@ -2,8 +2,6 @@ import pytest
 import os
 import tempfile
 import json
-import shutil
-from pathlib import Path
 
 from easyner.io import get_io_handler
 from easyner.pipeline.splitter.writers import JSONWriter
@@ -53,7 +51,9 @@ class TestSplitterIOIntegration:
         with tempfile.TemporaryDirectory() as tmp_dir:
             # Initialize JSONWriter with json io_format
             writer = JSONWriter(
-                output_folder=tmp_dir, output_file_prefix="test_split", io_format="json"
+                output_folder=tmp_dir,
+                output_file_prefix="test_split",
+                io_format="json",
             )
 
             # Write processed data

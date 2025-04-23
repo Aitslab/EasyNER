@@ -136,15 +136,21 @@ def test_different_tokenizers(temp_standard_dir):
             if process.is_alive():
                 # If still running after timeout, terminate and skip
                 process.terminate()
-                pytest.skip("NLTK punkt download is taking too long, skipping test")
+                pytest.skip(
+                    "NLTK punkt download is taking too long, skipping test"
+                )
 
             # Verify it was downloaded
             nltk.data.find("tokenizers/punkt")
         except Exception:
-            pytest.skip("Failed to download NLTK punkt, skipping NLTK tokenizer test")
+            pytest.skip(
+                "Failed to download NLTK punkt, skipping NLTK tokenizer test"
+            )
 
     # Set up output directory
-    output_dir = os.path.join(os.path.dirname(temp_standard_dir), "output_nltk")
+    output_dir = os.path.join(
+        os.path.dirname(temp_standard_dir), "output_nltk"
+    )
     os.makedirs(output_dir, exist_ok=True)
 
     # Configure the splitter with NLTK
@@ -165,7 +171,9 @@ def test_different_tokenizers(temp_standard_dir):
 
         # Find the output file(s)
         output_files = glob(os.path.join(output_dir, "test_nltk_*.json"))
-        assert len(output_files) > 0, "No output files were created with NLTK tokenizer"
+        assert (
+            len(output_files) > 0
+        ), "No output files were created with NLTK tokenizer"
 
         # Load the output file
         with open(output_files[0], "r", encoding="utf-8") as f:
