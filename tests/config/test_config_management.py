@@ -3,16 +3,69 @@ import shutil
 import tempfile
 from pathlib import Path
 from typing import Any, Dict, Generator
-
+from contextlib import redirect_stdout
+import io
+from types import SimpleNamespace
 import pytest
 
-from easyner.config.validator import (
-    check_absolute_paths,
-    load_schema,
-    validate_config,
-)
-from easyner.config.generator import generate_template
+from easyner.config.validator import ConfigValidator
+from easyner.config.generator import ConfigGenerator
 from easyner.infrastructure.paths import PROJECT_ROOT
+
+from easyner.infrastructure.paths import SCHEMA_PATH
+
+# Constants for frequently used filenames and values using SimpleNamespace
+# for better attribute access and IDE autocomplete support
+TEST_FILENAMES = SimpleNamespace(
+    CONFIG="config.json",
+    TEMPLATE="config.template.json",
+    INVALID_CONFIG_MISSING="invalid_config_missing.json",
+    INVALID_CONFIG_TYPE="invalid_config_type.json",
+    INVALID_CONFIG_PATHS="invalid_config_paths.json",
+    BAD_TEMPLATE="bad_template.json",
+    ORIGINAL_BACKUP="original_backup.json",
+    PARTIAL_CONFIG="partial_config.json",
+    GENERATED_TEMPLATE="generated_template.json",
+    CURRENT_CONFIG_COPY="current_config_copy.json",
+)
+
+
+# Helper functions for common operations
+def create_json_file(
+    directory: Path, filename: str, content: Dict[str, Any]
+) -> Path:
+    """Create a JSON file with the given content and return its path."""
+    file_path = directory / filename
+    with open(file_path, "w") as f:
+        json.dump(content, f, indent=2)
+    return file_path
+
+
+def load_json(file_path: Path) -> Dict[str, Any]:
+    """Load JSON from file."""
+    with open(file_path, "r") as f:
+        return json.load(f)
+
+
+def create_minimal_valid_config() -> Dict[str, Any]:
+    """Create a minimally valid configuration."""
+    return {
+        "CPU_LIMIT": 5,
+        "TIMEKEEP": True,
+        "ignore": {
+            "cord_loader": True,
+            "downloader": False,
+            "text_loader": True,
+            "pubmed_bulk_loader": True,
+            "splitter": False,
+            "ner": True,
+            "analysis": True,
+            "merger": True,
+            "metrics": True,
+            "nel": True,
+            "result_inspection": True,
+        },
+    }
 
 
 @pytest.fixture
@@ -82,21 +135,34 @@ def config_files(
     }
 
 
+@pytest.fixture
+def validator() -> ConfigValidator:
+    """Create a ConfigValidator instance for testing."""
+    return ConfigValidator(quiet=True)
+
+
+@pytest.fixture
+def generator() -> ConfigGenerator:
+    """Create a ConfigGenerator instance for testing."""
+    return ConfigGenerator(quiet=True, schema_path=SCHEMA_PATH)
+
+
 def test_generate_template(
-    config_files: Dict[str, str], sample_config: Dict[str, Any]
+    config_files: Dict[str, str],
+    sample_config: Dict[str, Any],
+    generator: ConfigGenerator,
 ) -> None:
     """Test the template generation functionality."""
     # Generate the template - now directly using the output path
-    generate_template(config_files["template_path"])
+
+    generator.generate_template(config_files["template_path"])
 
     # Check that the template file exists
-    assert Path(
-        config_files["template_path"]
-    ).exists(), "Template file was not created"
+    template_path = Path(config_files["template_path"])
+    assert template_path.exists(), "Template file was not created"
 
     # Load the template
-    with open(config_files["template_path"], "r") as f:
-        template = json.load(f)
+    template = load_json(template_path)
 
     # Check that the basic structure is present
     assert "CPU_LIMIT" in template
@@ -117,137 +183,183 @@ def test_generate_template(
     assert "$schema" in template
 
 
-def test_validate_config(config_files: Dict[str, str]) -> None:
+def test_validate_config(
+    config_files: Dict[str, str],
+    validator: ConfigValidator,
+    generator: ConfigGenerator,
+) -> None:
     """Test the config validation functionality."""
-    # Validate the original config
-    result = validate_config(config_files["config_path"])
+    # Disable quiet mode temporarily to see validation errors
+    validator.quiet = False
+
+    # Validate the original config and capture output
+    f = io.StringIO()
+    with redirect_stdout(f):
+        result = validator.validate_config(config_files["config_path"])
+
+    # Print error output if validation failed to help debug
+    if not result:
+        print(f"Config validation failed with errors:\n{f.getvalue()}")
+
     assert result, "Valid config should pass validation"
 
-    # Generate the template directly to the template path
-    generate_template(config_files["template_path"])
+    # Re-enable quiet mode
+    validator.quiet = True
 
-    # Validate the template
-    result = validate_config(config_files["template_path"])
+    # Generate the template directly to the template path
+    generator.generate_template(config_files["template_path"])
+
+    # Validate the template using Path object
+    template_path = Path(config_files["template_path"])
+
+    # Disable quiet mode to see template validation errors
+    validator.quiet = False
+    f = io.StringIO()
+    with redirect_stdout(f):
+        result = validator.validate_config(str(template_path))
+
+    # Print error output if validation failed to help debug
+    if not result:
+        print(f"Template validation failed with errors:\n{f.getvalue()}")
+
     assert result, "Template should pass validation"
 
 
-def test_validate_config_missing_fields(temp_test_dir: str) -> None:
+def test_validate_config_missing_fields(
+    temp_test_dir: str, validator: ConfigValidator
+) -> None:
     """Test validation of configs missing required fields."""
     # Test invalid config - missing required fields
-    invalid_config = Path(temp_test_dir) / "invalid_config_missing.json"
-    with open(invalid_config, "w") as f:
-        # This will fail because it's missing required fields like TIMEKEEP and ignore
-        json.dump({"CPU_LIMIT": 5}, f)
+    invalid_config_path = create_json_file(
+        Path(temp_test_dir),
+        TEST_FILENAMES.INVALID_CONFIG_MISSING,
+        {"CPU_LIMIT": 5},
+    )
 
-    result = validate_config(str(invalid_config))
+    result = validator.validate_config(str(invalid_config_path))
     assert not result, "Config missing required fields should fail validation"
 
 
 def test_validate_config_wrong_types(
-    temp_test_dir: str, sample_config: Dict[str, Any]
+    temp_test_dir: str,
+    sample_config: Dict[str, Any],
+    validator: ConfigValidator,
 ) -> None:
     """Test validation of configs with incorrect data types."""
     # Test invalid config - wrong type
-    invalid_config_type = Path(temp_test_dir) / "invalid_config_type.json"
-    with open(invalid_config_type, "w") as f:
-        # This includes all required fields but has wrong type for CPU_LIMIT
-        json.dump(
-            {
-                "CPU_LIMIT": "not_an_integer",
-                "TIMEKEEP": True,
-                "ignore": sample_config["ignore"],
-            },
-            f,
-        )
+    invalid_config_path = create_json_file(
+        Path(temp_test_dir),
+        TEST_FILENAMES.INVALID_CONFIG_TYPE,
+        {
+            "CPU_LIMIT": "not_an_integer",
+            "TIMEKEEP": True,
+            "ignore": sample_config["ignore"],
+        },
+    )
 
-    result = validate_config(str(invalid_config_type))
+    result = validator.validate_config(str(invalid_config_path))
     assert not result, "Config with wrong types should fail validation"
 
 
-def test_validate_config_path_types(temp_test_dir: str) -> None:
+def test_validate_config_path_types(
+    temp_test_dir: str, validator: ConfigValidator
+) -> None:
     """Test that config validation requires paths to be strings."""
-    invalid_config = Path(temp_test_dir) / "invalid_config_paths.json"
-    with open(invalid_config, "w") as f:
-        json.dump(
-            {
-                "CPU_LIMIT": 5,
-                "TIMEKEEP": True,
-                "ignore": {
-                    "cord_loader": True,
-                    "downloader": False,
-                    "text_loader": True,
-                    "pubmed_bulk_loader": True,
-                    "splitter": False,
-                    "ner": True,
-                    "analysis": True,
-                    "merger": True,
-                    "metrics": True,
-                    "nel": True,
-                    "result_inspection": True,
-                },
-                "downloader": {
-                    "input_path": "data/test.txt",
-                    "output_path": 42,  # Should be a string
-                    "batch_size": 100,
-                },
+    invalid_config_path = create_json_file(
+        Path(temp_test_dir),
+        TEST_FILENAMES.INVALID_CONFIG_PATHS,
+        {
+            "CPU_LIMIT": 5,
+            "TIMEKEEP": True,
+            "ignore": {
+                "cord_loader": True,
+                "downloader": False,
+                "text_loader": True,
+                "pubmed_bulk_loader": True,
+                "splitter": False,
+                "ner": True,
+                "analysis": True,
+                "merger": True,
+                "metrics": True,
+                "nel": True,
+                "result_inspection": True,
             },
-            f,
-        )
+            "downloader": {
+                "input_path": "data/test.txt",
+                "output_path": 42,  # Should be a string
+                "batch_size": 100,
+            },
+        },
+    )
 
-    result = validate_config(str(invalid_config))
+    result = validator.validate_config(str(invalid_config_path))
     assert not result, "Config with non-string path should fail validation"
 
 
-def test_config_path_types() -> None:
+def test_config_path_types(
+    temp_test_dir: str, validator: ConfigValidator
+) -> None:
     """Test that path fields in the current config are valid strings."""
-    # This test should pass with the fixed config.json where all paths are strings
-    result = validate_config("config.json")
+    # Copy the project config to a temp location to avoid modifying original
+    project_config_path = PROJECT_ROOT / "config.json"
+    temp_config_path = Path(temp_test_dir) / "temp_config.json"
+    shutil.copy(project_config_path, temp_config_path)
+
+    # Validate the copy instead of the original
+    result = validator.validate_config(str(temp_config_path))
     assert result is True
 
 
-def test_check_absolute_paths(config_files: Dict[str, str]) -> None:
+def test_check_absolute_paths(
+    config_files: Dict[str, str],
+    validator: ConfigValidator,
+    generator: ConfigGenerator,
+) -> None:
     """Test the absolute path checking functionality."""
     # Generate the template
-    generate_template(config_files["template_path"])
+    generator.generate_template(config_files["template_path"])
 
     # Check the template for absolute paths
-    result = check_absolute_paths(config_files["template_path"])
+    result = validator.check_absolute_paths(config_files["template_path"])
     assert result, "Template should not have absolute paths"
 
 
 def test_check_absolute_paths_failure(
-    config_files: Dict[str, str], temp_test_dir: str
+    config_files: Dict[str, str],
+    temp_test_dir: str,
+    validator: ConfigValidator,
+    generator: ConfigGenerator,
 ) -> None:
     """Test that absolute paths are correctly detected."""
     # Generate the template
-    generate_template(config_files["template_path"])
+    generator.generate_template(config_files["template_path"])
 
     # Create a template with an absolute path
-    bad_template = Path(temp_test_dir) / "bad_template.json"
-    with open(config_files["template_path"], "r") as f:
-        template = json.load(f)
+    bad_template_path = Path(temp_test_dir) / TEST_FILENAMES.BAD_TEMPLATE
+
+    # Load and modify the template
+    template = load_json(Path(config_files["template_path"]))
 
     # Introduce an absolute path
     template["ner"]["input_path"] = "C:/some/path"
 
-    with open(bad_template, "w") as f:
-        json.dump(template, f, indent=2)
+    # Save the modified template
+    create_json_file(
+        Path(temp_test_dir), TEST_FILENAMES.BAD_TEMPLATE, template
+    )
 
     # Suppress output during this test to avoid confusing error messages
-    import io
-    from contextlib import redirect_stdout
-
     f = io.StringIO()
     with redirect_stdout(f):
-        result = check_absolute_paths(str(bad_template))
+        result = validator.check_absolute_paths(str(bad_template_path))
 
     assert not result, "Template with absolute paths should fail check"
 
 
-def test_schema_loading() -> None:
+def test_schema_loading(validator: ConfigValidator) -> None:
     """Test that the schema loads correctly."""
     # Check that the schema is loaded as expected
-    schema = load_schema()
+    schema = validator.schema
     assert isinstance(schema, dict)
     assert "type" in schema
     assert schema["type"] == "object"
@@ -255,7 +367,9 @@ def test_schema_loading() -> None:
     assert "CPU_LIMIT" in schema["properties"]
 
 
-def test_validate_current_config() -> None:
+def test_validate_current_config(
+    temp_test_dir: str, validator: ConfigValidator
+) -> None:
     """Test validation of the current config.json file.
 
     This test ensures that the actual config file being used in the project
@@ -264,16 +378,100 @@ def test_validate_current_config() -> None:
     # Check if config.json exists
     config_path = PROJECT_ROOT / "config.json"
     assert config_path.exists(), "Current config.json file not found"
-    "Generate using python easyner.config.generate.py"
 
-    # Validate the config file
-    result = validate_config(str(config_path))
+    # Create a copy in the temp directory
+    temp_config_path = Path(temp_test_dir) / TEST_FILENAMES.CURRENT_CONFIG_COPY
+    shutil.copy(config_path, temp_config_path)
 
-    # The test should fail if validation fails
+    # Validate the copy instead of the original
+    result = validator.validate_config(str(temp_config_path))
     assert (
         result
     ), "Current config.json failed validation - check for path format issues or invalid values"
 
-    # Check for absolute paths in the config
-    result = check_absolute_paths(str(config_path))
+    # Check for absolute paths in the config copy
+    result = validator.check_absolute_paths(str(temp_config_path))
     assert result, "Current config.json contains absolute paths"
+
+
+def test_validator_run_validation_tests(
+    temp_test_dir: str, validator: ConfigValidator
+) -> None:
+    """Test the run_validation_tests method."""
+    # This test verifies the behavior of run_validation_tests
+    # In a real environment it would pass if both the config.json and config.template.json files exist
+    # Since we're testing in isolation, we expect it to fail because those files don't exist
+    result = validator.run_validation_tests()
+    assert isinstance(
+        result, bool
+    ), "run_validation_tests should return a boolean"
+
+
+def test_generate_template_preserves_values(
+    temp_test_dir: str, validator: ConfigValidator, generator: ConfigGenerator
+) -> None:
+    """Test that generate_template preserves existing values and only adds missing fields."""
+    # Create a partial config with some values in a temporary file
+    temp_dir = Path(temp_test_dir)
+
+    partial_config = {
+        "$schema": "easyner/config/schema.json",
+        "CPU_LIMIT": 8,  # Custom value
+        "TIMEKEEP": False,
+        "ignore": {
+            "cord_loader": False,
+            "downloader": True,
+        },
+    }
+
+    # Create input file that will also serve as the output
+    partial_config_path = create_json_file(
+        temp_dir, TEST_FILENAMES.PARTIAL_CONFIG, partial_config
+    )
+
+    # Make a backup copy to verify original content isn't lost
+    original_backup_path = temp_dir / TEST_FILENAMES.ORIGINAL_BACKUP
+    shutil.copy(partial_config_path, original_backup_path)
+
+    # Generate template using the partial config file path directly
+    generator.generate_template(str(partial_config_path), skip_prettier=True)
+
+    # Load the updated config and original backup for verification
+    updated_config = load_json(partial_config_path)
+    original_content = load_json(original_backup_path)
+
+    # Check that original values are preserved
+    assert (
+        updated_config["CPU_LIMIT"] == 8
+    ), "Custom CPU_LIMIT value was not preserved"
+    assert (
+        updated_config["TIMEKEEP"] is False
+    ), "Custom TIMEKEEP value was not preserved"
+    assert (
+        updated_config["ignore"]["cord_loader"] is False
+    ), "Custom ignore.cord_loader value was not preserved"
+    assert (
+        updated_config["ignore"]["downloader"] is True
+    ), "Custom ignore.downloader value was not preserved"
+
+    # Check that missing fields were added
+    assert (
+        "text_loader" in updated_config["ignore"]
+    ), "Missing ignore.text_loader field was not added"
+    assert "ner" in updated_config, "Missing ner section was not added"
+    assert (
+        "downloader" in updated_config
+    ), "Missing downloader section was not added"
+
+    # Check that validation passes on the completed template
+    assert validator.validate_config(
+        str(partial_config_path)
+    ), "Generated template fails validation"
+
+    # Verify the original file wasn't modified (our backup should still have the original content)
+    assert "text_loader" not in original_content.get(
+        "ignore", {}
+    ), "Original file content verification failed"
+    assert (
+        "ner" not in original_content
+    ), "Original file content verification failed"

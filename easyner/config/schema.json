@@ -262,7 +262,8 @@
               "maxItems": 2,
               "description": "Process files with indices between [start, end] inclusive."
             }
-          ]
+          ],
+          "default": "ALL"
         },
         "tokenizer": {
           "type": "string",

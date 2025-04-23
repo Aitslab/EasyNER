@@ -1,102 +1,66 @@
 """
 EasyNER Configuration Management
 
-Tools for creating, validating, and working with the config.
-
-Main benefit is to validate the configuration files against a schema on
-load ensure that the configuration is correct and complete.
+This module provides tools for creating, validating, and working with configuration files.
 
 Example Usage:
 -------------
-1. Load and validate a configuration file:
+1. Load and use the configuration:
    ```python
-   from scripts.config import load_config
+   from easyner.config import config_manager
 
-   # Load the default config file (config.json)
-   config = load_config()
+   # Get the entire config
+   config = config_manager.get_config()
+   print(f"Using {config['CPU_LIMIT']} CPU cores")
 
-   # Access a specific module's configuration
-   ner_config = config["ner"]
+   # Access specific sections using dictionary syntax
+   ner_config = config_manager["ner"]
    print(f"Using NER model: {ner_config['model_type']}")
+
+   # Check if a config key exists
+   if "experimental_features" in config_manager:
+       print("Experimental features are configured")
+
+   # Iterate through config sections
+   for section_name, section_data in config_manager.items():
+       print(f"Section: {section_name}")
    ```
 
-2. Generate a template from the schema:
+2. Working with configuration templates and validation:
    ```python
-   from scripts.config import generate_template_from_schema,
-   DEFAULT_TEMPLATE_PATH
+   from easyner.config import config_manager
 
-   # Generate a template based on the schema
-   generate_template_from_schema(DEFAULT_TEMPLATE_PATH)
-   print(f"Template generated at {DEFAULT_TEMPLATE_PATH}")
+   # Generate a template
+   config_manager.generate_template()
+
+   # Validate configuration files
+   is_valid = config_manager.validate_all()
    ```
 
-3. Validate a configuration file:
+3. For more advanced use cases:
    ```python
-   from scripts.config import validate_config
+   from easyner.config.manager import ConfigManager
+   from easyner.config.validator import ConfigValidator
+   from easyner.config.generator import ConfigGenerator
 
-   # Validate a specific config file
-   is_valid = validate_config("my_custom_config.json")
-   if not is_valid:
-       print("Configuration has issues that need to be fixed")
-   ```
+   # Create custom instances for specific needs
+   custom_manager = ConfigManager(config_path="custom_config.json")
 
-4. Format a JSON file with prettier:
-   ```python
-   from scripts.config import format_with_prettier
-
-   # Format a JSON file using prettier (requires npm prettier to be
-   # installed)
-   format_with_prettier("config.template.json")
+   # Access config using dictionary syntax
+   custom_config = custom_manager["ner"]
    ```
 """
 
-__all__ = [
-    # Variables
-    # "config",
-    # Functions
-    "load_config",
-]
+from easyner.infrastructure.paths import (
+    CONFIG_PATH,
+    TEMPLATE_PATH,
+    SCHEMA_PATH,
+)
+from easyner.config.manager import ConfigManager
 
-
-import json
-from pathlib import Path
-from typing import Dict, Any, Union
-
-# Import paths from the infrastructure package
-from easyner.infrastructure.paths import CONFIG_PATH
-
-
-def load_config(config_path: Union[str, Path] = CONFIG_PATH) -> Dict[str, Any]:
-    """Load and validate a configuration file.
-
-    Args:
-        config_path: Path to the configuration file to load
-
-    Returns:
-        Dict containing the loaded configuration
-
-    Raises:
-        FileNotFoundError: If the config file doesn't exist
-        json.JSONDecodeError: If the config file contains invalid JSON
-    """
-    from . import validator
-
-    config_path = Path(config_path)
-
-    if not config_path.exists():
-        print(f"Configuration file not found: {config_path}")
-        raise FileNotFoundError(f"Configuration file not found: {config_path}")
-
-    # Validate the config
-    is_valid = validator.validate_config(config_path)
-    if not is_valid:
-        print(f"Warning: Configuration at {config_path} has validation issues")
-
-    # Load the configuration
-    with open(config_path, "r", encoding="utf-8") as f:
-        config = json.load(f)
-
-    return config
-
-
-# config: Dict[str, Any] = load_config()
+# Create a default instance of ConfigManager for convenient access
+config_manager = ConfigManager(
+    config_path=CONFIG_PATH,
+    template_path=TEMPLATE_PATH,
+    schema_path=SCHEMA_PATH,
+)
