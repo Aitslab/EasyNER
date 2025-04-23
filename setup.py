@@ -10,5 +10,11 @@ setup(
     install_requires=[
         # Add your dependencies here
         "spacy",
+        "argcomplete",  # for command autocomplete
     ],
+    entry_points={
+        "console_scripts": [
+            "easyner=easyner.cli.main:main",  # Single entry point for all commands
+        ],
+    },
 )
