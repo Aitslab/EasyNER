@@ -19,11 +19,11 @@ from .progress import ProgressReporter
 from .message_handler import MessageHandler
 from .stats_manager import StatsManager
 
-from easyner.config import load_config
+from easyner.config import config_manager
 
 # Get logger for this module
 logger = logging.getLogger("easyner.pipeline.splitter.runner")
-config = load_config()
+config = config_manager.load_config()
 
 
 def make_batches(list_id, n):
