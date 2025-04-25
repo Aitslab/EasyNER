@@ -170,21 +170,28 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
             device=device,
         )
 
-        def wrapper_predict(example):
+        def wrapper_predict(batch):
             """
-            a wrapper to run map function with predict
+            A wrapper to run map function with predict in batches
             """
             try:
-                example["prediction"] = ner_session.predict(example["text"])
-            except:
-                example["prediction"] = []
+                predictions = ner_session.nlp(
+                    batch["text"], batch_size=ner_config.get("batch_size", 8)
+                )
+            except Exception as e:
+                # Create empty lists for failed predictions
+                predictions = [[] for _ in range(len(batch["text"]))]
 
-            return example
+            batch["prediction"] = predictions
+            return batch
 
         articles_dataset = biobert_process_articles(articles)
 
         articles_dataset_processed = articles_dataset.map(
-            wrapper_predict, desc="Batch " + str(batch_index)
+            wrapper_predict,
+            batched=True,
+            batch_size=8,  # Adjust based on your memory and CPU capacity
+            desc="Batch " + str(batch_index),
         )
 
         articles_processed = convert_dataset_to_dict(
