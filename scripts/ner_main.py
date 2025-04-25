@@ -1,15 +1,85 @@
 # coding=utf-8
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from glob import glob
 import spacy
 import os
 import re
 import json
 import pandas as pd
+import torch
 from tqdm import tqdm
 from spacy.matcher import PhraseMatcher
 from datasets import Dataset, load_dataset
 from . import ner_biobert, util
 from .ner_inference import NERInferenceSession_biobert_onnx
+
+
+def run_ner_pipeline(ner_config: dict, cpu_limit: int):
+    """
+    Main entry point for the NER pipeline that handles:
+    - Output directory setup
+    - Input file gathering and filtering
+    - Managing parallel or sequential processing
+
+    Parameters:
+    -----------
+    ner_config: dict
+        Configuration for NER processing
+    cpu_limit: int
+        Maximum number of CPUs to use for multiprocessing
+    """
+    print("Running NER script.")
+
+    if ner_config.get("clear_old_results", True):
+        try:
+            os.remove(ner_config["output_path"])
+        except OSError:
+            pass
+
+    os.makedirs(ner_config["output_path"], exist_ok=True)
+
+    input_file_list = sorted(
+        glob(f'{ner_config["input_path"]}*.json'),
+        key=lambda x: int(
+            os.path.splitext(os.path.basename(x))[0].split("-")[-1]
+        ),
+    )
+
+    # Sort files on range
+    if "article_limit" in ner_config:
+        if isinstance(ner_config["article_limit"], list):
+            start = ner_config["article_limit"][0]
+            end = ner_config["article_limit"][1]
+
+            input_file_list = filter_files(input_file_list, start, end)
+
+            print(
+                "processing articles between {} and {} range".format(
+                    start, end
+                )
+            )
+
+    # Run prediction on each sentence in each article.
+    if ner_config["multiprocessing"]:
+        from multiprocessing import cpu_count
+
+        with ProcessPoolExecutor(min(cpu_limit, cpu_count())) as executor:
+
+            futures = [
+                executor.submit(run_ner_main, ner_config, batch_file)
+                for batch_file in input_file_list
+            ]
+
+            for future in as_completed(futures):
+                i = future.result()
+    else:
+        device = torch.device(0 if torch.cuda.is_available() else "cpu")
+
+        for batch_file in tqdm(input_file_list):
+            run_ner_main(ner_config, batch_file, device)
+
+    print("Finished running NER script.")
 
 
 def run_ner_main(ner_config: dict, batch_file, device=-1):
