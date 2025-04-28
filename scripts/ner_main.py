@@ -63,10 +63,12 @@ def run_ner_pipeline(ner_config: dict, cpu_limit: int):
 
     # Run prediction on each sentence in each article.
     if ner_config["multiprocessing"]:
+        print(
+            f"Running NER with {ner_config['model_type']} in parallel with {cpu_limit} CPUs"
+        )
         from multiprocessing import cpu_count
 
         with ProcessPoolExecutor(min(cpu_limit, cpu_count())) as executor:
-
             futures = [
                 executor.submit(run_ner_main, ner_config, batch_file)
                 for batch_file in input_file_list
@@ -76,6 +78,9 @@ def run_ner_pipeline(ner_config: dict, cpu_limit: int):
                 i = future.result()
     else:
         device = torch.device(0 if torch.cuda.is_available() else "cpu")
+        print(
+            f"Running NER with {ner_config['model_type']} on device: {device}"
+        )
 
         for batch_file in tqdm(input_file_list):
             run_ner_main(ner_config, batch_file, device)
@@ -126,7 +131,6 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
 
         # Run prediction on each sentence in each article.
         for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
-
             sentences = articles[pmid]["sentences"]
 
             # Predict with spacy PhraseMatcher, if it has been selected
@@ -162,8 +166,7 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
                 articles[pmid]["sentences"][i]["entity_spans"] = spans
 
     elif ner_config["model_type"] == "biobert_finetuned":
-
-        # print("Running NER with finetuned BioBERT")
+        print("Running NER with finetuned BioBERT", flush=True)
 
         ner_session = ner_biobert.NER_biobert(
             model_dir=ner_config["model_folder"],
@@ -171,30 +174,18 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
             device=device,
         )
 
-        def wrapper_predict(batch):
-            """
-            A wrapper to run map function with predict in batches
-            """
-            try:
-                predictions = ner_session.nlp(
-                    batch["text"], batch_size=ner_config.get("batch_size", 8)
-                )
-            except Exception as e:
-                # Create empty lists for failed predictions
-                predictions = [[] for _ in range(len(batch["text"]))]
+        # Convert articles to dataset
+        articles_dataset = convert_articles_to_dataset(articles)
 
-            batch["prediction"] = predictions
-            return batch
-
-        articles_dataset = biobert_process_articles(articles)
-
-        articles_dataset_processed = articles_dataset.map(
-            wrapper_predict,
-            batched=True,
-            batch_size=8,  # Adjust based on your memory and CPU capacity
-            desc="Batch " + str(batch_index),
+        # Use the predict_dataset method instead of map+wrapper_predict
+        print(f"Processing batch {batch_index} with batch size")
+        articles_dataset_processed = ner_session.predict_dataset(
+            articles_dataset,
+            text_column="text",
+            batch_size=64,
         )
 
+        # Convert back to the dictionary structure (reusing existing code)
         articles_processed = convert_dataset_to_dict(
             articles, articles_dataset_processed
         )
@@ -239,7 +230,7 @@ def filter_files(list_files, start, end):
     return filtered_list_files
 
 
-def biobert_process_articles(
+def convert_articles_to_dataset(
     articles, column_names=["pmid", "sent_idx", "text"]
 ):
     """
