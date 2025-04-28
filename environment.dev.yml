@@ -34,6 +34,9 @@ dependencies:
   - yaml=0.2.5
   - jsonschema=4.23.0
   - pytest-benchmark=5.1.0
+  - mypy
+  - black
+  - flake8
   - pip:
     - nltk==3.8.1
     - orjson
