@@ -26,8 +26,8 @@ class NER_biobert:
         self.model = AutoModelForTokenClassification.from_pretrained(
             self.model_path
         )
-        
 
+        self.model.eval()  # Set model to evaluation mode
 
         print(f"NER_BIOBERT: Creating pipeline with device={device}")
         self.nlp: Pipeline = pipeline(
