@@ -16,7 +16,7 @@ dependencies:
   - pandas
   - pillow=
   - pip
-  - python=3.9.1
+  - python=3.9
   - pytorch-cuda
   - pytorch-mutex
   - regex=2022.7.9
