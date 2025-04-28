@@ -17,11 +17,118 @@ from .ner_inference import NERInferenceSession_biobert_onnx
 OUTPUT_FILE_TEMPLATE = "{output_path}/{output_file_prefix}-{batch_index}.json"
 
 
+def run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index):
+    """
+    Run NER with spacy PhraseMatcher
+    """
+    if not ner_config["multiprocessing"]:
+        spacy.prefer_gpu()
+
+    print("Running NER with spacy")
+    nlp = spacy.load(ner_config["model_name"])
+    terms = []
+    with open(ner_config["vocab_path"], "r") as f:
+        for line in f:
+            x = line.strip()
+            terms.append(x)
+    print("Phraselist complete")
+
+    matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
+    patterns = [nlp.make_doc(term) for term in terms]
+    matcher.add(ner_config["entity_type"], patterns)
+
+    # Run prediction on each sentence in each article.
+    for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
+        sentences = articles[pmid]["sentences"]
+
+        # Predict with spacy PhraseMatcher, if it has been selected
+
+        for i, sentence in enumerate(sentences):
+            ner_class = ner_config["entity_type"]
+
+            doc = nlp(sentence["text"])
+            if ner_config["store_tokens"] == "yes":
+                tokens = []
+                # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
+                for token in doc:
+                    tokens.append(
+                        token.text
+                    )  # to get a list of tokens in the sentence
+                # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
+                articles[pmid]["sentences"][i]["tokens"] = tokens
+
+            entities = []
+            spans = []
+            matches = matcher(doc)
+
+            for match_id, start, end in matches:
+                span = doc[start:end]
+                ent = span.text
+                entities.append(ent)
+                first_char = span.start_char
+                last_char = span.end_char - 1
+                spans.append((first_char, last_char))
+
+            # articles[pmid]["sentences"][i]["NER class"] = ner_class
+            articles[pmid]["sentences"][i]["entities"] = entities
+            articles[pmid]["sentences"][i]["entity_spans"] = spans
+    return articles
+
+
+def run_ner_with_biobert_finetuned(articles, ner_config, batch_index, device) -> dict:
+    """
+    Run NER with finetuned BioBERT
+    """
+
+    print("Running NER with finetuned BioBERT", flush=True)
+
+    ner_session = ner_biobert.NER_biobert(
+        model_dir=ner_config["model_folder"],
+        model_name=ner_config["model_name"],
+        device=device,
+    )
+
+    # Convert articles to dataset
+    articles_dataset = convert_articles_to_dataset(articles)
+
+    # Use the predict_dataset method instead of map+wrapper_predict
+    print(f"Processing batch {batch_index} with batch size")
+    articles_dataset_processed = ner_session.predict_dataset(
+        articles_dataset,
+        text_column="text",
+        batch_size=64,
+    )
+
+    # Convert back to the dictionary structure (reusing existing code)
+    articles_processed = convert_dataset_to_dict(
+        articles, articles_dataset_processed
+    )
+    return articles_processed
+
+    # for i, sentence in enumerate(sentences):
+    #     try:
+    #         # the entities predicted are all uncased but the entity within the sentence is cased
+    #         entities = ner_session.predict(sentence["text"])
+    #     except:
+    #         # exception due to existence of utf tags in the data, which is incomprehensable/non-tokenizable by the model
+    #         print("batch {}, sentence no. {} with text [{}] was not predicted".format(batch_index, i, sentence))
+    #         entities = []
+
+    #     entities_list = []
+    #     entity_spans_list = []
+    #     if len(entities)>0:
+    #         for ent in entities:
+    #             entities_list.append(ent["word"])
+    #             entity_spans_list.append([ent["start"],ent["end"]])
+
+    #     articles[pmid]["sentences"][i]["entities"] = entities_list
+    #     articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
+
+
 def run_ner_pipeline(ner_config: dict, cpu_limit: int):
     """
     Main entry point for the NER pipeline that handles:
     - Output directory setup
-    - Input file gathering and filtering
     - Managing parallel or sequential processing
 
     Parameters:
@@ -63,22 +170,10 @@ def run_ner_pipeline(ner_config: dict, cpu_limit: int):
                 )
             )
 
-    # Run prediction on each sentence in each article.
     if ner_config["multiprocessing"]:
-        print(
-            f"Running NER with {ner_config['model_type']} in parallel with {cpu_limit} CPUs"
-        )
-        from multiprocessing import cpu_count
-
-        with ProcessPoolExecutor(min(cpu_limit, cpu_count())) as executor:
-            futures = [
-                executor.submit(run_ner_main, ner_config, batch_file)
-                for batch_file in input_file_list
-            ]
-
-            for future in as_completed(futures):
-                i = future.result()
+        ner_multiprocessing(cpu_limit=cpu_limit, input_file_list=input_file_list, ner_config=ner_config)
     else:
+
         device = torch.device(0 if torch.cuda.is_available() else "cpu")
         print(
             f"Running NER with {ner_config['model_type']} on device: {device}"
@@ -87,7 +182,7 @@ def run_ner_pipeline(ner_config: dict, cpu_limit: int):
         for batch_file in tqdm(input_file_list):
             run_ner_main(ner_config, batch_file, device)
 
-    print("Finished running NER script.")
+    print("----Finished running NER script----")
 
 
 def run_ner_main(ner_config: dict, batch_file, device=-1):
@@ -118,103 +213,15 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
 
     # Prepare spacy, if it is needed
     if ner_config["model_type"] == "spacy_phrasematcher":
-        if not ner_config["multiprocessing"]:
-            spacy.prefer_gpu()
-
-        print("Running NER with spacy")
-        nlp = spacy.load(ner_config["model_name"])
-        terms = []
-        with open(ner_config["vocab_path"], "r") as f:
-            for line in f:
-                x = line.strip()
-                terms.append(x)
-        print("Phraselist complete")
-
-        matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
-        patterns = [nlp.make_doc(term) for term in terms]
-        matcher.add(ner_config["entity_type"], patterns)
-
-        # Run prediction on each sentence in each article.
-        for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
-            sentences = articles[pmid]["sentences"]
-
-            # Predict with spacy PhraseMatcher, if it has been selected
-
-            for i, sentence in enumerate(sentences):
-                ner_class = ner_config["entity_type"]
-
-                doc = nlp(sentence["text"])
-                if ner_config["store_tokens"] == "yes":
-                    tokens = []
-                    # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
-                    for token in doc:
-                        tokens.append(
-                            token.text
-                        )  # to get a list of tokens in the sentence
-                    # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
-                    articles[pmid]["sentences"][i]["tokens"] = tokens
-
-                entities = []
-                spans = []
-                matches = matcher(doc)
-
-                for match_id, start, end in matches:
-                    span = doc[start:end]
-                    ent = span.text
-                    entities.append(ent)
-                    first_char = span.start_char
-                    last_char = span.end_char - 1
-                    spans.append((first_char, last_char))
-
-                # articles[pmid]["sentences"][i]["NER class"] = ner_class
-                articles[pmid]["sentences"][i]["entities"] = entities
-                articles[pmid]["sentences"][i]["entity_spans"] = spans
-
+        articles = run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index)
     elif ner_config["model_type"] == "biobert_finetuned":
-        print("Running NER with finetuned BioBERT", flush=True)
-
-        ner_session = ner_biobert.NER_biobert(
-            model_dir=ner_config["model_folder"],
-            model_name=ner_config["model_name"],
-            device=device,
+        articles = run_ner_with_biobert_finetuned(articles, ner_config, batch_index, device)
+    else:
+        raise ValueError(
+            f"Unknown model type: {ner_config['model_type']}. Supported types are 'spacy_phrasematcher' and 'biobert_finetuned'."
         )
 
-        # Convert articles to dataset
-        articles_dataset = convert_articles_to_dataset(articles)
-
-        # Use the predict_dataset method instead of map+wrapper_predict
-        print(f"Processing batch {batch_index} with batch size")
-        articles_dataset_processed = ner_session.predict_dataset(
-            articles_dataset,
-            text_column="text",
-            batch_size=64,
-        )
-
-        # Convert back to the dictionary structure (reusing existing code)
-        articles_processed = convert_dataset_to_dict(
-            articles, articles_dataset_processed
-        )
-        articles = articles_processed
-
-        # for i, sentence in enumerate(sentences):
-        #     try:
-        #         # the entities predicted are all uncased but the entity within the sentence is cased
-        #         entities = ner_session.predict(sentence["text"])
-        #     except:
-        #         # exception due to existence of utf tags in the data, which is incomprehensable/non-tokenizable by the model
-        #         print("batch {}, sentence no. {} with text [{}] was not predicted".format(batch_index, i, sentence))
-        #         entities = []
-
-        #     entities_list = []
-        #     entity_spans_list = []
-        #     if len(entities)>0:
-        #         for ent in entities:
-        #             entities_list.append(ent["word"])
-        #             entity_spans_list.append([ent["start"],ent["end"]])
-
-        #     articles[pmid]["sentences"][i]["entities"] = entities_list
-        #     articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
-
+    # Save the processed articles to the output file
     util.append_to_json_file(output_file, articles)
     return batch_index
 
@@ -287,6 +294,20 @@ def convert_dataset_to_dict(articles, ner_dataset):
                 )
 
     return articles
+
+
+def ner_multiprocessing(input_file_list, ner_config: dict, cpu_limit: int = 1):
+    print(
+        f"Running NER with {ner_config['model_type']} in parallel with {cpu_limit} CPUs"
+    )
+    from multiprocessing import cpu_count
+    with ProcessPoolExecutor(min(cpu_limit, cpu_count())) as executor:
+        futures = [
+            executor.submit(run_ner_main, ner_config, batch_file)
+            for batch_file in input_file_list
+        ]
+        for future in as_completed(futures):
+            i = future.result()
 
 
 if __name__ == "__main__":
