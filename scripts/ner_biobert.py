@@ -29,7 +29,10 @@ class NER_biobert:
             device=device,
         )
 
-    def predict(self, sequence: str):
+    @DeprecationWarning
+    def predict(self, sequence: str) -> List[Dict[str, Any]]:
+        """Process a single text sequence"""
+        print(f"Processing text in single sequence: {sequence}")
         return self.nlp(sequence)
 
 
