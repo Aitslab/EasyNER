@@ -199,7 +199,7 @@ def run_ner(ner_config: dict, ignore: bool) -> None:  # noqa: C901, D103
         print("Ignoring script: NER.")
         return
 
-    ner_main.run_ner_pipeline(ner_config, CPU_LIMIT)
+    ner_main.run_ner_module(ner_config, CPU_LIMIT)
 
 
 def run_analysis(analysis_config: dict, ignore: bool) -> None:  # noqa: D103
