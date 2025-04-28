@@ -6,20 +6,19 @@ channels:
 dependencies:
   - cryptography=38.0.1
   - datasets
-  - huggingface_hub=0.10.1
-  - matplotlib=3.5.3
-  - matplotlib-base=3.5.3
-  - numpy=1.23.3
-  - numpy-base=1.23.3
-  - onnxruntime=1.12.1
+  - huggingface_hub
+  - matplotlib
+  - matplotlib-base
+  - numpy
+  - numpy-base
+  - onnxruntime
   - openssl=1.1.1t
-  - pandas=1.4.4
-  - pillow=9.2.0
-  - pip=22.2.2
-  - python=3.9.13
-  - pytorch=1.13.0
-  - pytorch-cuda=11.7
-  - pytorch-mutex=1.0
+  - pandas
+  - pillow=
+  - pip
+  - python=3.9.1
+  - pytorch-cuda
+  - pytorch-mutex
   - regex=2022.7.9
   - requests=2.28.1
   - seaborn=0.12.2
@@ -29,8 +28,8 @@ dependencies:
   - toml=0.10.2
   - torchaudio=0.13.0
   - torchvision=0.14.0
-  - tqdm=4.64.1
-  - transformers=4.24.0
+  - tqdm
+  - transformers
   - urllib3=1.26.12
   - yaml=0.2.5
   - jsonschema=4.23.0
