@@ -31,13 +31,14 @@ def run_ner_pipeline(ner_config: dict, cpu_limit: int):
     """
     print("Running NER script.")
 
+    output_path = ner_config["output_path"]
     if ner_config.get("clear_old_results", True):
         try:
-            os.remove(ner_config["output_path"])
+            os.remove(output_path)
         except OSError:
             pass
 
-    os.makedirs(ner_config["output_path"], exist_ok=True)
+    os.makedirs(output_path, exist_ok=True)
 
     input_file_list = sorted(
         glob(f'{ner_config["input_path"]}*.json'),
