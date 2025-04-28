@@ -14,6 +14,8 @@ from datasets import Dataset, load_dataset
 from . import ner_biobert, util
 from .ner_inference import NERInferenceSession_biobert_onnx
 
+OUTPUT_FILE_TEMPLATE = "{output_path}/{output_file_prefix}-{batch_index}.json"
+
 
 def run_ner_pipeline(ner_config: dict, cpu_limit: int):
     """
@@ -104,11 +106,14 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
         print(batch_file)
         raise Exception("Filenames not numbered!")
 
+    output_file = OUTPUT_FILE_TEMPLATE.format(
+        output_path=ner_config["output_path"],
+        output_file_prefix=ner_config["output_file_prefix"],
+        batch_index=batch_index
+    )
+
     if len(articles) == 0:
-        util.append_to_json_file(
-            f'{ner_config["output_path"]}/{ner_config["output_file_prefix"]}-{batch_index}.json',
-            articles,
-        )
+        util.append_to_json_file(output_file, articles)
         return batch_index
 
     # Prepare spacy, if it is needed
@@ -210,10 +215,7 @@ def run_ner_main(ner_config: dict, batch_file, device=-1):
         #     articles[pmid]["sentences"][i]["entities"] = entities_list
         #     articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
 
-    util.append_to_json_file(
-        f'{ner_config["output_path"]}/{ner_config["output_file_prefix"]}-{batch_index}.json',
-        articles,
-    )
+    util.append_to_json_file(output_file, articles)
     return batch_index
 
 
