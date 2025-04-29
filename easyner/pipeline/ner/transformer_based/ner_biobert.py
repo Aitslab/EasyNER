@@ -1,6 +1,8 @@
 # coding=utf-8
 
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Dict, List, Any
+import warnings
 from datasets import Dataset
 from transformers import (
     AutoTokenizer,
@@ -9,14 +11,334 @@ from transformers import (
     Pipeline,
 )
 from pathlib import Path, PurePosixPath
-import torch  # Ensure torch is imported if not already
+import torch
+from tqdm import tqdm
+
+from easyner.pipeline.ner.processor import NERProcessor
+
+
+class BioBertNERProcessor(NERProcessor):
+    """NER processor using BioBert fine-tuned model."""
+
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__(config)
+        # Load BioBERT model once for all processing
+        self._model = None
+
+    def _initialize_model(self, device: Any) -> None:
+        """
+        Initialize the BioBERT model once for all processing.
+
+        Parameters:
+        -----------
+        device: Any
+            Device to use for model loading (GPU or CPU)
+        """
+        from easyner.pipeline.ner.utils import get_device_int
+
+        print(f"Initializing BioBERT model on device: {device}")
+
+        # Extract model configuration from the config dict
+        model_dir = self.config.get("model_folder", "")
+        model_name = self.config.get("model_name", "")
+        model_max_length = self.config.get("model_max_length", 192)
+
+        if not model_dir or not model_name:
+            raise ValueError(
+                "Missing required configuration for BioBERT: 'model_folder' and 'model_name' must be provided"
+            )
+
+        # Initialize model components directly in the processor
+        self.model_path = PurePosixPath(Path(model_dir, model_name))
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            self.model_path, model_max_length=model_max_length
+        )
+        self.model = AutoModelForTokenClassification.from_pretrained(
+            self.model_path
+        )
+
+        self.model.eval()  # Set model to evaluation mode
+
+        print(f"BioBERT: Creating pipeline with device={device}")
+        self.nlp = pipeline(
+            task="ner",
+            model=self.model,
+            tokenizer=self.tokenizer,
+            aggregation_strategy="max",
+            device=get_device_int(device),
+        )
+        print("BioBERT model initialized successfully")
+
+    def process_dataset(
+        self, input_files: List[str], device: Any = None
+    ) -> None:
+        """
+        Process all files using BioBERT.
+
+        Parameters:
+        -----------
+        input_files: List[str]
+            List of input file paths to process
+        device: Any, optional
+            Device to use for processing
+        """
+        if device is None:
+            device = torch.device(0 if torch.cuda.is_available() else "cpu")
+
+        # Initialize model once for all processing
+        self._initialize_model(device)
+
+        # BioBERT often benefits from batched processing across files
+        if self.config.get("cross_file_batching", False):
+            self._process_with_cross_file_batching(input_files, device)
+        elif self.config.get("multiprocessing", False):
+            # For multi-GPU setups
+            self._process_files_in_parallel(input_files)
+        else:
+            # Process sequentially
+            for batch_file in tqdm(
+                input_files, desc="Processing with BioBERT"
+            ):
+                self._process_single_file(batch_file, device)
+
+    def _process_single_file(self, batch_file: str, device: Any) -> int:
+        """Process a single file with BioBERT NER."""
+        from easyner.io.converters.articles_to_datasets import (
+            convert_articles_to_dataset,
+            convert_dataset_to_dict,
+        )
+
+        articles, batch_index = self._read_batch_file(batch_file)
+
+        if not articles:
+            self._save_processed_articles(articles, batch_index)
+            return batch_index
+
+        # Convert articles to dataset formatW
+        articles_dataset = convert_articles_to_dataset(articles)
+
+        # Process with integrated pipeline
+        print(f"Processing batch {batch_index}")
+        batch_size = self.config.get("batch_size", None)
+
+        if articles_dataset is None or len(articles_dataset) == 0:
+            print("Empty dataset provided")
+            self._save_processed_articles(articles, batch_index)
+            return batch_index
+
+        # Determine batch size if not provided
+        if batch_size is None:
+            batch_size = self._get_optimal_batch_size(articles_dataset, "text")
+
+        print(f"Processing dataset with batch size: {batch_size}", flush=True)
+
+        # Process the dataset
+        articles_dataset_processed = self._predict_dataset(
+            articles_dataset, text_column="text", batch_size=batch_size
+        )
+
+        # Convert back to the dictionary structure
+        processed_articles = convert_dataset_to_dict(
+            articles, articles_dataset_processed
+        )
+        self._save_processed_articles(processed_articles, batch_index)
+        return batch_index
+
+    def _predict_dataset(
+        self, dataset: Dataset, text_column="text", batch_size=None
+    ):
+        """
+        Process an entire HuggingFace dataset.
+
+        Parameters:
+        -----------
+        dataset: Dataset
+            HuggingFace dataset with text column
+        text_column: str
+            Name of the column containing text
+        batch_size: int, optional
+            Batch size to use (None for auto-determination)
+
+        Returns:
+        --------
+        Dataset: Dataset with predictions added
+        """
+        print(f"Processing dataset", flush=True)
+
+        # Check if dataset is empty
+        if dataset is None or len(dataset) == 0:
+            print("Empty dataset provided")
+            return dataset
+
+        print(f"Number of texts: {len(dataset)}", flush=True)
+
+        batch_size = (
+            self._get_optimal_batch_size(dataset, text_column)
+            if batch_size is None
+            else batch_size
+        )
+
+        print(f"Processing dataset with batch size: {batch_size}", flush=True)
+
+        # Process the entire dataset at once with the pipeline
+        with torch.no_grad():
+            try:
+                # Pass the dataset column directly
+                results = self.nlp(
+                    inputs=dataset[text_column], batch_size=batch_size
+                )
+            except torch.cuda.OutOfMemoryError as oom:
+                print(f"Out of memory error during NER processing: {oom}")
+                torch.cuda.empty_cache()  # Clear the CUDA memory
+                # Create empty results for error cases
+                results = [[] for _ in range(len(dataset))]
+            except Exception as e:
+                print(f"Error in NER processing: {e}")
+                # Create empty results for error cases
+                results = [[] for _ in range(len(dataset))]
+
+        # Add predictions to the dataset
+        dataset = dataset.add_column("prediction", results)
+        if "prediction" not in dataset.column_names:
+            raise ValueError(
+                "Failed to add predictions to the dataset. Check the pipeline output."
+            )
+        return dataset
+
+    def _process_with_cross_file_batching(
+        self, input_files: List[str], device: Any
+    ) -> None:
+        """Process with optimal batching across files."""
+        # Implementation for cross-file batching strategy
+        # This would combine articles from multiple files to create optimally-sized batches
+        # for transformer processing
+        pass
+
+    def _process_files_in_parallel(self, input_files: List[str]) -> None:
+        """Process files in parallel using multiprocessing."""
+        from multiprocessing import cpu_count
+
+        cpu_limit = self.config.get("cpu_limit", 1)
+
+        try:
+            with ProcessPoolExecutor(min(cpu_limit, cpu_count())) as executor:
+                futures = []
+
+                # Create a separate device for each worker if multiple GPUs are available
+                for i, batch_file in enumerate(input_files):
+                    device_id = (
+                        i % torch.cuda.device_count()
+                        if torch.cuda.is_available()
+                        else "cpu"
+                    )
+                    device = (
+                        torch.device(device_id)
+                        if isinstance(device_id, int)
+                        else device_id
+                    )
+                    futures.append(
+                        executor.submit(
+                            self._process_single_file, batch_file, device
+                        )
+                    )
+
+                for i, future in enumerate(as_completed(futures)):
+                    try:
+                        batch_index = future.result()
+                        print(
+                            f"Completed BioBERT batch {batch_index} ({i+1}/{len(futures)})"
+                        )
+                    except Exception as e:
+                        print(f"Error processing batch: {e}")
+        except Exception as e:
+            print(f"Error in parallel processing: {e}")
+            # Fall back to sequential processing
+            print("Falling back to sequential processing")
+            for batch_file in input_files:
+                device = torch.device(
+                    0 if torch.cuda.is_available() else "cpu"
+                )
+                self._process_single_file(batch_file, device)
+
+    def _get_optimal_batch_size(
+        self, dataset: Dataset, text_column: str, fallback_batch_size: int = 32
+    ) -> int:
+        """
+        Determine the optimal batch size for processing the dataset.
+        This is a placeholder function and should be implemented based on
+        specific requirements or heuristics.
+
+        Args:
+            dataset: HuggingFace dataset
+
+        Returns:
+            Optimal batch size
+        """
+        # Placeholder logic for determining batch size
+        try:
+            from easyner.pipeline.ner.utils import (
+                calculate_optimal_batch_size,
+            )
+
+            print("Auto-determining optimal batch size", flush=True)
+
+            return calculate_optimal_batch_size(
+                pipeline=self.nlp,
+                dataset=dataset,
+                text_column=text_column,
+                sample=True,
+            )
+
+        except ImportError as e:
+            print(
+                "Error importing calculate_optimal_batch_size function: "
+                f"{e}",
+                flush=True,
+            )
+
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+            return fallback_batch_size
+
+        except RuntimeError as e:
+            print(
+                f"Runtime error in auto-determining batch size: {e}",
+                flush=True,
+            )
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+            return fallback_batch_size
+
+        except Exception as e:
+            print(f"Error in auto-determining batch size: {e}", flush=True)
+            # Fallback to a default batch size
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+
+            return fallback_batch_size
 
 
 class NER_biobert:
+    """
+    DEPRECATED: This class is being phased out in favor of BioBertNERProcessor.
+    Please use BioBertNERProcessor instead.
+    """
 
     def __init__(
         self, model_dir: str, model_name: str, model_max_length=192, device=-1
     ):
+        warnings.warn(
+            "NER_biobert is deprecated and will be removed in a future version. "
+            "Use BioBertNERProcessor directly instead.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         from easyner.pipeline.ner.utils import get_device_int
 
         self.model_path = PurePosixPath(Path(model_dir, model_name))
@@ -168,8 +490,33 @@ def run_ner_with_biobert_finetuned(
     articles, ner_config, batch_index, device
 ) -> dict:
     """
-    Run NER with finetuned BioBERT
+    Legacy function for backward compatibility.
+    Uses BioBertNERProcessor to process articles.
+
+    Parameters:
+    -----------
+    articles: dict
+        Articles to process
+    ner_config: dict
+        Configuration for NER processing
+    batch_index: int
+        Batch index for logging
+    device: Any
+        Device to use for processing
+
+    Returns:
+    --------
+    dict: Processed articles
     """
+    import warnings
+
+    warnings.warn(
+        "run_ner_with_biobert_finetuned is deprecated and will be removed in a future version. "
+        "Use BioBertNERProcessor directly instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
     from easyner.io.converters.articles_to_datasets import (
         convert_articles_to_dataset,
         convert_dataset_to_dict,
@@ -177,24 +524,22 @@ def run_ner_with_biobert_finetuned(
 
     print("Running NER with finetuned BioBERT", flush=True)
 
-    ner_session = NER_biobert(
-        model_dir=ner_config["model_folder"],
-        model_name=ner_config["model_name"],
-        device=device,
-    )
+    # Create a temporary processor instance
+    processor = BioBertNERProcessor(ner_config)
+    processor._initialize_model(device)
 
     # Convert articles to dataset
     articles_dataset = convert_articles_to_dataset(articles)
 
-    # Use the predict_dataset method instead of map+wrapper_predict
-    print(f"Processing batch {batch_index} with batch size")
-    articles_dataset_processed = ner_session.predict_dataset(
+    # Process with the processor
+    print(f"Processing batch {batch_index}")
+    articles_dataset_processed = processor._predict_dataset(
         articles_dataset,
         text_column="text",
-        batch_size=ner_config["batch_size"],
+        batch_size=ner_config.get("batch_size"),
     )
 
-    # Convert back to the dictionary structure (reusing existing code)
+    # Convert back to the dictionary structure
     articles_processed = convert_dataset_to_dict(
         articles, articles_dataset_processed
     )
