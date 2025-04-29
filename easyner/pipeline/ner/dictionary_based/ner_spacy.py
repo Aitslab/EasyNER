@@ -2,38 +2,100 @@
 
 import spacy
 from spacy.matcher import PhraseMatcher
+from tqdm import tqdm
 
+
+def run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index):
+    """
+    Run NER with spacy PhraseMatcher
+    """
+    if not ner_config["multiprocessing"]:
+        spacy.prefer_gpu()
+
+    print("Running NER with spacy")
+    nlp = spacy.load(ner_config["model_name"])
+    terms = []
+    with open(ner_config["vocab_path"], "r") as f:
+        for line in f:
+            x = line.strip()
+            terms.append(x)
+    print("Phraselist complete")
+
+    matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
+    patterns = [nlp.make_doc(term) for term in terms]
+    matcher.add(ner_config["entity_type"], patterns)
+
+    # Run prediction on each sentence in each article.
+    for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
+        sentences = articles[pmid]["sentences"]
+
+        # Predict with spacy PhraseMatcher, if it has been selected
+
+        for i, sentence in enumerate(sentences):
+            ner_class = ner_config["entity_type"]
+
+            doc = nlp(sentence["text"])
+            if ner_config["store_tokens"] == "yes":
+                tokens = []
+                # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
+                for token in doc:
+                    tokens.append(
+                        token.text
+                    )  # to get a list of tokens in the sentence
+                # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
+                articles[pmid]["sentences"][i]["tokens"] = tokens
+
+            entities = []
+            spans = []
+            matches = matcher(doc)
+
+            for match_id, start, end in matches:
+                span = doc[start:end]
+                ent = span.text
+                entities.append(ent)
+                first_char = span.start_char
+                last_char = span.end_char - 1
+                spans.append((first_char, last_char))
+
+            # articles[pmid]["sentences"][i]["NER class"] = ner_class
+            articles[pmid]["sentences"][i]["entities"] = entities
+            articles[pmid]["sentences"][i]["entity_spans"] = spans
+    return articles
+
+
+@PendingDeprecationWarning
 def run_ner_with_spacy(model_name, vocab_path, entity_type, sentences):
-    
+
     # Prepare spacy, if it is needed
     print("Running NER with spacy")
     nlp = spacy.load(model_name)
-    
+
     terms = []
     with open(vocab_path) as f:
         for line in f:
             x = line.strip()
             terms.append(x)
-    
+
     print("Phraselist complete")
-    
-    matcher = PhraseMatcher(nlp.vocab, attr = "LOWER")
+
+    matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
     patterns = [nlp.make_doc(term) for term in terms]
     matcher.add(entity_type, patterns)
-    
+
     for i, sentence in enumerate(sentences):
         ner_class = entity_type
-        
+
         doc = nlp(sentences["text"])
         if store_tokens == "yes":
             tokens = []
             # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
             for token in doc:
-                tokens.append(token.text) #to get a list of tokens in the sentence
+                tokens.append(
+                    token.text
+                )  # to get a list of tokens in the sentence
             # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
             articles[pmid]["sentences"][i]["tokens"] = tokens
 
-    
         entities = []
         spans = []
         matches = matcher(doc)
@@ -44,16 +106,12 @@ def run_ner_with_spacy(model_name, vocab_path, entity_type, sentences):
             entities.append(ent)
             first_char = span.start_char
             last_char = span.end_char - 1
-            spans.append((first_char, last_char)) 
-
+            spans.append((first_char, last_char))
 
         articles[pmid]["sentences"][i]["NER class"] = ner_class
         articles[pmid]["sentences"][i]["entities"] = entities
         articles[pmid]["sentences"][i]["entity spans"] = spans
 
+
 if __name__ == "__main__":
     pass
-
-
-
-

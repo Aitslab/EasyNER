@@ -38,6 +38,69 @@ class NER_biobert:
             device=get_device_int(device),
         )
 
+    def _get_optimal_batch_size(
+        self, dataset: Dataset, text_column: str, fallback_batch_size: int = 32
+    ) -> int:
+        """
+        Determine the optimal batch size for processing the dataset.
+        This is a placeholder function and should be implemented based on
+        specific requirements or heuristics.
+
+        Args:
+            dataset: HuggingFace dataset
+
+        Returns:
+            Optimal batch size
+        """
+        # Placeholder logic for determining batch size
+        try:
+            from easyner.pipeline.ner.utils import (
+                calculate_optimal_batch_size,
+            )
+
+            print("Auto-determining optimal batch size", flush=True)
+
+            return calculate_optimal_batch_size(
+                pipeline=self.nlp,
+                dataset=dataset,
+                text_column=text_column,
+                sample=True,
+            )
+
+        except ImportError as e:
+            print(
+                "Error importing calculate_optimal_batch_size function: "
+                f"{e}",
+                flush=True,
+            )
+
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+            return fallback_batch_size
+
+        except RuntimeError as e:
+            print(
+                f"Runtime error in auto-determining batch size: {e}",
+                flush=True,
+            )
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+            return fallback_batch_size
+
+        except Exception as e:
+            print(f"Error in auto-determining batch size: {e}", flush=True)
+            # Fallback to a default batch size
+            print(
+                f"Falling back to default batch size: {fallback_batch_size}",
+                flush=True,
+            )
+
+            return fallback_batch_size
+
     @DeprecationWarning
     def predict(self, sequence: str) -> List[Dict[str, Any]]:
         """Process a single text sequence"""
@@ -66,48 +129,14 @@ class NER_biobert:
             return dataset
 
         print(f"Number of texts: {len(dataset)}", flush=True)
+
+        batch_size = (
+            self._get_optimal_batch_size(dataset, text_column)
+            if batch_size is None
+            else batch_size
+        )
+
         print(f"Processing dataset with batch size: {batch_size}", flush=True)
-
-        if batch_size is None:
-            try:
-                from easyner.pipeline.ner.utils import (
-                    calculate_optimal_batch_size,
-                )
-
-                print("Auto-determining optimal batch size", flush=True)
-
-                batch_size = calculate_optimal_batch_size(
-                    pipeline=self.nlp,
-                    dataset=dataset,
-                    text_column=text_column,
-                    sample=True,
-                )
-
-                print(
-                    f"Auto-determined optimal batch size: {batch_size}",
-                    flush=True,
-                )
-            except ImportError as e:
-                print(
-                    "Error importing calculate_optimal_batch_size function: "
-                    f"{e}",
-                    flush=True,
-                )
-                # Fallback to a default batch size
-                batch_size = 32
-                print(
-                    f"Falling back to default batch size: {batch_size}",
-                    flush=True,
-                )
-
-            except Exception as e:
-                print(f"Error in auto-determining batch size: {e}", flush=True)
-                # Fallback to a default batch size
-                batch_size = 32
-                print(
-                    f"Falling back to default batch size: {batch_size}",
-                    flush=True,
-                )
 
         # Process the entire dataset at once with the pipeline
         with torch.no_grad():
