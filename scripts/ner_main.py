@@ -11,7 +11,9 @@ import torch
 from tqdm import tqdm
 from spacy.matcher import PhraseMatcher
 from datasets import Dataset, load_dataset
-from . import ner_biobert, util
+
+from easyner import util
+from . import ner_biobert
 from .ner_inference import NERInferenceSession_biobert_onnx
 
 OUTPUT_FILE_TEMPLATE = "{output_path}/{output_file_prefix}-{batch_index}.json"
