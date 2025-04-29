@@ -180,18 +180,15 @@ def run_ner_module(ner_config: dict, cpu_limit: int):
     """
     print("Starting NER pipeline...")
 
-    # Setup output directory
-    output_path = ner_config["output_path"]
     if ner_config.get("clear_old_results", True):
-        try:
-            os.remove(output_path)
-        except OSError:
-            # Directory might not exist or might be a directory
-            pass
+        from easyner.io.utils import _remove_all_files_from_dir
 
-    os.makedirs(output_path, exist_ok=True)
+        _remove_all_files_from_dir(
+            ner_config["output_path"]
+        )  # Todo change config to output_dir for claritys
+    else:
+        os.makedirs(ner_config["output_path"], exist_ok=True)
 
-    # Find and sort input files
     input_file_list = _get_input_files_sorted(ner_config)
 
     # Process files (in parallel or sequentially)

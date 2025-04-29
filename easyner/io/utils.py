@@ -53,3 +53,40 @@ def filter_files(list_files, start, end):
             filtered_list_files.append(file)
 
     return filtered_list_files
+
+
+def _remove_all_files_from_dir(dir_path: str):
+    """
+    Keep the directory but clear its contents
+    Example usage: Clear old results from the output directory.
+
+    Parameters:
+    -----------
+    dir_path: str
+        Path to the output directory
+    """
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path, exist_ok=True)
+        return
+
+    try:
+        files_to_remove = [
+            os.path.join(dir_path, f)
+            for f in os.listdir(dir_path)
+            if os.path.isfile(os.path.join(dir_path, f))
+        ]
+
+        if files_to_remove:
+            for file_path in files_to_remove:
+                try:
+                    os.remove(file_path)
+                except (PermissionError, OSError) as e:
+                    print(f"Warning: Could not remove {file_path}: {e}")
+
+            print(f"Cleared {len(files_to_remove)} files from {dir_path}")
+        else:
+            print(f"No files to clear in {dir_path}")
+
+    except OSError as e:
+        print(f"Error while clearing files from {dir_path}: {e}")
+        raise
