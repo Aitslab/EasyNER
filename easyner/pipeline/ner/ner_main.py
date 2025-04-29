@@ -2,15 +2,16 @@
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from glob import glob
-import spacy
 import os
-import re
 import json
-import pandas as pd
 import torch
 from tqdm import tqdm
-from spacy.matcher import PhraseMatcher
-from datasets import Dataset, load_dataset
+
+from easyner.io.converters.articles_to_datasets import (
+    convert_articles_to_dataset,
+    convert_dataset_to_dict,
+)
+from easyner.io.utils import extract_batch_index
 
 from .transformer_based import ner_biobert
 from easyner import util
@@ -140,6 +141,8 @@ def find_and_sort_input_files(ner_config: dict) -> list:
     if "article_limit" in ner_config and isinstance(
         ner_config["article_limit"], list
     ):
+        from easyner.io.utils import filter_files
+
         start = ner_config["article_limit"][0]
         end = ner_config["article_limit"][1]
 
@@ -236,31 +239,6 @@ def process_batch_file(ner_config: dict, batch_file: str, device=None) -> int:
     return batch_index
 
 
-def extract_batch_index(batch_file: str) -> int:
-    """
-    Extract the batch index from a filename.
-
-    Parameters:
-    -----------
-    batch_file: str
-        Path to the batch file
-
-    Returns:
-    --------
-    int: The extracted batch index
-
-    Raises:
-    -------
-    ValueError: If the filename doesn't contain a numeric index
-    """
-    regex = re.compile(r"\d+")
-    try:
-        return int(regex.findall(os.path.basename(batch_file))[-1])
-    except (IndexError, ValueError) as e:
-        print(f"Error extracting index from {batch_file}")
-        raise ValueError(f"Batch filenames must contain numeric indices: {e}")
-
-
 def prepare_output_path(ner_config: dict, batch_index: int) -> str:
     """
     Generate the output file path based on the configuration and batch index.
@@ -281,120 +259,6 @@ def prepare_output_path(ner_config: dict, batch_index: int) -> str:
         output_file_prefix=ner_config["output_file_prefix"],
         batch_index=batch_index,
     )
-
-
-# Update function calls throughout the code
-def filter_files(list_files, start, end):
-    """
-    Filter files based on index range.
-
-    Parameters:
-    -----------
-    list_files: list
-        List of file paths to filter
-    start: int
-        Starting index (inclusive)
-    end: int
-        Ending index (inclusive)
-
-    Returns:
-    --------
-    list: Filtered list of file paths
-    """
-    filtered_list_files = []
-    for file in list_files:
-        file_idx = int(
-            os.path.splitext(os.path.basename(file))[0].split("-")[-1]
-        )
-        if file_idx >= start and file_idx <= end:
-            filtered_list_files.append(file)
-
-    return filtered_list_files
-
-
-def convert_articles_to_dataset(
-    articles, column_names=["pmid", "sent_idx", "text"]
-):
-    """
-    process articles into a huggingface dataset
-    articles: sentence split articles from splitter
-    column names: column names for the dataframe/dataset
-
-    returns processed hf dataset where each line is a sentence
-    """
-
-    articles_processed = []
-
-    for pmid, content in articles.items():
-        l = []
-        sent_idx = 0
-        for sent in content["sentences"]:
-            articles_processed.append([pmid, sent_idx, sent["text"]])
-            sent_idx += 1
-
-    articles_df = pd.DataFrame(articles_processed)
-    articles_df.columns = column_names
-
-    articles_ds = Dataset.from_pandas(articles_df)
-
-    return articles_ds
-
-
-def convert_articles_to_dataset_optimized(
-    articles, column_names=["pmid", "sent_idx", "text"]
-):
-    """
-    Optimized version of convert_articles_to_dataset that uses list comprehension
-    for better performance and avoids unnecessary intermediate storage
-    """
-    # Optimized: Pre-allocate the total size for better memory efficiency
-    total_sentences = sum(
-        len(content["sentences"]) for content in articles.values()
-    )
-
-    # Optimized: Use list comprehension for faster processing
-    articles_processed = [
-        [pmid, sent_idx, sent["text"]]
-        for pmid, content in articles.items()
-        for sent_idx, sent in enumerate(content["sentences"])
-    ]
-
-    # Create DataFrame directly from the processed list
-    articles_df = pd.DataFrame(articles_processed, columns=column_names)
-
-    # Convert to dataset efficiently
-    articles_ds = Dataset.from_pandas(articles_df)
-
-    return articles_ds
-
-
-def convert_dataset_to_dict(articles, ner_dataset):
-    """
-    adds predictions and spans to expected dictionary/json format articles
-    articles: original articles
-    ner_dataset: hf dataset with predictions
-
-    returns: articles dictionary with added entities and spans
-    """
-
-    for row in ner_dataset:
-        pmid = row["pmid"]
-        sent_idx = row["sent_idx"]
-        text = row["text"]
-        prediction = row["prediction"]
-        articles[pmid]["sentences"][sent_idx]["entities"] = []
-        articles[pmid]["sentences"][sent_idx]["entity_spans"] = []
-
-        if len(prediction) != 0:
-            for pred in prediction:
-                articles[pmid]["sentences"][sent_idx]["entities"].append(
-                    pred["word"]
-                )
-                articles[pmid]["sentences"][sent_idx]["entity_spans"].append(
-                    [pred["start"], pred["end"]]
-                )
-
-    return articles
 
 
 if __name__ == "__main__":
