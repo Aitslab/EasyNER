@@ -5,6 +5,7 @@ import torch
 from glob import glob
 from typing import List, Dict, Any
 from easyner.pipeline.ner.factory import NERProcessorFactory
+import re
 
 
 class NERPipeline:
@@ -35,12 +36,24 @@ class NERPipeline:
         --------
         List[str]: Sorted list of input files to process
         """
-        input_file_list = sorted(
-            glob(f'{self.config["input_path"]}*.json'),
-            key=lambda x: int(
-                os.path.splitext(os.path.basename(x))[0].split("-")[-1]
-            ),
-        )
+        input_file_list = glob(f'{self.config["input_path"]}*.json')
+
+        # Try to sort by numeric indices, fall back to lexicographical if not possible
+        try:
+            # Extract batch numbers using regex pattern for "batch-X.json" format
+            pattern = re.compile(r"batch-(\d+)\.json$")
+
+            def get_batch_number(filename):
+                match = pattern.search(os.path.basename(filename))
+                if match:
+                    return int(match.group(1))
+                # Fall back to lexicographical for non-matching files
+                return os.path.basename(filename)
+
+            input_file_list = sorted(input_file_list, key=get_batch_number)
+        except Exception:
+            # Fall back to lexicographical sorting if any errors occur
+            input_file_list = sorted(input_file_list)
 
         # Apply file range filtering if configured
         if "article_limit" in self.config and isinstance(
