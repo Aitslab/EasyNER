@@ -380,6 +380,30 @@ def convert_articles_to_dataset(
     return articles_ds
 
 
+def convert_articles_to_dataset_optimized(articles, column_names=["pmid", "sent_idx", "text"]):
+    """
+    Optimized version of convert_articles_to_dataset that uses list comprehension
+    for better performance and avoids unnecessary intermediate storage
+    """
+    # Optimized: Pre-allocate the total size for better memory efficiency
+    total_sentences = sum(len(content["sentences"]) for content in articles.values())
+
+    # Optimized: Use list comprehension for faster processing
+    articles_processed = [
+        [pmid, sent_idx, sent["text"]]
+        for pmid, content in articles.items()
+        for sent_idx, sent in enumerate(content["sentences"])
+    ]
+
+    # Create DataFrame directly from the processed list
+    articles_df = pd.DataFrame(articles_processed, columns=column_names)
+
+    # Convert to dataset efficiently
+    articles_ds = Dataset.from_pandas(articles_df)
+
+    return articles_ds
+
+
 def convert_dataset_to_dict(articles, ner_dataset):
     """
     adds predictions and spans to expected dictionary/json format articles
