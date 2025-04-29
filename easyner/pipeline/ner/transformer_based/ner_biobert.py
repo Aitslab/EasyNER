@@ -164,6 +164,62 @@ class NER_biobert:
         return dataset
 
 
+def run_ner_with_biobert_finetuned(
+    articles, ner_config, batch_index, device
+) -> dict:
+    """
+    Run NER with finetuned BioBERT
+    """
+    from easyner.io.converters.articles_to_datasets import (
+        convert_articles_to_dataset,
+        convert_dataset_to_dict,
+    )
+
+    print("Running NER with finetuned BioBERT", flush=True)
+
+    ner_session = NER_biobert(
+        model_dir=ner_config["model_folder"],
+        model_name=ner_config["model_name"],
+        device=device,
+    )
+
+    # Convert articles to dataset
+    articles_dataset = convert_articles_to_dataset(articles)
+
+    # Use the predict_dataset method instead of map+wrapper_predict
+    print(f"Processing batch {batch_index} with batch size")
+    articles_dataset_processed = ner_session.predict_dataset(
+        articles_dataset,
+        text_column="text",
+        batch_size=ner_config["batch_size"],
+    )
+
+    # Convert back to the dictionary structure (reusing existing code)
+    articles_processed = convert_dataset_to_dict(
+        articles, articles_dataset_processed
+    )
+    return articles_processed
+
+    # for i, sentence in enumerate(sentences):
+    #     try:
+    #         # the entities predicted are all uncased but the entity within the sentence is cased
+    #         entities = ner_session.predict(sentence["text"])
+    #     except:
+    #         # exception due to existence of utf tags in the data, which is incomprehensable/non-tokenizable by the model
+    #         print("batch {}, sentence no. {} with text [{}] was not predicted".format(batch_index, i, sentence))
+    #         entities = []
+
+    #     entities_list = []
+    #     entity_spans_list = []
+    #     if len(entities)>0:
+    #         for ent in entities:
+    #             entities_list.append(ent["word"])
+    #             entity_spans_list.append([ent["start"],ent["end"]])
+
+    #     articles[pmid]["sentences"][i]["entities"] = entities_list
+    #     articles[pmid]["sentences"][i]["entity_spans"] = entity_spans_list
+
+
 if __name__ == "__main__":
     model_dir = "../../rafsan/models/biobert_pytorch_pretrained/"
     model_name = "HunFlair_chemical_all/"
