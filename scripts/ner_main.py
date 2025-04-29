@@ -98,7 +98,7 @@ def run_ner_with_biobert_finetuned(
     articles_dataset_processed = ner_session.predict_dataset(
         articles_dataset,
         text_column="text",
-        batch_size=64,
+        batch_size=ner_config["batch_size"],
     )
 
     # Convert back to the dictionary structure (reusing existing code)

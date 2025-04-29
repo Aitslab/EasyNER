@@ -339,6 +339,21 @@
           "description": "If true, clears previous results in the output folder before running.",
           "default": false
         },
+        "batch_size": {
+          "description": "For BioBERT models, controls how many sentences are processed simultaneously during inference. Higher values generally increase GPU memory usage but improve processing speed. For dictionary-based NER, this parameter has minimal effect. Default is automatic.",
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Batch size for processing sentences."
+            },
+            {
+              "type": "null",
+              "description": "If set to null, tries to automatically determine the best batch size based on available hardware or if not implemented defaults to standard batch size."
+            }
+          ],
+          "default": null
+        },
         "article_limit": {
           "type": "array",
           "items": {
