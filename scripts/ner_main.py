@@ -75,7 +75,9 @@ def run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index):
     return articles
 
 
-def run_ner_with_biobert_finetuned(articles, ner_config, batch_index, device) -> dict:
+def run_ner_with_biobert_finetuned(
+    articles, ner_config, batch_index, device
+) -> dict:
     """
     Run NER with finetuned BioBERT
     """
@@ -191,7 +193,9 @@ def find_and_sort_input_files(ner_config: dict) -> list:
     )
 
     # Apply file range filtering if configured
-    if "article_limit" in ner_config and isinstance(ner_config["article_limit"], list):
+    if "article_limit" in ner_config and isinstance(
+        ner_config["article_limit"], list
+    ):
         start = ner_config["article_limit"][0]
         end = ner_config["article_limit"][1]
 
@@ -201,7 +205,9 @@ def find_and_sort_input_files(ner_config: dict) -> list:
     return input_file_list
 
 
-def process_files_in_parallel(input_file_list: list, ner_config: dict, cpu_limit: int = 1):
+def process_files_in_parallel(
+    input_file_list: list, ner_config: dict, cpu_limit: int = 1
+):
     """
     Process multiple batch files in parallel using a process pool.
 
@@ -265,9 +271,13 @@ def process_batch_file(ner_config: dict, batch_file: str, device=None) -> int:
 
     # Process with appropriate NER model
     if ner_config["model_type"] == "spacy_phrasematcher":
-        articles = run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index)
+        articles = run_ner_with_spacy_phrasematcher(
+            articles, ner_config, batch_index
+        )
     elif ner_config["model_type"] == "biobert_finetuned":
-        articles = run_ner_with_biobert_finetuned(articles, ner_config, batch_index, device)
+        articles = run_ner_with_biobert_finetuned(
+            articles, ner_config, batch_index, device
+        )
     else:
         raise ValueError(
             f"Unknown model type: {ner_config['model_type']}. Supported types are 'spacy_phrasematcher' and 'biobert_finetuned'."
@@ -321,7 +331,7 @@ def prepare_output_path(ner_config: dict, batch_index: int) -> str:
     return OUTPUT_FILE_TEMPLATE.format(
         output_path=ner_config["output_path"],
         output_file_prefix=ner_config["output_file_prefix"],
-        batch_index=batch_index
+        batch_index=batch_index,
     )
 
 
@@ -345,7 +355,9 @@ def filter_files(list_files, start, end):
     """
     filtered_list_files = []
     for file in list_files:
-        file_idx = int(os.path.splitext(os.path.basename(file))[0].split("-")[-1])
+        file_idx = int(
+            os.path.splitext(os.path.basename(file))[0].split("-")[-1]
+        )
         if file_idx >= start and file_idx <= end:
             filtered_list_files.append(file)
 
@@ -380,13 +392,17 @@ def convert_articles_to_dataset(
     return articles_ds
 
 
-def convert_articles_to_dataset_optimized(articles, column_names=["pmid", "sent_idx", "text"]):
+def convert_articles_to_dataset_optimized(
+    articles, column_names=["pmid", "sent_idx", "text"]
+):
     """
     Optimized version of convert_articles_to_dataset that uses list comprehension
     for better performance and avoids unnecessary intermediate storage
     """
     # Optimized: Pre-allocate the total size for better memory efficiency
-    total_sentences = sum(len(content["sentences"]) for content in articles.values())
+    total_sentences = sum(
+        len(content["sentences"]) for content in articles.values()
+    )
 
     # Optimized: Use list comprehension for faster processing
     articles_processed = [
