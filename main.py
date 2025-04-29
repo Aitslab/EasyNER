@@ -7,6 +7,7 @@ from concurrent.futures import (
 )
 from multiprocessing import cpu_count
 
+from easyner.pipeline.ner import ner_main
 from easyner.pipeline.pubmed import (
     get_abstracts_by_pmids,
     pubmed_bulk_downloader,
@@ -18,7 +19,6 @@ from scripts import (
     entity_merger,
     metrics,
     nel,
-    ner_main,
     search,
     text_loader,
 )
