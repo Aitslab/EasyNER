@@ -121,9 +121,9 @@ def process_batch_file(ner_config: dict, batch_file: str, device=None) -> int:
     --------
     int: The batch index of the processed file
     """
-    # Load the batch file
-    with open(batch_file, "r", encoding="utf-8") as f:
-        articles = json.loads(f.read())
+    from easyner.io.handlers import JsonHandler
+
+    articles = JsonHandler().read(batch_file)
 
     # Extract batch index from filename
     batch_index = extract_batch_index(batch_file)
