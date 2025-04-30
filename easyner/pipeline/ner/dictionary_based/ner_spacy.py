@@ -116,7 +116,7 @@ class SpacyNERProcessor(NERProcessor):
             for i, sentence in enumerate(sentences):
                 doc = self.nlp(sentence["text"])
 
-                if self.config.get("store_tokens") == "yes":
+                if self.config.get("store_tokens"):
                     tokens = [token.text for token in doc]
                     articles[pmid]["sentences"][i]["tokens"] = tokens
 

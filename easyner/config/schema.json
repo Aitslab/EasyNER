@@ -431,9 +431,9 @@
           "description": "Path to dictionary file for dictionary-based NER, e.g., 'dictionaries/covid-19_synonyms_v2.txt'."
         },
         "store_tokens": {
-          "type": "string",
-          "description": "'yes' to store all tokens in the output for error analysis (only for dictionary-based NER); default is 'no'.",
-          "default": "no"
+          "type": "boolean",
+          "description": "If true store all tokens in the output for error analysis (only for dictionary-based NER); default is 'false'.",
+          "default": false
         },
         "labels": {
           "type": "string",
