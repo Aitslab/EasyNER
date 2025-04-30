@@ -16,7 +16,7 @@ def get_batch_number(filename):
     return os.path.basename(filename)
 
 
-def extract_batch_index(batch_file: str) -> int:
+def get_batch_file_index(batch_file: str) -> int:
     """
     Extract the batch index from a filename.
     Use case when you need strict validation and errors for malformed filenames
