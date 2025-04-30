@@ -31,6 +31,7 @@ class NERPipeline:
     def _get_input_files_sorted(self) -> List[str]:
         """
         Find and sort input files based on configuration.
+        Can be overridden by NER_ARTICLE_START and NER_ARTICLE_END environment variables.
 
         Returns:
         --------
@@ -55,17 +56,32 @@ class NERPipeline:
             # Fall back to lexicographical sorting if any errors occur
             input_file_list = sorted(input_file_list)
 
-        # Apply file range filtering if configured
-        if "article_limit" in self.config and isinstance(
+        # Check environment variables first, then config
+        env_start = os.environ.get("NER_ARTICLE_START")
+        env_end = os.environ.get("NER_ARTICLE_END")
+
+        if env_start and env_end:
+            # Environment variables override config
+            from easyner.io.utils import filter_files
+
+            start = int(env_start)
+            end = int(env_end)
+            input_file_list = filter_files(input_file_list, start, end)
+            print(
+                f"Processing articles in range {start} to {end} (from environment variables)"
+            )
+        elif "article_limit" in self.config and isinstance(
             self.config["article_limit"], list
         ):
+            # Fall back to config if no environment variables
             from easyner.io.utils import filter_files
 
             start = self.config["article_limit"][0]
             end = self.config["article_limit"][1]
-
             input_file_list = filter_files(input_file_list, start, end)
-            print(f"Processing articles in range {start} to {end}")
+            print(
+                f"Processing articles in range {start} to {end} (from config)"
+            )
 
         return input_file_list
 
