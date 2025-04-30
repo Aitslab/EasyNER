@@ -1,5 +1,5 @@
 import pytest
-from easyner.io.utils import extract_batch_index, filter_batch_files
+from easyner.io.utils import get_batch_file_index, filter_batch_files
 
 
 @pytest.fixture
@@ -45,15 +45,15 @@ def test_get_batch_number(
     filename = create_batch_filename(batch_number, file_extension)
 
     if isinstance(expected, int):
-        assert extract_batch_index(filename) == expected
+        assert get_batch_file_index(filename) == expected
     else:
         with expected:
-            extract_batch_index(filename)
+            get_batch_file_index(filename)
 
     # Empty string special case handled separately
     if batch_number == "":
         with pytest.raises(ValueError):
-            extract_batch_index("")
+            get_batch_file_index("")
 
 
 @pytest.fixture
@@ -167,6 +167,62 @@ def test_filter_batch_files_with_empty_list_exclude_batches(caplog):
             1,
             [2],
             pytest.raises(ValueError),
+        ),
+        # Test with absolute paths
+        (
+            [
+                "/path/to/batch_1.txt",
+                "/path/to/batch_2.txt",
+                "/path/to/batch_3.txt",
+            ],
+            1,
+            3,
+            None,
+            [
+                "/path/to/batch_1.txt",
+                "/path/to/batch_2.txt",
+                "/path/to/batch_3.txt",
+            ],
+        ),
+        # Test with nested directories
+        (
+            ["dir1/batch_1.txt", "dir2/batch_2.txt", "dir3/batch_3.txt"],
+            1,
+            3,
+            None,
+            ["dir1/batch_1.txt", "dir2/batch_2.txt", "dir3/batch_3.txt"],
+        ),
+        # Test with mixed absolute and relative paths
+        (
+            ["/abs/path/batch_1.txt", "rel/path/batch_2.txt", "./batch_3.txt"],
+            1,
+            3,
+            None,
+            ["/abs/path/batch_1.txt", "rel/path/batch_2.txt", "./batch_3.txt"],
+        ),
+        # Test with deeply nested paths
+        (
+            ["/root/dir1/subdir/batch_1.txt", "/root/dir2/subdir/batch_2.txt"],
+            1,
+            2,
+            None,
+            ["/root/dir1/subdir/batch_1.txt", "/root/dir2/subdir/batch_2.txt"],
+        ),
+        # Test excluding batches with mixed paths
+        (
+            ["/path/to/batch_1.txt", "dir/batch_2.txt", "./batch_3.txt"],
+            1,
+            3,
+            [2],
+            ["/path/to/batch_1.txt", "./batch_3.txt"],
+        ),
+        # Test with Windows-style paths (should still work on Linux)
+        (
+            ["C:\\Users\\user\\batch_1.txt", "D:\\data\\batch_2.txt"],
+            1,
+            2,
+            None,
+            ["C:\\Users\\user\\batch_1.txt", "D:\\data\\batch_2.txt"],
         ),
     ],
 )
