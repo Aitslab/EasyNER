@@ -379,6 +379,24 @@
         },
         "model_type": {
           "type": "string",
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "biobert_finetuned",
+                "spacy_phrasematcher"
+              ],
+              "description": "Predefined model options"
+            },
+            {
+              "type": "string",
+              "description": "Custom model type"
+            }
+          ],
+          "enum": [
+            "biobert_finetuned",
+            "spacy_phrasematcher"
+          ],
           "description": "Type of model to use: 'biobert_finetuned' for deep learning or 'spacy_phrasematcher' for dictionary-based NER.",
           "default": "biobert_finetuned"
         },
