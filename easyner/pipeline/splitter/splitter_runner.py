@@ -678,6 +678,8 @@ def run_splitter(
     Returns:
         Dict: Empty dict (for compatibility with pipeline architecture)
     """
+    import gc
+
     if ignore:
         logger.info("Ignoring script: splitter.")
         return {}
@@ -696,8 +698,18 @@ def run_splitter(
 
     logger.info(f"Starting splitter with {cpu_limit_to_use} CPU cores")
 
-    runner = SplitterRunner(splitter_config, cpu_limit_to_use)
-    runner.run()
+    try:
+        runner = SplitterRunner(splitter_config, cpu_limit_to_use)
+        runner.run()
+        logger.info("Finished running splitter script.")
+    except KeyboardInterrupt:
+        logger.info("Splitter processing interrupted by user.")
+        raise
+    except Exception as e:
+        logger.error(f"Error running splitter: {e}")
+        raise
+    finally:
+        # Clean up resources
+        gc.collect()  # Force garbage collection
 
-    logger.info("Finished running splitter script.")
     return {}
