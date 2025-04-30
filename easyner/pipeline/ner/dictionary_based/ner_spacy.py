@@ -2,8 +2,7 @@
 
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Any, Dict, List
-import spacy
-from spacy.matcher import PhraseMatcher
+
 from tqdm import tqdm
 
 from easyner.pipeline.ner.processor import NERProcessor
@@ -19,8 +18,36 @@ class SpacyNERProcessor(NERProcessor):
 
     def _initialize_model(self) -> None:
         """Initialize the spaCy model once for all processing."""
-        # Implementation-specific initialization
-        pass
+        import spacy
+        from spacy.matcher import PhraseMatcher
+
+        if not self.config.get("multiprocessing", False):
+            spacy.prefer_gpu()  # Should ideally be called before importing spacy and loading any pipelines
+
+        self.nlp = spacy.load("en_core_web_sm")  # Default model
+        self.matcher = PhraseMatcher(self.nlp.vocab, attr="LOWER")
+        terms = self._load_vocabulary()
+
+        # To create the patterns, each phrase has to be processed with the nlp object. If you have a trained pipeline loaded, doing this in a loop or list comprehension can easily become inefficient and slow. If you only need the tokenization and lexical attributes, you can run nlp.make_doc instead, which will only run the tokenizer. For an additional speed boost, you can also use the nlp.tokenizer.pipe method, which will process the texts as a stream.
+
+        # TODO: Implement choice between full nlp processing and nlp.make_doc/nlp.tokenizer.pipe
+
+        # patterns = [self.nlp.make_doc(term) for term in terms]
+
+        patterns = list(
+            self.nlp.tokenizer.pipe(terms)
+        )  # Faster will process the texts as a stream.
+        self.matcher.add(self.config["entity_type"], patterns)
+
+    def _load_vocabulary(self) -> List[str]:
+        """Load vocabulary terms from the specified file."""
+        terms = []
+        with open(self.config["vocab_path"], "r") as f:
+            for line in f:
+                term = line.strip()
+                if term:  # Skip empty lines
+                    terms.append(term)
+        return terms
 
     def process_dataset(
         self, input_files: List[str], device: Any = None
@@ -52,9 +79,7 @@ class SpacyNERProcessor(NERProcessor):
             self._save_processed_articles(articles, batch_index)
             return batch_index
 
-        processed_articles = run_ner_with_spacy_phrasematcher(
-            articles, self.config, batch_index
-        )
+        processed_articles = self._process_articles(articles, batch_index)
 
         self._save_processed_articles(processed_articles, batch_index)
         return batch_index
@@ -77,113 +102,40 @@ class SpacyNERProcessor(NERProcessor):
                     f"Completed SpaCy batch {batch_index} ({i+1}/{len(futures)})"
                 )
 
+    def _process_articles(self, articles: Dict, batch_index: int) -> Dict:
+        """
+        Run NER with spacy PhraseMatcher
+        """
 
-def run_ner_with_spacy_phrasematcher(articles, ner_config, batch_index):
-    """
-    Run NER with spacy PhraseMatcher
-    """
-    if not ner_config["multiprocessing"]:
-        spacy.prefer_gpu()
+        # Run prediction on each sentence in each article.
+        for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
+            sentences = articles[pmid]["sentences"]
 
-    print("Running NER with spacy")
-    nlp = spacy.load(ner_config["model_name"])
-    terms = []
-    with open(ner_config["vocab_path"], "r") as f:
-        for line in f:
-            x = line.strip()
-            terms.append(x)
-    print("Phraselist complete")
+            # Predict with spacy PhraseMatcher, if it has been selected
 
-    matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
-    patterns = [nlp.make_doc(term) for term in terms]
-    matcher.add(ner_config["entity_type"], patterns)
+            for i, sentence in enumerate(sentences):
+                doc = self.nlp(sentence["text"])
 
-    # Run prediction on each sentence in each article.
-    for pmid in tqdm(articles, desc=f"batch:{batch_index}"):
-        sentences = articles[pmid]["sentences"]
+                if self.config.get("store_tokens") == "yes":
+                    tokens = [token.text for token in doc]
+                    articles[pmid]["sentences"][i]["tokens"] = tokens
 
-        # Predict with spacy PhraseMatcher, if it has been selected
+                entities = []
+                spans = []
+                matches = self.matcher(doc)
 
-        for i, sentence in enumerate(sentences):
-            ner_class = ner_config["entity_type"]
+                for match_id, start, end in matches:
+                    span = doc[start:end]
+                    ent = span.text
+                    entities.append(ent)
+                    first_char = span.start_char
+                    last_char = span.end_char - 1
+                    spans.append((first_char, last_char))
 
-            doc = nlp(sentence["text"])
-            if ner_config["store_tokens"] == "yes":
-                tokens = []
-                # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
-                for token in doc:
-                    tokens.append(
-                        token.text
-                    )  # to get a list of tokens in the sentence
-                # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
-                articles[pmid]["sentences"][i]["tokens"] = tokens
+                articles[pmid]["sentences"][i]["entities"] = entities
+                articles[pmid]["sentences"][i]["entity_spans"] = spans
 
-            entities = []
-            spans = []
-            matches = matcher(doc)
-
-            for match_id, start, end in matches:
-                span = doc[start:end]
-                ent = span.text
-                entities.append(ent)
-                first_char = span.start_char
-                last_char = span.end_char - 1
-                spans.append((first_char, last_char))
-
-            # articles[pmid]["sentences"][i]["NER class"] = ner_class
-            articles[pmid]["sentences"][i]["entities"] = entities
-            articles[pmid]["sentences"][i]["entity_spans"] = spans
-    return articles
-
-
-@PendingDeprecationWarning
-def run_ner_with_spacy(model_name, vocab_path, entity_type, sentences):
-
-    # Prepare spacy, if it is needed
-    print("Running NER with spacy")
-    nlp = spacy.load(model_name)
-
-    terms = []
-    with open(vocab_path) as f:
-        for line in f:
-            x = line.strip()
-            terms.append(x)
-
-    print("Phraselist complete")
-
-    matcher = PhraseMatcher(nlp.vocab, attr="LOWER")
-    patterns = [nlp.make_doc(term) for term in terms]
-    matcher.add(entity_type, patterns)
-
-    for i, sentence in enumerate(sentences):
-        ner_class = entity_type
-
-        doc = nlp(sentences["text"])
-        if store_tokens == "yes":
-            tokens = []
-            # tokens_idxs = []  #uncomment if you want a list of token character offsets within the sentence
-            for token in doc:
-                tokens.append(
-                    token.text
-                )  # to get a list of tokens in the sentence
-            # tokens_idxs.append(token.idx) #uncomment if you want a list of token character offsets within the sentence
-            articles[pmid]["sentences"][i]["tokens"] = tokens  # type: ignore
-
-        entities = []
-        spans = []
-        matches = matcher(doc)
-
-        for match_id, start, end in matches:
-            span = doc[start:end]
-            ent = span.text
-            entities.append(ent)
-            first_char = span.start_char
-            last_char = span.end_char - 1
-            spans.append((first_char, last_char))
-
-        articles[pmid]["sentences"][i]["NER class"] = ner_class
-        articles[pmid]["sentences"][i]["entities"] = entities
-        articles[pmid]["sentences"][i]["entity spans"] = spans
+        return articles
 
 
 if __name__ == "__main__":
