@@ -56,6 +56,26 @@ def test_get_batch_number(
             get_batch_file_index("")
 
 
+def test_sort_by_batch_number():
+    """Test sorting a list of batch filenames by their numeric index."""
+    files = [
+        "batch_10.txt",
+        "batch_2.txt",
+        "batch_1.txt",
+        "batch_20.txt",
+        "batch_3.txt",
+    ]
+    sorted_files = sorted(files, key=get_batch_file_index)
+    expected_sorted_files = [
+        "batch_1.txt",
+        "batch_2.txt",
+        "batch_3.txt",
+        "batch_10.txt",
+        "batch_20.txt",
+    ]
+    assert sorted_files == expected_sorted_files
+
+
 @pytest.fixture
 def batch_files():
     return [
