@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PubMed Articles Collection",
+  "type": "object",
+  "patternProperties": {
+    "^[0-9]+$": {
+      "type": "object",
+      "required": [
+        "title",
+        "sentences"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "abstract": {
+          "type": "string"
+        },
+        "sentences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "properties": {
+              "text": {
+                "type": "string"
+              },
+              "tokens": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entities": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "entity_spans": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "ids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "names": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "metadata": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
