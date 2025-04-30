@@ -11,6 +11,20 @@ from pathlib import Path
 from easyner.infrastructure.paths import SCHEMA_PATH
 
 
+def test_schema_exists_and_is_valid_json():
+    """Test that the schema file exists and is a valid JSON file."""
+    assert SCHEMA_PATH.exists(), f"Schema file does not exist at {SCHEMA_PATH}"
+
+    f"{SCHEMA_PATH} resolves to valid schema file"
+
+    # Check if the file contains valid JSON
+    try:
+        with open(SCHEMA_PATH, "r") as f:
+            json.load(f)
+    except json.JSONDecodeError as e:
+        pytest.fail(f"Schema file is not a valid JSON file: {e}")
+
+
 def test_complex_types_have_defaults():
     """Test that all oneOf and anyOf structures in the schema have top-level default values."""
 
