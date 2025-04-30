@@ -1,7 +1,5 @@
 import pytest
-from easyner.io.utils import (
-    extract_batch_index,
-)
+from easyner.io.utils import extract_batch_index, filter_batch_files
 
 
 @pytest.fixture
@@ -56,3 +54,135 @@ def test_get_batch_number(
     if batch_number == "":
         with pytest.raises(ValueError):
             extract_batch_index("")
+
+
+@pytest.fixture
+def batch_files():
+    return [
+        "batch_1.txt",
+        "batch_2.txt",
+        "batch_3.txt",
+    ]
+
+
+def test_filter_batch_files_with_empty_list():
+    """Test filter_batch_files with an empty list."""
+    with pytest.raises(ValueError):
+        filter_batch_files([], start=1, end=3)
+
+
+def test_filter_batch_files_with_start_greater_than_end():
+    """Test filter_batch_files with start > end."""
+    files = ["batch_1.txt", "batch_2.txt", "batch_3.txt"]
+    with pytest.raises(ValueError):
+        filter_batch_files(files, start=3, end=1)
+
+
+def test_filter_batch_files_with_empty_list_exclude_batches(caplog):
+    files = ["batch_1.txt", "batch_2.txt", "batch_3.txt"]
+    with caplog.at_level("WARNING"):
+        filtered_files = filter_batch_files(files, exclude_batches=[])
+        assert filtered_files == files  # No files should be excluded
+        # Check that some warning was logged, without requiring exact text
+        assert len(caplog.records) > 0
+        assert any(record.levelname == "WARNING" for record in caplog.records)
+
+
+@pytest.mark.parametrize(
+    "files,start,end,exclude_batches,expected",
+    [
+        # Basic filter tests
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            1,
+            3,
+            None,
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+        ),
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            1,
+            3,
+            [2],
+            ["batch_1.txt", "batch_3.txt"],
+        ),
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            None,
+            2,
+            None,
+            ["batch_1.txt", "batch_2.txt"],
+        ),
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            2,
+            None,
+            None,
+            ["batch_2.txt", "batch_3.txt"],
+        ),
+        # Test with different filename formats
+        (
+            ["batch-1.json", "batch-2.json", "batch-3.json"],
+            1,
+            3,
+            None,
+            ["batch-1.json", "batch-2.json", "batch-3.json"],
+        ),
+        # Test with non-sequential batch numbers
+        (
+            ["batch_1.txt", "batch_5.txt", "batch_10.txt"],
+            1,
+            10,
+            None,
+            ["batch_1.txt", "batch_5.txt", "batch_10.txt"],
+        ),
+        # Test excluding multiple batches
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt", "batch_4.txt"],
+            None,
+            None,
+            [1, 3],
+            ["batch_2.txt", "batch_4.txt"],
+        ),
+        # Test with mixed filename patterns
+        (
+            ["batch_1.txt", "batch-2.json", "batch_3.csv"],
+            1,
+            3,
+            None,
+            ["batch_1.txt", "batch-2.json", "batch_3.csv"],
+        ),
+        # Test with start > end
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            3,
+            1,
+            None,
+            pytest.raises(ValueError),
+        ),
+        # Test with start > end and exclude_batches
+        (
+            ["batch_1.txt", "batch_2.txt", "batch_3.txt"],
+            3,
+            1,
+            [2],
+            pytest.raises(ValueError),
+        ),
+    ],
+)
+def test_filter_batch_files_parametrized(
+    files, start, end, exclude_batches, expected
+):
+    """Test filter_batch_files with various input combinations."""
+    # If expected is a context manager (like pytest.raises), use it directly
+    if not isinstance(expected, list):
+        with expected:
+            filter_batch_files(
+                files, start=start, end=end, exclude_batches=exclude_batches
+            )
+    else:
+        # Otherwise, compare the function's output with the expected result
+        filtered_files = filter_batch_files(
+            files, start=start, end=end, exclude_batches=exclude_batches
+        )
+        assert filtered_files == expected

@@ -1,5 +1,7 @@
+import logging
 import os
 import re
+from typing import List, Optional
 
 
 def get_batch_number(filename):
@@ -61,7 +63,12 @@ def extract_batch_index(batch_file: str) -> int:
     )
 
 
-def filter_files(list_files, start, end):
+def filter_batch_files(
+    file_list,
+    start: Optional[int] = None,
+    end: Optional[int] = None,
+    exclude_batches: Optional[List[int]] = None,
+):
     """
     Filter files based on index range.
 
@@ -78,13 +85,38 @@ def filter_files(list_files, start, end):
     --------
     list: Filtered list of file paths
     """
-    filtered_list_files = []
-    for file in list_files:
-        file_idx = int(
-            os.path.splitext(os.path.basename(file))[0].split("-")[-1]
+    if not file_list:
+        raise ValueError(
+            "The file list is empty. Cannot filter an empty list."
         )
-        if file_idx >= start and file_idx <= end:
+    if start is not None and end is not None:
+        if start > end:
+            raise ValueError("Start index cannot be greater than end index.")
+    if exclude_batches == []:
+        logging.warning(
+            "Empty exclude_batches list provided. No batches will be excluded."
+        )
+        exclude_batches = None  # Reset to None to avoid confusion
+
+    filtered_list_files = []
+    for file in file_list:
+        try:
+            batch_idx = extract_batch_index(file)
+            if exclude_batches and batch_idx in exclude_batches:
+                continue
+
+            if start is not None:
+                if batch_idx < start:
+                    continue
+            if end is not None:
+                if batch_idx > end:
+                    continue
+
             filtered_list_files.append(file)
+        except (ValueError, IndexError):
+            raise ValueError(
+                f"Batch filenames must contain numeric indices when filtering: {file}"
+            )
 
     return filtered_list_files
 
