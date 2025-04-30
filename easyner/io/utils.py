@@ -2,9 +2,22 @@ import os
 import re
 
 
+def get_batch_number(filename):
+    # Use get_batch_number for sorting file lists when you want graceful fallback
+    # Extract batch numbers using regex pattern for "batch-X.json" format
+    pattern = re.compile(r"batch-(\d+)\.json$")
+
+    match = pattern.search(os.path.basename(filename))
+    if match:
+        return int(match.group(1))
+    # Fall back to lexicographical for non-matching files
+    return os.path.basename(filename)
+
+
 def extract_batch_index(batch_file: str) -> int:
     """
     Extract the batch index from a filename.
+    Use case when you need strict validation and errors for malformed filenames
 
     Parameters:
     -----------

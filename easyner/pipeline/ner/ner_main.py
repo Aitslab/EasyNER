@@ -4,6 +4,7 @@ import os
 import torch
 from glob import glob
 from typing import List, Dict, Any
+from easyner.io.utils import get_batch_number
 from easyner.pipeline.ner.factory import NERProcessorFactory
 import re
 
@@ -41,16 +42,6 @@ class NERPipeline:
 
         # Try to sort by numeric indices, fall back to lexicographical if not possible
         try:
-            # Extract batch numbers using regex pattern for "batch-X.json" format
-            pattern = re.compile(r"batch-(\d+)\.json$")
-
-            def get_batch_number(filename):
-                match = pattern.search(os.path.basename(filename))
-                if match:
-                    return int(match.group(1))
-                # Fall back to lexicographical for non-matching files
-                return os.path.basename(filename)
-
             input_file_list = sorted(input_file_list, key=get_batch_number)
         except Exception:
             # Fall back to lexicographical sorting if any errors occur
