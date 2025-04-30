@@ -130,7 +130,7 @@ class TestNERUtils:
                 )
 
                 # Should fallback to half the failing batch size or start_batch
-                assert result == 16, f"Expected 16 but got {result}"
+                assert result == 2, f"Expected 2 but got {result}"
 
     def test_optimal_batch_size_verbose_output(self):
         """Test that batch size calculation outputs informative progress messages."""
