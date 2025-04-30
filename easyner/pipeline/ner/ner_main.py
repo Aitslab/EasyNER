@@ -86,7 +86,7 @@ class NERPipeline:
         print("----Starting NER pipeline----")
 
         # Set up output directory
-        if self.config.get("clear_old_results", True):
+        if self.config.get("clear_old_results", False):
             from easyner.io.utils import _remove_all_files_from_dir
 
             _remove_all_files_from_dir(self.config["output_path"])
