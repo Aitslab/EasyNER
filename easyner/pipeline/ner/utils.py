@@ -1,4 +1,4 @@
-from typing import Union, Optional
+from typing import Union, Optional, List, Dict, Any
 import torch
 from datasets import Dataset
 import time
@@ -47,13 +47,74 @@ def get_device_int(device: Union[int, torch.device]) -> int:
     return pipeline_device_int
 
 
+def get_available_gpus() -> List[int]:
+    """
+    Detect available GPUs on the system.
+
+    Returns:
+    --------
+    List[int]: List of available GPU device IDs
+    """
+    if not torch.cuda.is_available():
+        return []
+
+    # Do a more thorough check to ensure all GPUs are detected
+    try:
+        # Force CUDA initialization to detect all GPUs
+        torch.cuda.init()
+
+        # Get actual device count
+        num_devices = torch.cuda.device_count()
+
+        # First try a simple detection approach
+        if num_devices > 0:
+            # Just return all device IDs without individual testing
+            # This is more reliable in some environments where detailed probing can fail
+            gpu_ids = list(range(num_devices))
+            print(f"Detected {len(gpu_ids)} GPU(s) using device count method")
+            return gpu_ids
+
+        # Fall back to thorough checking only if the simple approach returns 0
+        # Double-check by trying to query each device
+        available_gpus = []
+        for i in range(num_devices):
+            try:
+                # Check if we can access the device properties
+                props = torch.cuda.get_device_properties(i)
+                # Create a small test tensor to verify the device works
+                test_tensor = torch.zeros(1, device=f"cuda:{i}")
+                del test_tensor
+                # Add this GPU to available list
+                available_gpus.append(i)
+                print(
+                    f"GPU {i} ({props.name}) is available with {props.total_memory / (1024**3):.1f} GB memory"
+                )
+            except Exception as e:
+                print(f"GPU {i} exists but is not usable: {e}")
+
+        print(
+            f"Found {len(available_gpus)} usable GPU(s) out of {num_devices} detected"
+        )
+        return available_gpus
+    except Exception as e:
+        print(f"Error detecting available GPUs: {e}")
+        # Fall back to simple count as last resort
+        try:
+            count = torch.cuda.device_count()
+            return list(range(count))
+        except:
+            print("Could not determine GPU count. Assuming no GPUs available.")
+            return []
+
+
+
 def calculate_optimal_batch_size(
     pipeline,
     dataset: Dataset,
     text_column: str = "text",
     sample: bool = False,
     max_batch_size: Optional[int] = None,
-    start_batch=16,
+    start_batch=2,
     min_improvement_percentage=2,
 ):
     """
