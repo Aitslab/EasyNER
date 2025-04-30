@@ -441,6 +441,11 @@
           ],
           "default": null
         },
+        "reuse_optimal_batch_size": {
+          "type": "boolean",
+          "description": "If true, calculates the optimal batch size only once for the first batch and reuses it for all subsequent batches. This improves performance by avoiding redundant batch size calculations.",
+          "default": true
+        },
         "article_limit": {
           "type": "array",
           "items": {

@@ -24,6 +24,8 @@ class BioBertNERProcessor(NERProcessor):
         super().__init__(config)
         # Load BioBERT model once for all processing
         self._model = None
+        # Store calculated optimal batch size to reuse across batches
+        self._optimal_batch_size = None
 
     def _initialize_model(self, device: Any) -> None:
         """
@@ -114,11 +116,13 @@ class BioBertNERProcessor(NERProcessor):
             self._save_processed_articles(articles, batch_index)
             return batch_index
 
-        # Convert articles to dataset formatW
+        # Convert articles to dataset format
         articles_dataset = convert_articles_to_dataset(articles)
 
         # Process with integrated pipeline
         print(f"Processing batch {batch_index}")
+
+        # Check if batch size is explicitly provided in config
         batch_size = self.config.get("batch_size", None)
 
         if articles_dataset is None or len(articles_dataset) == 0:
@@ -126,11 +130,39 @@ class BioBertNERProcessor(NERProcessor):
             self._save_processed_articles(articles, batch_index)
             return batch_index
 
-        # Determine batch size if not provided
+        # Determine batch size if not provided in config
         if batch_size is None:
-            batch_size = self._get_optimal_batch_size(articles_dataset, "text")
+            # Check if we should reuse the cached optimal batch size
+            reuse_optimal_batch_size = self.config.get(
+                "reuse_optimal_batch_size", True
+            )
 
-        print(f"Processing dataset with batch size: {batch_size}", flush=True)
+            if (
+                self._optimal_batch_size is None
+                or not reuse_optimal_batch_size
+            ):
+                # Calculate optimal batch size if not already determined or if explicitly told not to reuse
+                self._optimal_batch_size = self._get_optimal_batch_size(
+                    articles_dataset, "text"
+                )
+                print(
+                    f"Calculated optimal batch size: {self._optimal_batch_size}",
+                    flush=True,
+                )
+            else:
+                print(
+                    f"Reusing previously calculated optimal batch size: {self._optimal_batch_size}",
+                    flush=True,
+                )
+
+            batch_size = self._optimal_batch_size
+        else:
+            # If batch size is explicitly specified in config, use that
+            self._optimal_batch_size = batch_size
+            print(
+                f"Using specified batch size from config: {batch_size}",
+                flush=True,
+            )
 
         # Process the dataset
         articles_dataset_processed = self._predict_dataset(
