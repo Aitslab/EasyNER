@@ -32,12 +32,33 @@ def extract_batch_index(batch_file: str) -> int:
     -------
     ValueError: If the filename doesn't contain a numeric index
     """
-    regex = re.compile(r"\d+")
-    try:
-        return int(regex.findall(os.path.basename(batch_file))[-1])
-    except (IndexError, ValueError) as e:
-        print(f"Error extracting index from {batch_file}")
-        raise ValueError(f"Batch filenames must contain numeric indices: {e}")
+    filename = os.path.basename(batch_file)
+
+    # Get the name part (before any extensions)
+    name_part = filename.split(".")[0]
+
+    # Find the last series of digits at the end of the name part
+    match = re.search(r"(\d+)$", name_part)
+
+    if match:
+        # If match is preceded by numeric characters anywhere in the name raise warning about ambigous batch filename
+        if re.search(r"\d", name_part[: -len(match.group(1))]):
+            print(
+                f"Warning: Ambiguous batch filename '{filename}'. "
+                "Batch number should be at the end of the filename."
+            )
+
+        # Match is not at the end of the name part
+        if match.start() != len(name_part) - len(match.group(1)):
+            raise ValueError(
+                f"Batch filename '{filename}' contains non-numeric characters after the batch number."
+            )
+        return int(match.group(1))
+
+    print(f"Error extracting index from {batch_file}")
+    raise ValueError(
+        "Batch filenames must contain a pure numeric index before the extension"
+    )
 
 
 def filter_files(list_files, start, end):
