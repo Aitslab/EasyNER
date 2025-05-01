@@ -333,7 +333,6 @@ class TestNERIntegration:
         output_dir = setup_test_environment["output_dir"]
 
         # Create configuration with article range filters
-        # Note: The config should use "article_limit" key based on the code in NERPipeline
         config = {
             "model_type": "biobert_finetuned",
             "model_folder": "/dummy/path",
@@ -357,40 +356,22 @@ class TestNERIntegration:
             "easyner.pipeline.ner.ner_main.NERProcessorFactory.create_processor",
             return_value=mock_processor,
         ):
-
-            # Run pipeline with controlled file list
+            # Run pipeline with the actual file system
             pipeline = NERPipeline(config)
+            pipeline.run()
 
-            # Sort input files for predictable behavior
-            sorted_files = sorted(setup_test_environment["files"])
-
-            # Replace the glob function to return our sorted files
-            with patch("easyner.pipeline.ner.ner_main.glob") as mock_glob:
-                mock_glob.return_value = sorted_files
-
-                # Also patch io.utils.filter_files to use our test filtering logic
-                # This ensures we're testing the actual filter implementation
-                def mock_filter(files, start, end):
-                    # Only return files that match batch-{i} where i is between start and end
-                    return [f for f in files if f"batch-{start}.json" in f]
-
-                with patch(
-                    "easyner.io.utils.filter_files", side_effect=mock_filter
-                ):
-                    pipeline.run()
-
-                # Verify only the specified batch was processed
-                expected_file = next(
-                    f
-                    for f in setup_test_environment["files"]
-                    if "batch-1.json" in f
-                )
-                assert hasattr(
-                    pipeline.processor, "processed_files"
-                ), "Expected processed_files attribute"
-                assert (
-                    len(pipeline.processor.processed_files) == 1
-                ), f"Expected exactly one file to be processed but got {pipeline.processor.processed_files}"
-                assert (
-                    pipeline.processor.processed_files[0] == expected_file
-                ), f"Expected {expected_file} to be processed but got {pipeline.processor.processed_files[0]}"
+            # Verify only the specified batch was processed
+            expected_file = next(
+                f
+                for f in setup_test_environment["files"]
+                if "batch-1.json" in f
+            )
+            assert hasattr(
+                pipeline.processor, "processed_files"
+            ), "Expected processed_files attribute"
+            assert (
+                len(pipeline.processor.processed_files) == 1
+            ), f"Expected exactly one file to be processed but got {pipeline.processor.processed_files}"
+            assert (
+                pipeline.processor.processed_files[0] == expected_file
+            ), f"Expected {expected_file} to be processed but got {pipeline.processor.processed_files[0]}"

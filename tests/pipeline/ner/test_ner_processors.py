@@ -82,28 +82,30 @@ class TestNERProcessors:
     @pytest.fixture
     def mock_utils(self):
         """Mock utility functions"""
+        # Import the modules directly
+        from easyner.pipeline.ner import utils as ner_utils
+        from easyner.io import utils as io_utils
+
         with (
-            patch(
-                "easyner.pipeline.ner.utils.get_device_int"
-            ) as mock_get_device,
-            patch(
-                "easyner.pipeline.ner.utils.calculate_optimal_batch_size",
-                create=True,
+            patch.object(ner_utils, "get_device_int") as mock_get_device,
+            patch.object(
+                ner_utils, "calculate_optimal_batch_size", create=True
             ) as mock_calc,
-            patch(
-                "easyner.io.utils.extract_batch_index"
-            ) as mock_extract_index,
-            patch(
-                "easyner.io.utils._remove_all_files_from_dir"
+            patch.object(io_utils, "get_batch_file_index") as mock_batch_index,
+            patch.object(
+                io_utils, "_remove_all_files_from_dir"
             ) as mock_remove_files,
         ):
             mock_get_device.return_value = 0
             mock_calc.return_value = 32
-            mock_extract_index.return_value = 1
+            mock_batch_index.return_value = 1
             yield {
                 "get_device_int": mock_get_device,
                 "calculate_optimal_batch_size": mock_calc,
-                "extract_batch_index": mock_extract_index,
+                # Keep old key for backward compatibility with existing tests
+                "extract_batch_index": mock_batch_index,
+                # Add new key with correct name
+                "get_batch_file_index": mock_batch_index,
                 "remove_files": mock_remove_files,
             }
 
@@ -506,11 +508,13 @@ class TestNERPipeline:
     @pytest.fixture
     def mock_processor_factory(self):
         """Mock the NERProcessorFactory"""
-        with patch(
-            "easyner.pipeline.ner.ner_main.NERProcessorFactory"
+        from easyner.pipeline.ner import ner_main
+
+        with patch.object(
+            ner_main.NERProcessorFactory, "create_processor"
         ) as factory_mock:
             processor_mock = MagicMock()
-            factory_mock.create_processor.return_value = processor_mock
+            factory_mock.return_value = processor_mock
             yield {"factory": factory_mock, "processor": processor_mock}
 
     @pytest.fixture

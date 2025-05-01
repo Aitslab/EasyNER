@@ -107,7 +107,6 @@ def get_available_gpus() -> List[int]:
             return []
 
 
-
 def calculate_optimal_batch_size(
     pipeline,
     dataset: Dataset,

@@ -494,6 +494,11 @@
           "type": "boolean",
           "description": "If true, enables multiprocessing for faster processing when using SpacyPharseMatcher dictionary based NER.",
           "default": true
+        },
+        "reprocess": {
+          "type": "boolean",
+          "description": "If true, reprocesses the input files even if they already exist in the output folder.",
+          "default": false
         }
       },
       "required": [
