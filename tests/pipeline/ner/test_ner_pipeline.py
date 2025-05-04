@@ -61,7 +61,7 @@ class TestNERPipeline:
 
         with patch("torch.device", return_value="mocked_device"):
             pipeline = NERPipeline(sample_config)
-            files = pipeline._get_input_files_sorted()
+            files = pipeline._get_filtered_input_files()
 
             # Verify files are sorted by numeric index, not lexicographically
             assert files == [
@@ -85,7 +85,7 @@ class TestNERPipeline:
         with patch("torch.device", return_value="mocked_device"):
             pipeline = NERPipeline(sample_config)
             # Should fall back to lexicographical sorting without error
-            files = pipeline._get_input_files_sorted()
+            files = pipeline._get_filtered_input_files()
 
             # Files should be sorted lexicographically
             assert files == [
@@ -110,7 +110,7 @@ class TestNERPipeline:
             pipeline = NERPipeline(sample_config)
 
             # Should return empty list without error
-            files = pipeline._get_input_files_sorted()
+            files = pipeline._get_filtered_input_files()
             assert files == []
 
             # Running the pipeline with no files should not crash

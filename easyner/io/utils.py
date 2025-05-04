@@ -1,7 +1,8 @@
 import logging
 import os
 import re
-from typing import List, Optional
+from typing import List, Optional, Dict
+from glob import glob
 
 
 def get_batch_file_index(batch_file: str) -> int:
@@ -107,6 +108,73 @@ def filter_batch_files(
             )
 
     return filtered_list_files
+
+
+def get_batch_indices(output_path: str) -> List[int]:
+    """
+    Get list of batch indices from files in the specified directory.
+
+    Parameters:
+    -----------
+    output_path: str
+        Path to the directory containing batch files
+
+    Returns:
+    --------
+    List[int]: List of processed batch indices
+    """
+    if not os.path.isdir(output_path):
+        logging.warning(f"Directory does not exist: {output_path}")
+        return []
+
+    output_files = glob(os.path.join(output_path, "*.json"))
+    batch_indices = [
+        get_batch_file_index(os.path.basename(f))
+        for f in output_files
+        if os.path.isfile(f)
+    ]
+    return batch_indices
+
+
+def check_for_duplicate_batch_indices(file_list: List[str]) -> None:
+    """
+    Check for duplicate batch indices in file list and raise error if found.
+
+    Parameters:
+    -----------
+    file_list: List[str]
+        List of files to check
+
+    Raises:
+    -------
+    ValueError: If duplicate batch indices are found
+    """
+    if not file_list:
+        return
+
+    # Get all batch indices
+    batch_indices = [get_batch_file_index(f) for f in file_list]
+
+    # Find duplicates
+    seen = set()
+    duplicates = {}
+
+    for i, idx in enumerate(batch_indices):
+        if idx in seen:
+            if idx not in duplicates:
+                duplicates[idx] = []
+            duplicates[idx].append(file_list[i])
+        else:
+            seen.add(idx)
+
+    # Raise error if duplicates found
+    if duplicates:
+        duplicate_info = "\n".join(
+            [f"Index {idx}: {files}" for idx, files in duplicates.items()]
+        )
+        raise ValueError(
+            f"Duplicate batch indices found in input files:\n{duplicate_info}"
+        )
 
 
 def _remove_all_files_from_dir(dir_path: str):

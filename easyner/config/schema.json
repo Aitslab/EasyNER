@@ -460,6 +460,21 @@
           "description": "If true, calculates the optimal batch size only once for the first batch and reuses it for all subsequent batches. This improves performance by avoiding redundant batch size calculations.",
           "default": true
         },
+        "batch_span_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Inclusive starting index for the batch of sentences to process. Default is 0.",
+          "default": 1,
+          "minimum": 1
+        },
+        "batch_span_end": {
+          "type": "integer",
+          "description": "Exclusive end index for the batch of sentences to process. Default is null, which processes all batches.",
+          "default": null,
+          "minimum": 1
+        },
         "article_limit": {
           "type": "array",
           "items": {
