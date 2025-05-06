@@ -50,12 +50,6 @@
                   "maxItems": 2
                 }
               },
-              "ids": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
               "names": {
                 "type": "array",
                 "items": {
