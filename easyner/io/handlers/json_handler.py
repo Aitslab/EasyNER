@@ -26,13 +26,40 @@ class JsonHandler(IOHandler):
         timeout: int = 180,
         **kwargs: Any,  # noqa: ANN401
     ) -> Any:
-        """Read data from a JSON file with timeout protection."""
+        """Read data from a JSON file
+        If file > 10MB → Try mmap + orjson → Success? Return result : Continue
+        ↓
+        Try direct orjson → Success? Return result : Continue
+        ↓
+        Use ThreadPoolExecutor to call _load_json with timeout
+        ↓
+        _load_json uses standard json.load.
+        """
         self.check_file_exists(file_path)
 
         # Get file size for logging
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
 
-        # First try orjson if available (much faster)
+        # Use memory mapping for large files (>10MB)
+        if file_size_mb > 10:
+            try:
+                import mmap
+
+                import orjson
+
+                with open(file_path, "rb") as f:
+                    mm = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+                    try:
+                        view = memoryview(mm)
+                        return orjson.loads(view)
+                    finally:
+                        del view
+            except Exception as e:
+                logger.warning(
+                    f"Memory mapping failed, falling back to standard method: {e}",
+                )
+
+        # Existing orjson implementation for smaller files or if memory mapping fails
         try:
             import orjson
 
@@ -40,10 +67,11 @@ class JsonHandler(IOHandler):
                 with open(file_path, "rb") as f:
                     return orjson.loads(f.read())
             except Exception as e:
-                logger.warning(f"orjson failed, falling back to standard json: {e}")
-                # Fall back to standard json with timeout
+                logger.warning(
+                    f"orjson failed, falling back to standard json: {e}",
+                )
         except ImportError:
-            pass  # orjson not available, use standard json
+            pass
 
         # Use ThreadPoolExecutor for timeout protection
         # This is safe in multiprocessing as each process has its
