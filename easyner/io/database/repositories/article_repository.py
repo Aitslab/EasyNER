@@ -1,6 +1,5 @@
 import pandas as pd
 from typing import Dict, List, Any, Union, Optional, Set
-import logging
 
 from easyner.io.database.utils.column_names import (
     ARTICLE_ID,
@@ -11,7 +10,6 @@ from easyner.io.database.utils.column_names import (
 from easyner.io.database.schemas import ARTICLES_TABLE_SQL
 
 from .base import Repository
-from ..connection import DatabaseConnection
 
 
 class ArticleRepository(Repository):
@@ -31,6 +29,11 @@ class ArticleRepository(Repository):
     @property
     def required_columns(self) -> Set[str]:
         return {ARTICLE_ID, TITLE}
+
+    @property
+    def primary_key_columns(self) -> List[str]:
+        """Return the primary key of the articles table."""
+        return [ARTICLE_ID]
 
     def _get_required_columns(self) -> Set[str]:
         """Return the required columns for article insertion."""

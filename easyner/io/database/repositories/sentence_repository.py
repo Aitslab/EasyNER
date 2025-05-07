@@ -32,6 +32,11 @@ class SentenceRepository(Repository):
     def required_columns(self) -> Set[str]:
         return {ARTICLE_ID, SENTENCE_ID, TEXT}
 
+    @property
+    def primary_key_columns(self) -> List[str]:
+        """Return the primary key of the sentences table."""
+        return [ARTICLE_ID, SENTENCE_ID]
+
     def _build_insert_query(self, view_name: str) -> str:
         """
         Build SQL query for insertion from a temporary view.
@@ -42,7 +47,7 @@ class SentenceRepository(Repository):
         Returns:
             SQL query string for insertion
         """
-        return f"INSERT OR IGNORE INTO {SENTENCES_TABLE} ({ARTICLE_ID}, {SENTENCE_ID}, {TEXT}) SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {view_name}"
+        return f"INSERT INTO {SENTENCES_TABLE} ({ARTICLE_ID}, {SENTENCE_ID}, {TEXT}) SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {view_name}"
 
     def insert(self, item: Dict[str, Any]) -> None:
         """
