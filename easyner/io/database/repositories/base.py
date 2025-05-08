@@ -5,6 +5,7 @@ for the concrete repository implementations.
 """
 
 import logging
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any, Union
 
@@ -139,8 +140,10 @@ class Repository(ABC):
             msg = f"DataFrame is missing columns: {missing_cols}"
             raise ValueError(msg)
 
-        # Perform insertion
-        view_name = f"temp_{self.table_name}_df_{id(df)}"
+        # Perform insertion, unique view name to avoid conflicts
+        view_name = (
+            f"temp_{self.table_name}_df_{id(df)}_{str(uuid.uuid4())[:8]}"
+        )
 
         try:
             # Register view with only the columns we need
