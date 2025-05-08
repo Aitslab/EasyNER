@@ -313,6 +313,16 @@ class Repository(ABC):
         4. Logs these internal duplicates (keeping the first occurrence)
         5. Inserts the remaining unique records into the main table
 
+        # TODO: Improve duplicate handling logic so that if a parent object
+        # is duplicated, all child objects are also moveed to the duplicates table
+        # e.g. if a article is duplicate, we should not add it's sentences to the main
+        # table, but rather move them to the duplicates table as well but mark wheter,
+        # they themself are duplicates or not
+        # An alternative strategy would be to simply skip them and analyze them later
+        # in the source file.
+        # For now this is not an issue as we only really importing articles with the
+        # log to  duplicates table option
+
         Args:
             view_name: Name of the temporary view containing records to insert
 
