@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
 authors = [
-    {name = "Aits Labs"}
+    {name = "Aits Labs. Mainly Carl Ollvik Aasa adapted from work by Rafsan Ahmed, Sonja Aits, Salma Kazemi Rashed"}
 ]
 dependencies = [
     "numpy>=1.20.0",
