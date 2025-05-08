@@ -192,6 +192,7 @@ class Repository(ABC):
     def insert_many_transactional(
         self,
         items: Union[list[dict[str, Any]], pd.DataFrame],
+        log_duplicates_to_duplicates_table: bool = False,
     ) -> None:
         """Insert multiple items with transaction support.
 
@@ -199,12 +200,17 @@ class Repository(ABC):
 
         Args:
             items: List of dictionaries or DataFrame containing data
+            log_duplicates_to_duplicates_table: Flag to log duplicates
+            to duplicates table (default: False)
 
         Raises:
             Exception: If there is an error during insertion
 
         """
-        self.insert_many_non_transactional(items)
+        self.insert_many_non_transactional(
+            items,
+            log_duplicates_to_duplicates_table,
+        )
 
     def insert_many_non_transactional(
         self,
