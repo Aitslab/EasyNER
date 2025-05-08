@@ -13,6 +13,7 @@
     "**/temp"
   ],
   "mypy.enabled": true,
+  "mypy.runUsingActiveInterpreter": true,
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.wordBasedSuggestions": "off"
