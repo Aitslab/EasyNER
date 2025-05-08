@@ -38,6 +38,8 @@ dependencies:
   - black
   - flake8
   - argcomplete
+  - pandas-stubs
+  - types-jsonschema
   - ruff
   - pip:
     - nltk==3.8.1
