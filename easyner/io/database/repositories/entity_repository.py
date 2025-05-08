@@ -164,3 +164,29 @@ class EntityRepository(Repository):
         except Exception as e:
             self.logger.error(f"Error retrieving entities by sentence: {e}")
             raise
+
+    def insert_many_non_transactional(
+        self,
+        items: Union[list[dict[str, Any]], pd.DataFrame],
+        log_duplicates: bool = False,
+        ignore_duplicates: bool = False,
+    ) -> None:
+        """Override to disable duplicate logging for entities.
+
+        For entities, we prefer to simply fail on duplicates rather than
+        attempting to log them, since entity_id is auto-generated and
+        true business-key duplicates should be prevented upstream.
+        """
+        if log_duplicates:
+            self.logger.warning(
+                "Duplicate logging not supported for entities. "
+                "Setting log_duplicates=False and proceeding with insertion."
+            )
+            log_duplicates = False
+
+        # Call the parent method with modified parameters
+        super().insert_many_non_transactional(
+            items,
+            log_duplicates=False,  # Force this off
+            ignore_duplicates=ignore_duplicates,
+        )
