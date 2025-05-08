@@ -270,6 +270,9 @@ class Repository(ABC):
 
         This is a complete copy of the original table with a different name.
         """
+
+        # TODO: Early exit if duplicates table already exists
+
         duplicate_table_name = f"{self.table_name}_duplicates"
         # replace table_name with duplicate_table_name in the SQL statement
         create_table_sql = self.table_sql_stmt.replace(
@@ -282,7 +285,7 @@ class Repository(ABC):
             self.connection.execute(
                 f"""
                 ALTER TABLE {duplicate_table_name}
-                ADD COLUMN duplicate_detection_timestamp TIMESTAMP DEFAULT NOW()
+                ADD COLUMN IF NOT EXISTS duplicate_detection_timestamp TIMESTAMP DEFAULT NOW()
             """,
             )
             self.duplicate_table_name = duplicate_table_name
