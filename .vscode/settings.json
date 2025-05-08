@@ -10,7 +10,11 @@
   "python.testing.pytestEnabled": true,
   "python.analysis.typeCheckingMode": "standard",
   "python.analysis.exclude": [
-    "**/temp"
+    "**/temp",
+    "**/supplementary/experiment_scripts",
+    "**/easyner_env",
+    "site_packages",
+    "**/.conda/**"
   ],
   "mypy.enabled": true,
   "mypy.runUsingActiveInterpreter": true,
