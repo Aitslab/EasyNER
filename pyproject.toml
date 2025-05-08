@@ -65,32 +65,59 @@ ignore_missing_imports = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 follow_imports = "skip"
-exclude = '''(?x)(
-  ^venv/|
-  ^\.venv/|
-  ^build/|
-  ^dist/
-)'''
-overrides = [
-    { module = "numpy.*", follow_imports = "silent" },
-    { module = "pandas.*", follow_imports = "silent" },
-]
-
-
-[tool.flake8]
-max-line-length = 79
 exclude = [
-    ".git",
+    ".venv",
+    "venv",
+    "easyner_env",
     "__pycache__",
     "build",
     "dist",
-    "*.egg-info",
-    ".venv",
-    "venv",
-    "**/temp/**"
+    ".*\\.egg-info",
+    ".git",
+    "site-packages",
+    "temp",
+    "experiment_scripts",
+
+# Note that the TOML equivalent differs slightly. It can be either a single string (including a multi-line string) – which is treated as a single regular expression – or an array of such strings.
+#
+# Array of strings:
+#
+# [tool.mypy]
+# exclude = [
+#    "^one\\.py$",  # TOML's double-quoted strings require escaping backslashes
+#    'two\.pyi$',  # but TOML's single-quoted strings do not
+#    '^three\.',
+#]
+#
+#A single, multi-line string:
+#
+# [tool.mypy]
+# exclude = '''(?x)(
+#    ^one\.py$    # files named "one.py"
+#    | two\.pyi$  # or files ending with "two.pyi"
+#    | ^three\.   # or files starting with "three."
+# )'''  # TOML's single-quoted strings do not require escaping backslashes
 ]
-select = "E,W,F,N"
-ignore = "E203,W503,E501"
-per-file-ignores = """
-    __init__.py:F401
-"""
+
+# These are ignored as scripts are being migrated to the new easyner package.
+[[tool.mypy.overrides]]
+module = "scripts.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+# Development time for creating as rigerousy typed tests is at this stage
+# deemed to be too high. In future we will migrate to a more rigorous typing
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+
+[[tool.mypy.overrides]]
+module = [
+    "numpy.*",
+    "pandas.*",
+]
+follow_imports = "silent"
+
+
