@@ -121,3 +121,102 @@ module = [
 follow_imports = "silent"
 
 
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    # Exclude the scripts directory which is migrated to the new easyner package.
+    "scripts",
+]
+line-length = 88
+indent-width = 4
+
+target-version = "py39"
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+
+select = [
+    "E",
+    # Enable all of the pycodestyle codes.
+    # This includes all of the `E` codes, as well as `W` codes that are not
+    # enabled by default.
+    "F",
+    # Enable all of the pyflakes codes.
+    # This includes all of the `F` codes, as well as `W` codes that are not
+    # enabled by default.
+    "D",
+    # Augment the convention by requiring an imperative mood for all docstrings.
+    "D401",
+    "B",
+    "I",
+    # Enable all of the isort codes.
+    "N",
+    # Enable pep8-naming (N),
+    # flake8-use-pathlib (PTH),
+    "PTH",
+    # Perflint (PERF)
+    "PERF",
+    # pyupgrade (UP)
+    "UP",
+    # A checker for Flake8 that helps format nice error messages
+    "EM",
+    # McCabe complexity checker
+    "C90",
+    # flake8-pytest-style (PT) A flake8 plugin checking common style issues or inconsistencies with pytest-based tests
+    "PT",
+    "COM", # flake8-commas (COM)
+    # flake8-annotations is a plugin for Flake8 that detects the absence of PEP 3107-style function annotations
+    "ANN",
+]
+
+ignore = [
+    # Relax the convention by _not_ requiring documentation for every function parameter.
+    "D417",
+    # Relax convetion by not requiring documentation
+    "D415", # This duplicate "First line should end with a period RuffD400", cluttering the output
+]
+
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = ["F401"] # Don't automatically fix unused imports as this can provide info on unexected unused imports
+# that may be useful for debugging.
+
+extend-safe-fixes = ["UP006"] # UP006 use built in types, this is unsafe if using pydantic which relies on types being imported from types
+
+[tool.ruff.lint.mccabe]
+# Flag errors (`C901`) whenever the complexity level exceeds 5.
+max-complexity = 5
+
+[tool.ruff.lint.flake8-errmsg]
+max-string-length = 20

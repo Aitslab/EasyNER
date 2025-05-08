@@ -18,5 +18,19 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.wordBasedSuggestions": "off"
   },
-  "flake8.enabled": true
+  "flake8.enabled": false,
+  "flake8.ignorePatterns": [
+    "**/site-packages/**/*.py",
+    ".vscode/*.py",
+    "**/.conda",
+    "**supplementary/experiment_scripts",
+    "**/temp"
+  ],
+  "ruff.enable": true,
+  "ruff.configurationPreference": "filesystemFirst",
+  "ruff.codeAction.fixViolation": {
+    "enable": true
+  },
+  "ruff.fixAll": true,
+  "ruff.organizeImports": true,
 }

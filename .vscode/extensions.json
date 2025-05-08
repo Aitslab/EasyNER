@@ -3,9 +3,9 @@
     "ms-python.python",
     "ms-python.vscode-pylance",
     "ms-python.black-formatter",
-    "ms-python.flake8",
     "ms-python.isort",
     "matangover.mypy",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "charliermarsh.ruff"
   ]
 }
