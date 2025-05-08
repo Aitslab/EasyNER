@@ -36,8 +36,8 @@ class TestNERPipeline:
     """Test suite for the NERPipeline class."""
 
     def test_pipeline_initialization(
-        self, sample_config, mock_processor_factory
-    ):
+        self, sample_config: dict, mock_processor_factory: dict
+    ) -> None:
         """Test that NERPipeline initializes correctly"""
         pipeline = NERPipeline(sample_config, cpu_limit=4)
 
@@ -53,7 +53,7 @@ class TestNERPipeline:
         """Test that input files are properly sorted by numeric indices"""
 
         # Mock the glob function to return files with numeric indices
-        def mock_glob(pattern):
+        def mock_glob(pattern: str) -> list[str]:
             return ["batch-10.json", "batch-2.json", "batch-1.json"]
 
         monkeypatch.setattr("easyner.pipeline.ner.ner_main.glob", mock_glob)
