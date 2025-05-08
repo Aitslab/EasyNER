@@ -42,7 +42,7 @@ class TestNERPipeline:
         pipeline = NERPipeline(sample_config, cpu_limit=4)
 
         # Verify CPU limit is set
-        assert pipeline.config["cpu_limit"] == 4
+        assert pipeline.cpu_limit == 4
 
         # Verify processor factory was called with config
         mock_processor_factory[
