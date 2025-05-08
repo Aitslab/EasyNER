@@ -333,9 +333,12 @@ class Repository(ABC):
             )
 
             # Count and log how many conflicts were found
-            conflict_count = self.connection.execute(
-                f"SELECT COUNT(*) FROM {conflicts_view_name}"
-            ).fetchone()[0]
+            conflict_count_result = self.connection.execute(
+                f"SELECT COUNT(*) FROM {conflicts_view_name}",
+            ).fetchone()
+            conflict_count = (
+                conflict_count_result[0] if conflict_count_result else 0
+            )
 
             self.logger.info(
                 f"Found {conflict_count} records in view that conflict with "
@@ -385,10 +388,14 @@ class Repository(ABC):
             )
 
             # Count internal duplicates
-            internal_dup_count = self.connection.execute(
-                f"SELECT COUNT(*) FROM {internal_dups_view}"
-            ).fetchone()[0]
-
+            internal_dup_count_result = self.connection.execute(
+                f"SELECT COUNT(*) FROM {internal_dups_view}",
+            ).fetchone()
+            internal_dup_count = (
+                internal_dup_count_result[0]
+                if internal_dup_count_result
+                else 0
+            )
             self.logger.info(
                 f"Found {internal_dup_count} internal duplicate records in batch",
             )
@@ -418,9 +425,12 @@ class Repository(ABC):
             self.connection.execute(insert_query)
 
             # Count records actually inserted
-            inserted_count = self.connection.execute(
-                f"SELECT COUNT(*) FROM {unique_records_view}"
-            ).fetchone()[0]
+            inserted_count_result = self.connection.execute(
+                f"SELECT COUNT(*) FROM {unique_records_view}",
+            ).fetchone()
+            inserted_count = (
+                inserted_count_result[0] if inserted_count_result else 0
+            )
 
             self.logger.info(
                 f"Successfully inserted {inserted_count} unique records "
@@ -453,10 +463,11 @@ class Repository(ABC):
         table1_alias: str,
         table2_alias: str,
     ) -> str:
-        """Builds SQL condition using the primary key columns property."""
-        conditions = []
-        for col in self.primary_key_columns:
-            conditions.append(f"{table1_alias}.{col} = {table2_alias}.{col}")
+        """Build SQL condition using the primary key columns property."""
+        conditions = [
+            f"{table1_alias}.{col} = {table2_alias}.{col}"
+            for col in self.primary_key_columns
+        ]
         return " AND ".join(conditions)
 
     def _build_pk_columns_list(self) -> str:
