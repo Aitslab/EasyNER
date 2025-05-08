@@ -14,7 +14,9 @@ class IDatabaseConnection(ABC):
         pass
 
     @abstractmethod
-    def execute(self, query: str, parameters: Optional[list] = None):
+    def execute(
+        self, query: str, parameters: Optional[list[Any]] = None
+    ) -> Any:
         """Execute a query on the database"""
         pass
 
@@ -80,9 +82,8 @@ class DatabaseConnection(IDatabaseConnection):
                 self.logger.error(f"Error closing database connection: {e}")
                 raise
 
-    def execute(self, query: str, parameters: Optional[list] = None):
-        """
-        Execute a query on the database.
+    def execute(self, query: str, parameters: Optional[list] = None) -> Any:
+        """Execute a query on the database.
 
         Args:
             query: SQL query to execute
@@ -90,9 +91,12 @@ class DatabaseConnection(IDatabaseConnection):
 
         Returns:
             Query result
+
         """
         if self._connection is None:
             self.connect()
+            if self._connection is None:
+                raise RuntimeError("Failed to establish database connection")
 
         try:
             if parameters:
@@ -100,7 +104,33 @@ class DatabaseConnection(IDatabaseConnection):
             else:
                 return self._connection.execute(query)
         except Exception as e:
-            self.logger.error(f"Error executing query: {e}")
+            # Enhanced error logging with query details and stack trace
+            import textwrap
+            import traceback
+
+            # Get the stack trace for better debugging
+            stack_trace = traceback.format_stack()[
+                :-1
+            ]  # Exclude current frame
+
+            # Truncate very long queries for readability in logs
+            max_query_length = 1000
+            query_for_log = (
+                query
+                if len(query) <= max_query_length
+                else query[:max_query_length] + "... [truncated]"
+            )
+
+            # Format query with line breaks for better readability
+            formatted_query = textwrap.indent(query_for_log, "    ")
+
+            # Log detailed error information
+            error_msg = f"Error executing query: {e}\n"
+            error_msg += f"Query:\n{formatted_query}\n"
+
+            error_msg += "Stack trace:\n" + "".join(stack_trace)
+
+            self.logger.error(error_msg)
             raise
 
     def register(self, name: str, obj) -> None:
