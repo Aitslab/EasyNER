@@ -1,15 +1,21 @@
 # Test if a error is raised if duplicate keys are attempted to be inserted
 # Create articles table
 
-from easyner.io.database import (
-    DatabaseConnection,
-    ArticleRepository,
-    DuckDBHandler,
-)
-import pytest
+from collections.abc import Generator
+
 import duckdb
 import pandas as pd
-from typing import Generator
+import pytest
+
+from easyner.io.database import (
+    ArticleRepository,
+    DatabaseConnection,
+    DuckDBHandler,
+)
+from easyner.io.database.repositories.entity_repository import EntityRepository
+from easyner.io.database.repositories.sentence_repository import (
+    SentenceRepository,
+)
 
 
 @pytest.fixture(scope="class")
@@ -17,6 +23,7 @@ def db_connection() -> Generator[DatabaseConnection, None, None]:
     """Set up/tear down a database connection for a test class."""
     ddb_handler = DuckDBHandler(":memory:")
     connection = ddb_handler.connection
+    ddb_handler.create_base_tables()  # Create article, sentences and entities tables
     yield connection  # Provide the connection to the test
     if connection:
         connection.close()  # Teardown: close connection
@@ -26,6 +33,26 @@ def db_connection() -> Generator[DatabaseConnection, None, None]:
 def article_repo(db_connection: DatabaseConnection) -> ArticleRepository:
     """Fixture to create an ArticleRepository instance and its table."""
     repo = ArticleRepository(db_connection)
+    repo._create_table()  # Ensure table is created
+    return repo
+
+
+@pytest.fixture(scope="class")
+def sentence_repo(
+    db_connection: DatabaseConnection, article_repo: ArticleRepository
+) -> SentenceRepository:
+    """Fixture to create a SentenceRepository instance and its table."""
+    repo = SentenceRepository(db_connection)
+    repo._create_table()  # Ensure table is created
+    return repo
+
+
+@pytest.fixture(scope="class")
+def entity_repo(
+    db_connection: DatabaseConnection, sentence_repo: SentenceRepository
+) -> EntityRepository:
+    """Fixture to create an EntityRepository instance and its table."""
+    repo = EntityRepository(db_connection)
     repo._create_table()  # Ensure table is created
     return repo
 
@@ -52,8 +79,8 @@ def test_insert_duplicate_key(article_repo: ArticleRepository):
 
 
 def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
-    """
-    Test that insert with log_duplicates_to_duplicates_table=True
+    """Test that insert with log_duplicates_to_duplicates_table=True.
+
     handles duplicates without errors.
     """
     # Clear any existing data
@@ -78,9 +105,7 @@ def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
     df = pd.DataFrame(data)
 
     # This should NOT raise an exception
-    article_repo.insert_many_non_transactional(
-        df, log_duplicates_to_duplicates_table=True
-    )
+    article_repo.insert_many_non_transactional(df, log_duplicates=True)
 
     # Verify main table has 2 records: original 100 + first 101
     main_records = conn.execute(
@@ -144,9 +169,7 @@ def test_insert_log_duplicates_to_duplicates_table(
     test_df = pd.DataFrame(test_data)
 
     # Step 3: Insert with duplicate logging enabled
-    article_repo.insert_many_non_transactional(
-        test_df, log_duplicates_to_duplicates_table=True
-    )
+    article_repo.insert_many_non_transactional(test_df, log_duplicates=True)
 
     # Step 4: Verify results
     conn = article_repo.connection  # Use DatabaseConnection directly
@@ -222,3 +245,105 @@ def test_insert_log_duplicates_to_duplicates_table(
         5,
         "New Title 5B (Internal Duplicate)",
     ) in dup_records, "Internal duplicate ID 5B should be in duplicates table"
+
+
+def test_insert_duplicate_sentences(
+    sentence_repo: SentenceRepository, article_repo: ArticleRepository
+):
+    """Test duplicate handling in SentenceRepository."""
+    # Clear any existing data
+    conn = sentence_repo.connection
+    conn.execute(f"DELETE FROM {sentence_repo.table_name}")
+    if hasattr(sentence_repo, "duplicate_table_name"):
+        conn.execute(f"DELETE FROM {sentence_repo.duplicate_table_name}")
+    conn.execute(f"DELETE FROM {article_repo.table_name}")
+
+    # First, create necessary articles to satisfy foreign key constraints
+    articles_data = {
+        "article_id": [1, 2, 3],
+        "title": ["Article One", "Article Two", "Article Three"],
+    }
+    article_repo.insert_many_non_transactional(pd.DataFrame(articles_data))
+
+    # Now proceed with sentence testing as before
+    # Step 1: Add initial sentences
+    initial_data = {
+        "sentence_id": [1, 2, 3],
+        "article_id": [1, 1, 2],  # These now reference existing articles
+        "text": ["Sentence One", "Sentence Two", "Sentence Three"],
+        "position": [0, 1, 0],
+    }
+    initial_df = pd.DataFrame(initial_data)
+    sentence_repo.insert_many_non_transactional(initial_df)
+
+    # Step 2: Create test data with duplicates
+    test_data = {
+        "sentence_id": [1, 3, 4, 5, 5, 6],
+        "article_id": [1, 2, 2, 3, 3, 3],
+        "text": [
+            "New Sentence One (DB Conflict)",
+            "New Sentence Three (DB Conflict)",
+            "New Sentence Four (Unique)",
+            "New Sentence Five A (Internal Duplicate)",
+            "New Sentence Five B (Internal Duplicate)",
+            "New Sentence Six (Unique)",
+        ],
+        "position": [0, 0, 1, 0, 0, 1],
+    }
+    test_df = pd.DataFrame(test_data)
+
+    # Step 3: Insert with duplicate logging
+    sentence_repo.insert_many_non_transactional(test_df, log_duplicates=True)
+
+    # Step 4: Verify results
+    main_table_records = conn.execute(
+        f"SELECT sentence_id, article_id, text FROM {sentence_repo.table_name} "
+        f"ORDER BY sentence_id"
+    ).fetchall()
+
+    duplicates_records = conn.execute(
+        f"SELECT sentence_id, article_id, text FROM {sentence_repo.duplicate_table_name} "
+        f"ORDER BY sentence_id"
+    ).fetchall()
+
+    # Assertions
+    assert len(main_table_records) == 6, "Main table should contain 6 records"
+
+    # Check specific records
+    main_ids = [r[0] for r in main_table_records]
+    assert set(main_ids) == {
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+    }, "Main table should contain expected IDs"
+
+    # Original records shouldn't be changed
+    assert main_table_records[0][0:2] == (
+        1,
+        1,
+    ), "Existing record should not be modified"
+    assert main_table_records[0][2] == "Sentence One", "Text should not change"
+
+    # Check duplicates table
+    assert (
+        len(duplicates_records) == 3
+    ), "Duplicates table should contain 3 records"
+
+    dup_records = [(r[0], r[2]) for r in duplicates_records]
+    assert (
+        1,
+        "New Sentence One (DB Conflict)",
+    ) in dup_records, "DB conflict should be in duplicates"
+    assert (
+        3,
+        "New Sentence Three (DB Conflict)",
+    ) in dup_records, "DB conflict should be in duplicates"
+    assert (
+        5,
+        "New Sentence Five B (Internal Duplicate)",
+    ) in dup_records, "Internal duplicate should be logged"
+
+
