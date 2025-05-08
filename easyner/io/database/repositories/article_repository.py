@@ -1,20 +1,20 @@
-import pandas as pd
-from typing import Dict, List, Any, Union, Optional, Set
+from typing import Any, Optional, Union
 
-from easyner.io.database.utils.column_names import (
-    ARTICLE_ID,
-    TITLE,
-    ARTICLES_TABLE,
-)
+import pandas as pd
 
 from easyner.io.database.schemas import ARTICLES_TABLE_SQL
+from easyner.io.database.utils.column_names import (
+    ARTICLE_ID,
+    ARTICLES_TABLE,
+    TITLE,
+)
 
 from .base import Repository
 
 
 class ArticleRepository(Repository):
-    """
-    Repository for managing article data in the database.
+    """Repository for managing article data in the database.
+
     Provides methods to retrieve, insert, and query article records.
     """
 
@@ -27,41 +27,42 @@ class ArticleRepository(Repository):
         return ARTICLES_TABLE_SQL
 
     @property
-    def required_columns(self) -> Set[str]:
+    def required_columns(self) -> set[str]:
         return {ARTICLE_ID, TITLE}
 
     @property
-    def primary_key_columns(self) -> List[str]:
+    def primary_key_columns(self) -> list[str]:
         """Return the primary key of the articles table."""
         return [ARTICLE_ID]
 
-    def _get_required_columns(self) -> Set[str]:
+    def _get_required_columns(self) -> set[str]:
         """Return the required columns for article insertion."""
         return {ARTICLE_ID, TITLE}
 
     def _build_insert_query(self, view_name: str) -> str:
-        """
-        Build SQL insert query for articles.
+        """Build SQL insert query for articles.
 
         Args:
             view_name: Name of the temporary view
 
         Returns:
             SQL query for article insertion
+
         """
         return f"INSERT INTO {ARTICLES_TABLE} ({ARTICLE_ID}, {TITLE}) SELECT {ARTICLE_ID}, {TITLE} FROM {view_name}"
 
     def get_all(
-        self, as_df: bool = True
-    ) -> Union[pd.DataFrame, List[Dict[str, Any]]]:
-        """
-        Get all articles from the database.
+        self,
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, list[dict[str, Any]]]:
+        """Get all articles from the database.
 
         Args:
             as_df: Return as DataFrame if True, otherwise as list of dicts (default: True)
 
         Returns:
             DataFrame or list of article dictionaries
+
         """
         if as_df:
             return self.get_all_df()
@@ -69,26 +70,25 @@ class ArticleRepository(Repository):
             return self.get_all_dict_list()
 
     def get_all_df(self) -> pd.DataFrame:
-        """
-        Get all articles from the database as a DataFrame.
+        """Get all articles from the database as a DataFrame.
 
         Returns:
             DataFrame containing article data
+
         """
         try:
             query = f"SELECT {ARTICLE_ID}, {TITLE} FROM {ARTICLES_TABLE}"
-            result = self.connection.execute(query)
-            return result.fetchdf()
+            return self.connection.execute(query).fetchdf()
         except Exception as e:
             self.logger.error(f"Error retrieving articles as DataFrame: {e}")
             raise
 
-    def get_all_dict_list(self) -> List[Dict[str, Any]]:
-        """
-        Get all articles from the database as a list of dictionaries.
+    def get_all_dict_list(self) -> list[dict[str, Any]]:
+        """Get all articles from the database as a list of dictionaries.
 
         Returns:
             List of dictionaries containing article data
+
         """
         try:
             query = f"SELECT {ARTICLE_ID}, {TITLE} FROM {ARTICLES_TABLE}"
@@ -96,19 +96,19 @@ class ArticleRepository(Repository):
             return [{ARTICLE_ID: row[0], TITLE: row[1]} for row in rows]
         except Exception as e:
             self.logger.error(
-                f"Error retrieving articles as dictionary list: {e}"
+                f"Error retrieving articles as dictionary list: {e}",
             )
             raise
 
-    def get_by_id(self, article_id: int) -> Optional[Dict[str, Any]]:
-        """
-        Get an article by its ID.
+    def get_by_id(self, article_id: int) -> Optional[dict[str, Any]]:
+        """Get an article by its ID.
 
         Args:
             article_id: ID of the article to retrieve
 
         Returns:
             Article data as a dictionary or None if not found
+
         """
         try:
             result = self.connection.execute(
@@ -123,12 +123,12 @@ class ArticleRepository(Repository):
             self.logger.error(f"Error retrieving article by ID: {e}")
             raise
 
-    def insert(self, item: Dict[str, Any]) -> None:
-        """
-        Insert an article into the database.
+    def insert(self, item: dict[str, Any]) -> None:
+        """Insert an article into the database.
 
         Args:
             item: Article data as a dictionary with 'article_id' and 'title' keys
+
         """
         try:
             self.connection.execute(

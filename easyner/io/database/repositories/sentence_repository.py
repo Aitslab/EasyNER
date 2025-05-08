@@ -1,22 +1,21 @@
-import pandas as pd
-from typing import Dict, List, Any, Union, Optional, Set
+from typing import Any, Optional, Union
 
+import pandas as pd
+
+from easyner.io.database.schemas import SENTENCES_TABLE_SQL
 from easyner.io.database.utils.column_names import (
     ARTICLE_ID,
     SENTENCE_ID,
-    TEXT,
     SENTENCES_TABLE,
+    TEXT,
 )
 
-from easyner.io.database.schemas import SENTENCES_TABLE_SQL
-
 from .base import Repository
-from ..connection import DatabaseConnection
 
 
 class SentenceRepository(Repository):
-    """
-    Repository for managing sentence data in the database.
+    """Repository for managing sentence data in the database.
+
     Provides methods to retrieve, insert, and query sentence records.
     """
 
@@ -29,36 +28,36 @@ class SentenceRepository(Repository):
         return SENTENCES_TABLE_SQL
 
     @property
-    def required_columns(self) -> Set[str]:
+    def required_columns(self) -> set[str]:
         return {ARTICLE_ID, SENTENCE_ID, TEXT}
 
     @property
-    def primary_key_columns(self) -> List[str]:
+    def primary_key_columns(self) -> list[str]:
         """Return the primary key of the sentences table."""
         return [ARTICLE_ID, SENTENCE_ID]
 
     def _build_insert_query(self, view_name: str) -> str:
-        """
-        Build SQL query for insertion from a temporary view.
+        """Build SQL query for insertion from a temporary view.
 
         Args:
             view_name: Name of the temporary view
 
         Returns:
             SQL query string for insertion
+
         """
         return f"INSERT INTO {SENTENCES_TABLE} ({ARTICLE_ID}, {SENTENCE_ID}, {TEXT}) SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {view_name}"
 
-    def insert(self, item: Dict[str, Any]) -> None:
-        """
-        Insert a single sentence into the database.
+    def insert(self, item: dict[str, Any]) -> None:
+        """Insert a single sentence into the database.
 
         Args:
             item: Sentence data dictionary with required fields
+
         """
         try:
             self.connection.execute(
-                f"INSERT INTO {SENTENCES_TABLE} ({ARTICLE_ID}, {SENTENCE_ID}, {TEXT}) VALUES (?, ?, ?)",
+                f"INSERT INTO {SENTENCES_TABLE} ({ARTICLE_ID}, {SENTENCE_ID}, {TEXT}) VALUES (?, ?, ?)",  # noqa: E501
                 [item[ARTICLE_ID], item[SENTENCE_ID], item[TEXT]],
             )
         except Exception as e:
@@ -67,8 +66,9 @@ class SentenceRepository(Repository):
 
     # Repository-specific methods
     def get_all(
-        self, as_df: bool = True
-    ) -> Union[pd.DataFrame, List[Dict[str, Any]]]:
+        self,
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, list[dict[str, Any]]]:
         """Get all sentences from the database."""
         if as_df:
             return self.get_all_df()
@@ -79,18 +79,18 @@ class SentenceRepository(Repository):
         """Get all sentences as DataFrame."""
         try:
             result = self.connection.execute(
-                f"SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {SENTENCES_TABLE}"
+                f"SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {SENTENCES_TABLE}",
             )
             return result.fetchdf()
         except Exception as e:
             self.logger.error(f"Error retrieving sentences as DataFrame: {e}")
             raise
 
-    def get_all_dict_list(self) -> List[Dict[str, Any]]:
+    def get_all_dict_list(self) -> list[dict[str, Any]]:
         """Get all sentences as list of dictionaries."""
         try:
             rows = self.connection.execute(
-                f"SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {SENTENCES_TABLE}"
+                f"SELECT {ARTICLE_ID}, {SENTENCE_ID}, {TEXT} FROM {SENTENCES_TABLE}",
             ).fetchall()
             return [
                 {ARTICLE_ID: row[0], SENTENCE_ID: row[1], TEXT: row[2]}
@@ -98,13 +98,15 @@ class SentenceRepository(Repository):
             ]
         except Exception as e:
             self.logger.error(
-                f"Error retrieving sentences as dictionary list: {e}"
+                f"Error retrieving sentences as dictionary list: {e}",
             )
             raise
 
     def get_by_article_id(
-        self, article_id: int, as_df: bool = True
-    ) -> Union[pd.DataFrame, List[Dict[str, Any]]]:
+        self,
+        article_id: int,
+        as_df: bool = True,
+    ) -> Union[pd.DataFrame, list[dict[str, Any]]]:
         """Get sentences for a specific article."""
         try:
             result = self.connection.execute(
@@ -125,8 +127,10 @@ class SentenceRepository(Repository):
             raise
 
     def get_by_id(
-        self, article_id: int, sentence_id: int
-    ) -> Optional[Dict[str, Any]]:
+        self,
+        article_id: int,
+        sentence_id: int,
+    ) -> Optional[dict[str, Any]]:
         """Get a specific sentence by its article ID and sentence ID."""
         try:
             result = self.connection.execute(
@@ -145,7 +149,7 @@ class SentenceRepository(Repository):
         """Get count of sentences per article."""
         try:
             result = self.connection.execute(
-                f"SELECT {ARTICLE_ID}, COUNT(*) as sentence_count FROM {SENTENCES_TABLE} GROUP BY {ARTICLE_ID}"
+                f"SELECT {ARTICLE_ID}, COUNT(*) as sentence_count FROM {SENTENCES_TABLE} GROUP BY {ARTICLE_ID}",
             )
             return result.fetchdf()
         except Exception as e:
