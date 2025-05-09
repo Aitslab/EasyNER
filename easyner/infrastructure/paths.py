@@ -39,7 +39,9 @@ ANALYSIS_RESULTS_DIR = RESULTS_DIR / "analysis"
 
 
 # Ensure paths exist function
-def ensure_paths_exist(create_results_dirs=True, dry_run=False):
+def ensure_paths_exist(
+    create_results_dirs: bool = True, dry_run: bool = False
+) -> dict:
     """Ensure that all required directories exist.
 
     Args:
@@ -50,7 +52,7 @@ def ensure_paths_exist(create_results_dirs=True, dry_run=False):
     Returns:
         bool: True if all paths exist or were created successfully
     """
-    results = {}
+    results: dict = {}
 
     # Base directories
     for name, dir_path in {
