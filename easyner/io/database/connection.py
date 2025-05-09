@@ -60,7 +60,7 @@ class DatabaseConnection(IDatabaseConnection):
         self.db_path = db_path
         self.threads = threads
         self.memory_limit = memory_limit
-        self._connection: Optional[duckdb.DuckDBPyConnection] = None
+        self._conn: Optional[duckdb.DuckDBPyConnection] = None
 
     def connect(self) -> None:
         """Establish a connection to the database."""
@@ -71,10 +71,10 @@ class DatabaseConnection(IDatabaseConnection):
                 os.makedirs(db_dir, exist_ok=True)
 
         try:
-            self._connection = duckdb.connect(database=self.db_path)
-            if self._connection is not None:
-                self._connection.execute(f"PRAGMA threads={self.threads}")
-                self._connection.execute(
+            self._conn = duckdb.connect(database=self.db_path)
+            if self._conn is not None:
+                self._conn.execute(f"PRAGMA threads={self.threads}")
+                self._conn.execute(
                     f"PRAGMA memory_limit='{self.memory_limit}'",
                 )
         except Exception as e:
@@ -83,10 +83,10 @@ class DatabaseConnection(IDatabaseConnection):
 
     def close(self) -> None:
         """Close the database connection if it exists."""
-        if self._connection:
+        if self._conn:
             try:
-                self._connection.close()
-                self._connection = None
+                self._conn.close()
+                self._conn = None
             except Exception as e:
                 self.logger.error(f"Error closing database connection: {e}")
                 raise
@@ -106,25 +106,24 @@ class DatabaseConnection(IDatabaseConnection):
             Query result
 
         """
-        if self._connection is None:
+        if self._conn is None:
             self.connect()
-            if self._connection is None:
-                raise RuntimeError("Failed to establish database connection")
+            if self._conn is None:
+                msg = "Failed to establish database connection"
+                raise RuntimeError(msg)
 
         try:
             if parameters:
-                return self._connection.execute(query, parameters)
+                return self._conn.execute(query, parameters)
             else:
-                return self._connection.execute(query)
+                return self._conn.execute(query)
         except Exception as e:
             # Enhanced error logging with query details and stack trace
             import textwrap
             import traceback
 
             # Get the stack trace for better debugging
-            stack_trace = traceback.format_stack()[
-                :-1
-            ]  # Exclude current frame
+            stack_trace = traceback.format_stack()[:-1]  # Exclude current frame
 
             # Truncate very long queries for readability in logs
             max_query_length = 1000
@@ -154,13 +153,14 @@ class DatabaseConnection(IDatabaseConnection):
             obj: Object to register (typically a DataFrame)
 
         """
-        if self._connection is None:
+        if self._conn is None:
             self.connect()
-            if self._connection is None:
-                raise RuntimeError("Failed to establish database connection")
+            if self._conn is None:
+                msg = "Failed to establish database connection"
+                raise RuntimeError(msg)
 
         try:
-            self._connection.register(name, obj)
+            self._conn.register(name, obj)
         except Exception as e:
             self.logger.error(f"Error registering object: {e}")
             raise
@@ -172,13 +172,14 @@ class DatabaseConnection(IDatabaseConnection):
             name: Name of the object to unregister
 
         """
-        if self._connection is None:
+        if self._conn is None:
             self.connect()
-            if self._connection is None:
-                raise RuntimeError("Failed to establish database connection")
+            if self._conn is None:
+                msg = "Failed to establish database connection"
+                raise RuntimeError(msg)
 
         try:
-            self._connection.unregister(name)
+            self._conn.unregister(name)
         except Exception as e:
             self.logger.error(f"Error unregistering object: {e}")
             raise
@@ -190,7 +191,7 @@ class DatabaseConnection(IDatabaseConnection):
             True if in a transaction, False otherwise
 
         """
-        if self._connection is None:
+        if self._conn is None:
             self.logger.warning(
                 "Attempted to check transaction status with no active connection",
             )
@@ -200,10 +201,10 @@ class DatabaseConnection(IDatabaseConnection):
             # For DuckDB, use a more reliable approach
             # Try to begin a transaction and see if it raises an exception about already being in one
             try:
-                self._connection.execute("BEGIN TRANSACTION")
+                self._conn.execute("BEGIN TRANSACTION")
                 # If we get here, we weren't in a transaction
                 # But now we are, so roll it back
-                self._connection.execute("ROLLBACK")
+                self._conn.execute("ROLLBACK")
                 return False
             except Exception as e:
                 # If error message contains "already in a transaction", we're in a transaction
@@ -221,13 +222,14 @@ class DatabaseConnection(IDatabaseConnection):
         This marks the beginning of a transaction block that can be
         committed or rolled back as a single unit of work.
         """
-        if self._connection is None:
+        if self._conn is None:
             self.connect()
-            if self._connection is None:
-                raise RuntimeError("Failed to establish database connection")
+            if self._conn is None:
+                msg = "Failed to establish database connection"
+                raise RuntimeError(msg)
 
         try:
-            self._connection.execute("BEGIN TRANSACTION")
+            self._conn.execute("BEGIN TRANSACTION")
             self.logger.debug("Transaction started")
         except Exception as e:
             self.logger.error(f"Error beginning transaction: {e}")
@@ -238,14 +240,14 @@ class DatabaseConnection(IDatabaseConnection):
 
         This permanently applies all changes made within the current transaction.
         """
-        if self._connection is None:
+        if self._conn is None:
             self.logger.warning(
                 "Attempted to commit with no active connection",
             )
             return
 
         try:
-            self._connection.execute("COMMIT")
+            self._conn.execute("COMMIT")
             self.logger.debug("Transaction committed")
         except Exception as e:
             self.logger.error(f"Error committing transaction: {e}")
@@ -256,22 +258,22 @@ class DatabaseConnection(IDatabaseConnection):
 
         This discards all changes made within the current transaction.
         """
-        if self._connection is None:
+        if self._conn is None:
             self.logger.warning(
-                "Attempted to rollback with no active connection",
+                "Attempted to rollback with no active conn",
             )
             return
 
         try:
-            self._connection.execute("ROLLBACK")
+            self._conn.execute("ROLLBACK")
             self.logger.debug("Transaction rolled back")
         except Exception as e:
             self.logger.error(f"Error rolling back transaction: {e}")
             raise
 
     @property
-    def connection(self) -> duckdb.DuckDBPyConnection:
+    def conn(self) -> duckdb.DuckDBPyConnection:
         """Get the underlying DuckDB connection object."""
-        if self._connection is None:
+        if self._conn is None:
             self.connect()
-        return self._connection
+        return self._conn

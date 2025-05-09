@@ -44,7 +44,7 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
-from easyner.io.database.connection import DatabaseConnection
+from easyner.io.database.conn import DatabaseConnection
 
 logger = logging.getLogger(__name__)
 
@@ -71,14 +71,14 @@ class InsertionCounts:
 class HierarchicalDataManager:
     """Manages hierarchical relationships between articles, sentences, and entities during insertion."""
 
-    def __init__(self, connection: DatabaseConnection) -> None:
+    def __init__(self, conn: DatabaseConnection) -> None:
         """Initialize the hierarchical data manager.
 
         Args:
-            connection: Database connection to use for operations
+            conn: Database conn to use for operations
 
         """
-        self.connection = connection
+        self.conn = conn
         self.logger = logging.getLogger(__name__)
 
     def insert_hierarchical_data(
@@ -144,18 +144,18 @@ class HierarchicalDataManager:
         try:
             # Register views for all data
             if not articles_df.empty:
-                self.connection.register(articles_view, articles_df)
+                self.conn.register(articles_view, articles_df)
             if not sentences_df.empty:
-                self.connection.register(sentences_view, sentences_df)
+                self.conn.register(sentences_view, sentences_df)
             if not entities_df.empty:
-                self.connection.register(entities_view, entities_df)
+                self.conn.register(entities_view, entities_df)
 
             # Check if we're already in a transaction
             transaction_started_here = False
 
-            if not self.connection.is_in_transaction():
+            if not self.conn.is_in_transaction():
                 # Start a transaction if not already in one
-                self.connection.begin_transaction()
+                self.conn.begin_transaction()
                 transaction_started_here = True
 
             try:
@@ -191,20 +191,20 @@ class HierarchicalDataManager:
 
                 # Only commit if we started the transaction
                 if transaction_started_here:
-                    self.connection.commit()
+                    self.conn.commit()
 
                 return results.to_dict()
-            except Exception as e:
+            except Exception:
                 # Only rollback if we started the transaction
                 if transaction_started_here:
-                    self.connection.rollback()
+                    self.conn.rollback()
                 raise
 
         finally:
             # Clean up views
             for view in [articles_view, sentences_view, entities_view]:
                 try:
-                    self.connection.unregister(view)
+                    self.conn.unregister(view)
                 except Exception as e:
                     self.logger.warning(
                         f"Error unregistering view {view}: {e}",
@@ -237,7 +237,8 @@ class HierarchicalDataManager:
         # Step 1: Handle articles
         if articles_view:
             article_counts = self._handle_articles_optimized(
-                articles_view, log_duplicates
+                articles_view,
+                log_duplicates,
             )
             total_counts = total_counts + article_counts
 
@@ -260,7 +261,9 @@ class HierarchicalDataManager:
         return total_counts
 
     def _handle_articles_optimized(
-        self, articles_view: str, log_duplicates: bool
+        self,
+        articles_view: str,
+        log_duplicates: bool,
     ) -> InsertionCounts:
         """Handle article insertion using optimized CTE approach."""
         # Start with the duplicates CTE
@@ -295,11 +298,13 @@ class HierarchicalDataManager:
             (SELECT COUNT(*) FROM duplicates) as duplicates_count
         """
 
-        result = self.connection.execute(query).fetchone()
+        result = self.conn.execute(query).fetchone()
         return InsertionCounts(inserted=result[0], duplicates=result[1])
 
     def _handle_sentences_optimized(
-        self, sentences_view: str, log_duplicates: bool
+        self,
+        sentences_view: str,
+        log_duplicates: bool,
     ) -> InsertionCounts:
         """Handle sentence insertion using optimized CTE approach."""
         query = f"""--sql
@@ -342,11 +347,13 @@ class HierarchicalDataManager:
             (SELECT COUNT(*) FROM sentence_duplicates) as duplicates_count
         """
 
-        result = self.connection.execute(query).fetchone()
+        result = self.conn.execute(query).fetchone()
         return InsertionCounts(inserted=result[0], duplicates=result[1])
 
     def _handle_entities_optimized(
-        self, entities_view: str, log_duplicates: bool
+        self,
+        entities_view: str,
+        log_duplicates: bool,
     ) -> InsertionCounts:
         """Handle entity insertion using optimized CTE approach."""
         query = f"""--sql
@@ -396,7 +403,7 @@ class HierarchicalDataManager:
             (SELECT COUNT(*) FROM entity_duplicates) as duplicates_count
         """
 
-        result = self.connection.execute(query).fetchone()
+        result = self.conn.execute(query).fetchone()
         return InsertionCounts(inserted=result[0], duplicates=result[1])
 
     def _execute_hierarchical_insert(
@@ -444,7 +451,7 @@ class HierarchicalDataManager:
             "temp_duplicate_sentences",
             "temp_duplicate_entities",
         ]:
-            self.connection.execute(f"DROP TABLE IF EXISTS {table}")
+            self.conn.execute(f"DROP TABLE IF EXISTS {table}")
 
         return total_counts
 
@@ -587,7 +594,7 @@ class HierarchicalDataManager:
         temp_table: str,
     ) -> None:
         """Identify duplicates by comparing with existing records."""
-        self.connection.execute(
+        self.conn.execute(
             f"""
             CREATE TEMPORARY TABLE {temp_table} AS
             SELECT v.{id_col}
@@ -604,7 +611,7 @@ class HierarchicalDataManager:
         Sentences have a composite primary key (article_id, sentence_id), so we need to
         check for duplicates using both fields.
         """
-        self.connection.execute(
+        self.conn.execute(
             f"""
             CREATE TEMPORARY TABLE temp_duplicate_sentences AS
             SELECT s.sentence_id, s.article_id
@@ -622,7 +629,7 @@ class HierarchicalDataManager:
 
     def _identify_entity_duplicates(self, entities_view: str) -> None:
         """Identify duplicate entities or those with duplicate sentence parents."""
-        self.connection.execute(
+        self.conn.execute(
             f"""
             CREATE TEMPORARY TABLE temp_duplicate_entities AS
             SELECT e.entity_id
@@ -640,7 +647,7 @@ class HierarchicalDataManager:
 
     def _count_duplicates(self, temp_table: str) -> int:
         """Count records in a temporary duplicates table."""
-        return self.connection.execute(
+        return self.conn.execute(
             f"SELECT COUNT(*) FROM {temp_table}",
         ).fetchone()[0]
 
@@ -655,7 +662,7 @@ class HierarchicalDataManager:
         """Insert duplicates into the appropriate duplicates table."""
         if secondary_id_col:
             # Composite key version
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {duplicates_table}
                 SELECT v.*, NOW() as duplicate_detection_timestamp
@@ -668,7 +675,7 @@ class HierarchicalDataManager:
             )
         else:
             # Original version for single column keys
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {duplicates_table}
                 SELECT v.*, NOW() as duplicate_detection_timestamp
@@ -691,7 +698,7 @@ class HierarchicalDataManager:
         """Insert non-duplicate records into the target table."""
         if secondary_id_col:
             # Composite key version
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {table}
                 SELECT v.* FROM {view} v
@@ -703,7 +710,7 @@ class HierarchicalDataManager:
             )
         else:
             # Original version for single column keys
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {table}
                 SELECT v.* FROM {view} v
@@ -724,7 +731,7 @@ class HierarchicalDataManager:
         """Count non-duplicate records."""
         if secondary_id_col:
             # Composite key version
-            return self.connection.execute(
+            return self.conn.execute(
                 f"""
                 SELECT COUNT(*) FROM {view} v
                 WHERE NOT EXISTS (
@@ -735,7 +742,7 @@ class HierarchicalDataManager:
             ).fetchone()[0]
         else:
             # Original version for single column keys
-            return self.connection.execute(
+            return self.conn.execute(
                 f"""
                 SELECT COUNT(*) FROM {view} v
                 WHERE NOT EXISTS (
@@ -753,45 +760,46 @@ class HierarchicalDataManager:
 
             # Check if table exists
             table_exists = (
-                self.connection.execute(
+                self.conn.execute(
                     f"""
                 SELECT COUNT(*) FROM information_schema.tables
                 WHERE table_name = '{duplicate_table}'
-            """
+            """,
                 ).fetchone()[0]
                 > 0
             )
 
             if not table_exists:
                 # Get original table schema
-                columns_info = self.connection.execute(
+                columns_info = self.conn.execute(
                     f"""
                     SELECT column_name, data_type, is_nullable
                     FROM information_schema.columns
                     WHERE table_name = '{table}'
-                """
+                """,
                 ).fetchall()
 
                 if not columns_info:
-                    raise ValueError(f"Table {table} does not exist")
+                    msg = f"Table {table} does not exist"
+                    raise ValueError(msg)
 
                 # Construct create table statement
                 columns_sql = ", ".join(
                     [
                         f"{col[0]} {col[1]} {'NULL' if col[2] == 'YES' else 'NOT NULL'}"
                         for col in columns_info
-                    ]
+                    ],
                 )
 
-                self.connection.execute(
+                self.conn.execute(
                     f"""
                     CREATE TABLE IF NOT EXISTS {duplicate_table} (
                         {columns_sql},
                         duplicate_detection_timestamp TIMESTAMP DEFAULT NOW()
                     )
-                """
+                """,
                 )
 
                 self.logger.info(
-                    f"Created duplicates table: {duplicate_table}"
+                    f"Created duplicates table: {duplicate_table}",
                 )

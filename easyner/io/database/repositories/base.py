@@ -12,6 +12,10 @@ from typing import Any, Union
 import duckdb
 import pandas as pd
 
+from easyner.io.database.schemas.python_mappings import (
+    HIERARCHICAL_DUPLICATE,
+    KEY_DUPLICATE,
+)
 from easyner.io.database.utils.transaction import transactional
 
 from ..connection import DatabaseConnection
@@ -23,15 +27,15 @@ class Repository(ABC):
     Provides common methods and defines the interface for repository implementations.
     """
 
-    def __init__(self, connection: DatabaseConnection) -> None:
-        """Initialize a repository with a database connection.
+    def __init__(self, conn: DatabaseConnection) -> None:
+        """Initialize a repository with a database conn.
 
         Args:
-            connection: Database connection object
+            conn: Database conn object
 
         """
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.connection = connection
+        self.conn = conn
 
     @property
     @abstractmethod
@@ -57,9 +61,66 @@ class Repository(ABC):
         """The set of required columns for insertion operations."""
         pass
 
+    @property
+    @abstractmethod
+    def parent_table(self) -> str:
+        """Return the name of the parent table."""
+        pass
+
+    @property
+    def duplicate_table_name(self) -> str:
+        """Return the name of the repository's duplicates table."""
+        return f"{self.table_name}_duplicates"
+
     def _create_table(self) -> None:
         """Create the table if it does not exist."""
-        self.connection.execute(self.table_sql_stmt)
+        self.conn.execute(self.table_sql_stmt)
+
+    def _create_duplicates_table(self) -> None:
+        """Create a duplicates table for the repository if not exists.
+
+        This is a complete copy of the original table with a different name
+        and an additional column for the timestamp of when the duplicate was detected.
+        """
+        # TODO: Early exit if duplicates table already exists
+
+        # replace table_name with duplicate_table_name in the SQL statement
+        create_table_sql = self.table_sql_stmt.replace(
+            self.table_name,
+            self.duplicate_table_name,
+        )
+
+        try:
+            self.conn.execute(create_table_sql)
+            # Add timestamp column for when the duplicate was detected
+            # self.conn.execute(
+            #     f"""
+            #     ALTER TABLE {self.duplicate_table_name}
+            #     ADD COLUMN IF NOT EXISTS duplicate_detection_timestamp TIMESTAMP DEFAULT NOW()
+            # """,
+            # )
+            self.conn.execute(
+                f"""
+                ALTER TABLE {self.duplicate_table_name}
+                ADD COLUMN IF NOT EXISTS {HIERARCHICAL_DUPLICATE} BOOLEAN DEFAULT FALSE
+            """,
+            )
+            self.conn.execute(
+                f"""
+                ALTER TABLE {self.duplicate_table_name}
+                ADD COLUMN IF NOT EXISTS {KEY_DUPLICATE} BOOLEAN DEFAULT FALSE
+            """,
+            )
+
+            self.logger.info(
+                f"Created duplicates table: {self.duplicate_table_name}",
+            )
+        except Exception as e:
+            self.logger.error(
+                f"Error creating duplicates table {self.duplicate_table_name}: {e}",
+            )
+            raise
+            raise
 
     @abstractmethod
     def _build_insert_query(self, view_name: str) -> str:
@@ -160,7 +221,7 @@ class Repository(ABC):
                     # Replace INSERT with INSERT OR IGNORE in sql query
                     query = query.replace("INSERT", "INSERT OR IGNORE")
 
-                self.connection.execute(query)
+                self.conn.execute(query)
 
         except duckdb.ConstraintException as e:
             # Handle constraint violation
@@ -177,7 +238,7 @@ class Repository(ABC):
             self.logger.error(f"Error batch inserting {self.table_name}: {e}")
             raise
         finally:
-            self.connection.unregister(view_name)  # Always clean up
+            self.conn.unregister(view_name)  # Always clean up
 
     def _register_view(
         self,
@@ -193,7 +254,7 @@ class Repository(ABC):
             columns: Set of column names to include
 
         """
-        self.connection.register(view_name, df[list(columns)])
+        self.conn.register(view_name, df[list(columns)])
 
     @transactional
     def insert_many_transactional(
@@ -263,40 +324,6 @@ class Repository(ABC):
                 f"Error batch inserting {self.table_name} "
                 f"within an existing transaction: {e}",
             )
-            raise
-
-    def create_duplicates_table(self) -> None:
-        """Create a duplicates table for the repository if not exists.
-
-        This is a complete copy of the original table with a different name.
-        """
-
-        # TODO: Early exit if duplicates table already exists
-
-        duplicate_table_name = f"{self.table_name}_duplicates"
-        # replace table_name with duplicate_table_name in the SQL statement
-        create_table_sql = self.table_sql_stmt.replace(
-            self.table_name,
-            duplicate_table_name,
-        )
-        try:
-            self.connection.execute(create_table_sql)
-            # Add timestamp column for when the duplicate was detected
-            self.connection.execute(
-                f"""
-                ALTER TABLE {duplicate_table_name}
-                ADD COLUMN IF NOT EXISTS duplicate_detection_timestamp TIMESTAMP DEFAULT NOW()
-            """,
-            )
-            self.duplicate_table_name = duplicate_table_name
-            self.logger.info(
-                f"Created duplicates table: {duplicate_table_name}",
-            )
-        except Exception as e:
-            self.logger.error(
-                f"Error creating duplicates table {duplicate_table_name}: {e}",
-            )
-            raise
 
     def _insert_log_duplicates_to_duplicates_table(
         self,
@@ -331,7 +358,7 @@ class Repository(ABC):
 
         """
         # Create the duplicates table if it doesn't exist
-        self.create_duplicates_table()
+        self._create_duplicates_table()
 
         # Need to use self.duplicate_table_name which is set
         # in create_duplicates_table()
@@ -361,13 +388,13 @@ class Repository(ABC):
 
             # Execute query to find conflicts and save as temporary view
             conflicts_view_name = f"{view_name}_conflicts"
-            self.connection.execute(
+            self.conn.execute(
                 f"CREATE TEMPORARY VIEW {conflicts_view_name} AS {conflicts_query}",
             )
 
             # Step 2: Log these conflicts to the duplicates table
             # Add timestamp column for when the duplicate was detected
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {duplicates_table} ({self._build_columns_list()},
                                              duplicate_detection_timestamp)
@@ -377,7 +404,7 @@ class Repository(ABC):
             )
 
             # Count and log how many conflicts were found
-            conflict_count_result = self.connection.execute(
+            conflict_count_result = self.conn.execute(
                 f"SELECT COUNT(*) FROM {conflicts_view_name}",
             ).fetchone()
             conflict_count = (
@@ -394,7 +421,7 @@ class Repository(ABC):
             # This creates a view of unique records from the input that don't conflict
             # with the DB
             non_conflicts_view = f"{view_name}_non_conflicts"
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 CREATE TEMPORARY VIEW {non_conflicts_view} AS
                 SELECT v.* FROM {view_name} v
@@ -407,7 +434,7 @@ class Repository(ABC):
 
             # Identify internal duplicates (keeping the first occurrence of each PK)
             internal_dups_view = f"{view_name}_internal_dups"
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 CREATE TEMPORARY VIEW {internal_dups_view} AS
                 SELECT * FROM (
@@ -422,7 +449,7 @@ class Repository(ABC):
             )
 
             # Log internal duplicates to duplicates table
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 INSERT INTO {duplicates_table} ({self._build_columns_list()},
                                              duplicate_detection_timestamp)
@@ -432,7 +459,7 @@ class Repository(ABC):
             )
 
             # Count internal duplicates
-            internal_dup_count_result = self.connection.execute(
+            internal_dup_count_result = self.conn.execute(
                 f"SELECT COUNT(*) FROM {internal_dups_view}",
             ).fetchone()
             internal_dup_count = (
@@ -446,7 +473,7 @@ class Repository(ABC):
 
             # Step 5: Insert the remaining unique records into the main table
             unique_records_view = f"{view_name}_unique"
-            self.connection.execute(
+            self.conn.execute(
                 f"""
                 CREATE TEMPORARY VIEW {unique_records_view} AS
                 SELECT * FROM (
@@ -466,10 +493,10 @@ class Repository(ABC):
                 SELECT {self._build_columns_list()}
                 FROM {unique_records_view}
             """
-            self.connection.execute(insert_query)
+            self.conn.execute(insert_query)
 
             # Count records actually inserted
-            inserted_count_result = self.connection.execute(
+            inserted_count_result = self.conn.execute(
                 f"SELECT COUNT(*) FROM {unique_records_view}",
             ).fetchone()
             inserted_count = (
@@ -496,7 +523,7 @@ class Repository(ABC):
                 f"{view_name}_unique",
             ]:
                 try:
-                    self.connection.execute(f"DROP VIEW IF EXISTS {temp_view}")
+                    self.conn.execute(f"DROP VIEW IF EXISTS {temp_view}")
                 except Exception as e:
                     self.logger.warning(
                         f"Error dropping temp view {temp_view}: {e}",
@@ -540,7 +567,6 @@ class Repository(ABC):
 
     def _get_columns(self) -> None:
         """Placeholder. Return the set of columns in the table."""
-
         pass
 
     def insert_new(
@@ -574,9 +600,7 @@ class Repository(ABC):
         """,
         )
 
-        view_name = (
-            f"temp_{self.table_name}_df_{id(items)}_{str(uuid.uuid4())[:8]}"
-        )
+        view_name = f"temp_{self.table_name}_df_{id(items)}_{str(uuid.uuid4())[:8]}"
 
         try:
             self._register_view(view_name, items, self.required_columns)

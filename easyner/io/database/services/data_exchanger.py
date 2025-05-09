@@ -24,19 +24,19 @@ class DataExchanger:
 
     def __init__(
         self,
-        connection: DatabaseConnection,
+        conn: DatabaseConnection,
     ) -> None:
         """Initialize with database connection and repositories.
 
         Args:
-            connection: Database connection to use
+            conn: Database connection to use
             article_repo: ArticleRepository instance (created if None)
             sentence_repo: SentenceRepository instance (created if None)
             entity_repo: EntityRepository instance (created if None)
 
         """
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.conn = connection
+        self.conn = conn
 
     @transactional
     def import_article_with_sentences_and_entities(

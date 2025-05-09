@@ -19,42 +19,42 @@ from easyner.io.database.repositories.sentence_repository import (
 
 
 @pytest.fixture(scope="class")
-def db_connection() -> Generator[DatabaseConnection, None, None]:
+def db_conn() -> Generator[DatabaseConnection, None, None]:
     """Set up/tear down a database connection for a test class."""
     ddb_handler = DuckDBHandler(":memory:")
-    connection = ddb_handler.connection
+    conn = ddb_handler.conn
     ddb_handler.create_base_tables()  # Create article, sentences and entities tables
-    yield connection  # Provide the connection to the test
-    if connection:
-        connection.close()  # Teardown: close connection
+    yield conn  # Provide the connection to the test
+    if conn:
+        conn.close()  # Teardown: close connection
 
 
 @pytest.fixture(scope="class")
-def article_repo(db_connection: DatabaseConnection) -> ArticleRepository:
+def article_repo(db_conn: DatabaseConnection) -> ArticleRepository:
     """Fixture to create an ArticleRepository instance and its table."""
-    repo = ArticleRepository(db_connection)
+    repo = ArticleRepository(db_conn)
     repo._create_table()  # Ensure table is created
     return repo
 
 
 @pytest.fixture(scope="class")
 def sentence_repo(
-    db_connection: DatabaseConnection,
+    db_conn: DatabaseConnection,
     article_repo: ArticleRepository,
 ) -> SentenceRepository:
     """Fixture to create a SentenceRepository instance and its table."""
-    repo = SentenceRepository(db_connection)
+    repo = SentenceRepository(db_conn)
     repo._create_table()  # Ensure table is created
     return repo
 
 
 @pytest.fixture(scope="class")
 def entity_repo(
-    db_connection: DatabaseConnection,
+    db_conn: DatabaseConnection,
     sentence_repo: SentenceRepository,
 ) -> EntityRepository:
     """Fixture to create an EntityRepository instance and its table."""
-    repo = EntityRepository(db_connection)
+    repo = EntityRepository(db_conn)
     repo._create_table()  # Ensure table is created
     return repo
 
@@ -86,7 +86,7 @@ def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
     handles duplicates without errors.
     """
     # Clear any existing data
-    conn = article_repo.connection  # Use DatabaseConnection directly
+    conn = article_repo.conn  # Use DatabaseConnection directly
     conn.execute(f"DELETE FROM {article_repo.table_name}")
     if hasattr(article_repo, "duplicate_table_name"):
         conn.execute(f"DELETE FROM {article_repo.duplicate_table_name}")
@@ -172,7 +172,7 @@ def test_insert_log_duplicates_to_duplicates_table(
     article_repo.insert_many_non_transactional(test_df, log_duplicates=True)
 
     # Step 4: Verify results
-    conn = article_repo.connection  # Use DatabaseConnection directly
+    conn = article_repo.conn  # Use DatabaseConnection directly
 
     # Check main table - should have original 3 records + 2 new unique
     # records (total 5)
@@ -222,9 +222,7 @@ def test_insert_log_duplicates_to_duplicates_table(
 
     # Only one version of article_id 5 should be in the main table
     # (the first one)
-    assert (
-        main_ids.count(5) == 1
-    ), "Only one version of ID 5 should be in main table"
+    assert main_ids.count(5) == 1, "Only one version of ID 5 should be in main table"
 
     # Duplicates table checks
     assert (
@@ -253,7 +251,7 @@ def test_insert_duplicate_sentences(
 ):
     """Test duplicate handling in SentenceRepository."""
     # Clear any existing data
-    conn = sentence_repo.connection
+    conn = sentence_repo.conn
     conn.execute(f"DELETE FROM {sentence_repo.table_name}")
     if hasattr(sentence_repo, "duplicate_table_name"):
         conn.execute(f"DELETE FROM {sentence_repo.duplicate_table_name}")
@@ -329,9 +327,7 @@ def test_insert_duplicate_sentences(
     assert main_table_records[0][2] == "Sentence One", "Text should not change"
 
     # Check duplicates table
-    assert (
-        len(duplicates_records) == 3
-    ), "Duplicates table should contain 3 records"
+    assert len(duplicates_records) == 3, "Duplicates table should contain 3 records"
 
     dup_records = [(r[0], r[2]) for r in duplicates_records]
     assert (

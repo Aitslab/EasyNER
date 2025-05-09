@@ -44,16 +44,16 @@ class DuckDBHandler:
         self.logger = logging.getLogger(__name__)
 
         # Create component instances using dependency injection
-        self.connection = DatabaseConnection(db_path, threads, memory_limit)
-        self.connection.connect()
+        self.conn = DatabaseConnection(db_path, threads, memory_limit)
+        self.conn.connect()
 
         # No need to specify SQL directory since schemas are imported directly
-        self.table_manager = TableManager(self.connection)
+        self.table_manager = TableManager(self.conn)
 
         # Initialize repositories
-        self.article_repository = ArticleRepository(self.connection)
-        self.sentence_repository = SentenceRepository(self.connection)
-        self.entity_repository = EntityRepository(self.connection)
+        self.article_repository = ArticleRepository(self.conn)
+        self.sentence_repository = SentenceRepository(self.conn)
+        self.entity_repository = EntityRepository(self.conn)
 
     def read(self, file_path: str, **kwargs):
         """Read data from DuckDB database.
@@ -70,25 +70,26 @@ class DuckDBHandler:
         """
         query = kwargs.get("query")
         if not query:
+            msg = "Query parameter is required for reading from database"
             raise ValueError(
-                "Query parameter is required for reading from database",
+                msg,
             )
 
         # Create a temporary connection if a different DB path is provided
-        if file_path != self.connection.db_path:
-            temp_connection = DatabaseConnection(file_path)
-            temp_connection.connect()
-            result = temp_connection.execute(query)
-            temp_connection.close()
+        if file_path != self.conn.db_path:
+            temp_conn = DatabaseConnection(file_path)
+            temp_conn.connect()
+            result = temp_conn.execute(query)
+            temp_conn.close()
         else:
-            result = self.connection.execute(query)
+            result = self.conn.execute(query)
 
         # Return as DataFrame by default
         as_df = kwargs.get("as_df", True)
         return result.fetchdf() if as_df else result.fetchall()
 
     @transactional
-    def write(self, data, file_path: str, **kwargs):
+    def write(self, data, file_path: str, **kwargs) -> None:
         """Write data to DuckDB database.
 
         Args:
@@ -105,33 +106,34 @@ class DuckDBHandler:
         """
         table_name = kwargs.get("table_name")
         if not table_name:
+            msg = "table_name parameter is required for writing to database"
             raise ValueError(
-                "table_name parameter is required for writing to database",
+                msg,
             )
 
         if_exists = kwargs.get("if_exists", "fail")
 
-        # Create a temporary connection if a different DB path is provided
-        if file_path != self.connection.db_path:
-            temp_connection = DatabaseConnection(file_path)
-            temp_connection.connect()
+        # Create a temporary conn if a different DB path is provided
+        if file_path != self.conn.db_path:
+            temp_conn = DatabaseConnection(file_path)
+            temp_conn.connect()
             try:
-                # Begin transaction manually since we're not using self.connection
-                temp_connection.begin_transaction()
-                self._write_data(temp_connection, data, table_name, if_exists)
-                temp_connection.commit()
+                # Begin transaction manually since we're not using self.conn
+                temp_conn.begin_transaction()
+                self._write_data(temp_conn, data, table_name, if_exists)
+                temp_conn.commit()
             except Exception as e:
-                temp_connection.rollback()
+                temp_conn.rollback()
                 self.logger.error(f"Error writing data to {file_path}: {e}")
                 raise
             finally:
-                temp_connection.close()
+                temp_conn.close()
         else:
-            self._write_data(self.connection, data, table_name, if_exists)
+            self._write_data(self.conn, data, table_name, if_exists)
 
     def _write_data(
         self,
-        connection: DatabaseConnection,
+        conn: DatabaseConnection,
         data,
         table_name: str,
         if_exists: str,
@@ -139,7 +141,7 @@ class DuckDBHandler:
         """Helper method to write data to a database connection.
 
         Args:
-            connection: Database connection to write to
+            conn: Database connection to write to
             data: Data to write
             table_name: Name of the table to write to
             if_exists: What to do if table exists ('fail', 'replace', 'append')
@@ -147,33 +149,30 @@ class DuckDBHandler:
         """
         if isinstance(data, pd.DataFrame):
             # Register DataFrame as a view
-            connection.register(f"{table_name}_temp", data)
+            conn.register(f"{table_name}_temp", data)
 
             if if_exists == "replace":
-                connection.execute(f"DROP TABLE IF EXISTS {table_name}")
-                connection.execute(
+                conn.execute(f"DROP TABLE IF EXISTS {table_name}")
+                conn.execute(
                     f"CREATE TABLE {table_name} AS SELECT * FROM {table_name}_temp",
                 )
             elif if_exists == "append":
-                connection.execute(
+                conn.execute(
                     f"INSERT INTO {table_name} SELECT * FROM {table_name}_temp",
                 )
             else:  # 'fail'
                 query = f"SELECT count(*) FROM information_schema.tables WHERE table_name = '{table_name}'"
-                table_exists = connection.execute(query).fetchone()[0]
+                table_exists = conn.execute(query).fetchone()[0]
                 if table_exists:
-                    raise ValueError(f"Table {table_name} already exists")
-                connection.execute(
+                    msg = f"Table {table_name} already exists"
+                    raise ValueError(msg)
+                conn.execute(
                     f"CREATE TABLE {table_name} AS SELECT * FROM {table_name}_temp",
                 )
         else:
             # Convert to DataFrame if necessary
-            df = (
-                pd.DataFrame(data)
-                if not isinstance(data, pd.DataFrame)
-                else data
-            )
-            self._write_data(connection, df, table_name, if_exists)
+            df = pd.DataFrame(data) if not isinstance(data, pd.DataFrame) else data
+            self._write_data(conn, df, table_name, if_exists)
 
     def create_base_tables(self) -> None:
         """Create all database tables using SQL files.
@@ -206,7 +205,7 @@ class DuckDBHandler:
             DataFrame or list of tuples containing table data
 
         """
-        result = self.connection.execute(f"SELECT * FROM {table_name}")
+        result = self.conn.execute(f"SELECT * FROM {table_name}")
         return result.fetchdf() if as_df else result.fetchall()
 
     def get_table_count(self, table_name: str) -> int:
@@ -362,14 +361,14 @@ class DuckDBHandler:
             # Check if the table exists to prevent errors if it hasn't been created yet
             # (though create_base_tables should handle this in normal flow)
             query_exists = "SELECT count(*) FROM information_schema.tables WHERE table_name = 'conversion_log'"
-            table_exists = self.connection.execute(query_exists).fetchone()[0]
+            table_exists = self.conn.execute(query_exists).fetchone()[0]
             if not table_exists:
                 self.logger.warning(
                     "Conversion log table does not exist. Returning empty DataFrame.",
                 )
                 return pd.DataFrame()
 
-            return self.connection.execute(
+            return self.conn.execute(
                 "SELECT * FROM conversion_log",
             ).fetchdf()
         except Exception as e:

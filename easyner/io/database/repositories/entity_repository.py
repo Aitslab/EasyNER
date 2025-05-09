@@ -88,7 +88,7 @@ class EntityRepository(Repository):
             placeholders = ", ".join(["?"] * len(required_cols))
             cols = ", ".join(required_cols)
 
-            self.connection.execute(
+            self.conn.execute(
                 f"INSERT INTO {ENTITIES_TABLE} ({cols}) VALUES ({placeholders})",
                 [item[col] for col in required_cols],
             )
@@ -111,7 +111,7 @@ class EntityRepository(Repository):
         """Get all entities as DataFrame."""
         try:
             cols = ", ".join(self.required_columns)
-            result = self.connection.execute(
+            result = self.conn.execute(
                 f"SELECT {cols} FROM {ENTITIES_TABLE}",
             )
             return result.fetchdf()
@@ -123,14 +123,12 @@ class EntityRepository(Repository):
         """Get all entities as list of dictionaries."""
         try:
             cols = list(self.required_columns)
-            result = self.connection.execute(
+            result = self.conn.execute(
                 f"SELECT {', '.join(cols)} FROM {ENTITIES_TABLE}",
             )
             rows = result.fetchall()
 
-            return [
-                {cols[i]: row[i] for i in range(len(cols))} for row in rows
-            ]
+            return [{cols[i]: row[i] for i in range(len(cols))} for row in rows]
         except Exception as e:
             self.logger.error(
                 f"Error retrieving entities as dictionary list: {e}",
@@ -150,7 +148,7 @@ class EntityRepository(Repository):
                 SELECT {cols} FROM {ENTITIES_TABLE}
                 WHERE {ARTICLE_ID} = ? AND {SENTENCE_ID} = ?
             """
-            result = self.connection.execute(query, [article_id, sentence_id])
+            result = self.conn.execute(query, [article_id, sentence_id])
 
             if as_df:
                 return result.fetchdf()
@@ -189,4 +187,17 @@ class EntityRepository(Repository):
             items,
             log_duplicates=False,  # Force this off
             ignore_duplicates=ignore_duplicates,
+        )
+
+    def _insert_sql_duplicate_handling(
+        self,
+        view_name: str,
+        session_duplicates_table: str,
+    ) -> None:
+        msg = (
+            "Duplicate handling for entities is not implemented. "
+            "Please handle duplicates upstream."
+        )
+        raise NotImplementedError(
+            msg,
         )
