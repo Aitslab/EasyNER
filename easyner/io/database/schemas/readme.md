@@ -2,6 +2,7 @@
 
 ## DuckDB
 - Default is nullable
+ -INSERT BY NAME will match by column name, but fail if extra columns are present
 
 ## Best Practices for Database Schemas - DuckDB
 ### constraints
