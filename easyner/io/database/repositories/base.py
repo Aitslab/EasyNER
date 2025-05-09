@@ -542,3 +542,77 @@ class Repository(ABC):
         """Placeholder. Return the set of columns in the table."""
 
         pass
+
+    def insert_new(
+        self,
+        items: pd.DataFrame,
+        log_duplicates: bool = False,
+        ignore_duplicates: bool = False,
+    ) -> None:
+        """Insert new items into the database.
+
+        Args:
+            items: DataFrame containing data
+            log_duplicates: Flag to log duplicates to duplicates table
+                (default: False)
+            ignore_duplicates: Flag to ignore duplicate entries
+                (default: False)
+
+        """
+        self._create_table()
+
+        self._create_duplicates_table()
+
+        session_duplicates_table = f"{self.duplicate_table_name}_session"
+
+        # Make empty copy of duplicates table
+        self.conn.execute(
+            f"""
+            CREATE TEMPORARY TABLE {session_duplicates_table} AS
+            SELECT * FROM {self.duplicate_table_name}
+            WHERE 1=0
+        """,
+        )
+
+        view_name = (
+            f"temp_{self.table_name}_df_{id(items)}_{str(uuid.uuid4())[:8]}"
+        )
+
+        try:
+            self._register_view(view_name, items, self.required_columns)
+
+            self._insert_sql_duplicate_handling(
+                self,
+                view_name,
+                session_duplicates_table,
+            )
+        except Exception as e:
+            self.logger.error(
+                f"Error inserting new items into {self.table_name}: {e}",
+            )
+            raise
+
+        # self._insert_with_duplicate_handling(session_duplicates_table, items)
+
+    # @abstractmethod
+    # def _insert_with_duplicate_handling(
+    #     self,
+    #     session_duplicates_table: str,
+    #     items: pd.DataFrame,
+    # ) -> None:
+    #     pass
+
+    @abstractmethod
+    def _insert_sql_duplicate_handling(
+        self,
+        view_name: str,
+        session_duplicates_table: str,
+    ) -> None:
+        """Insert records with SQL duplicate handling.
+
+        Args:
+            view_name: Name of the temporary view
+            session_duplicates_table: Name of the session duplicates table
+
+        """
+        pass
