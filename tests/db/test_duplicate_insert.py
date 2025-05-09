@@ -39,7 +39,8 @@ def article_repo(db_connection: DatabaseConnection) -> ArticleRepository:
 
 @pytest.fixture(scope="class")
 def sentence_repo(
-    db_connection: DatabaseConnection, article_repo: ArticleRepository
+    db_connection: DatabaseConnection,
+    article_repo: ArticleRepository,
 ) -> SentenceRepository:
     """Fixture to create a SentenceRepository instance and its table."""
     repo = SentenceRepository(db_connection)
@@ -49,7 +50,8 @@ def sentence_repo(
 
 @pytest.fixture(scope="class")
 def entity_repo(
-    db_connection: DatabaseConnection, sentence_repo: SentenceRepository
+    db_connection: DatabaseConnection,
+    sentence_repo: SentenceRepository,
 ) -> EntityRepository:
     """Fixture to create an EntityRepository instance and its table."""
     repo = EntityRepository(db_connection)
@@ -110,7 +112,7 @@ def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
     # Verify main table has 2 records: original 100 + first 101
     main_records = conn.execute(
         f"SELECT article_id, title FROM {article_repo.table_name} "
-        f"ORDER BY article_id"
+        f"ORDER BY article_id",
     ).fetchall()
     assert len(main_records) == 2
     assert main_records[0] == (100, "Original Title")  # Original not changed
@@ -119,7 +121,7 @@ def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
     # Verify duplicates table has 2 records: duplicate 100 + second 101
     dup_records = conn.execute(
         f"SELECT article_id, title FROM {article_repo.duplicate_table_name} "
-        f"ORDER BY article_id"
+        f"ORDER BY article_id",
     ).fetchall()
     assert len(dup_records) == 2
     assert dup_records[0][0] == 100  # ID match
@@ -131,9 +133,7 @@ def test_insert_duplicate_key_with_logging(article_repo: ArticleRepository):
 def test_insert_log_duplicates_to_duplicates_table(
     article_repo: ArticleRepository,
 ):
-    """
-    Test that _insert_log_duplicates_to_duplicates_table correctly
-    handles duplicates.
+    """Test _insert_log_duplicates_to_duplicates_table correctly handles duplicates.
 
     This test verifies that:
     1. Existing records in DB are not overwritten
@@ -178,14 +178,14 @@ def test_insert_log_duplicates_to_duplicates_table(
     # records (total 5)
     main_table_records = conn.execute(
         f"SELECT article_id, title FROM {article_repo.table_name} "
-        f"ORDER BY article_id"
+        f"ORDER BY article_id",
     ).fetchall()
 
     # Check duplicates table - should have 2 DB conflicts + 1 internal
     # duplicate (total 3)
     duplicates_table_records = conn.execute(
         f"SELECT article_id, title FROM {article_repo.duplicate_table_name} "
-        f"ORDER BY article_id"
+        f"ORDER BY article_id",
     ).fetchall()
 
     # Assertions
@@ -248,7 +248,8 @@ def test_insert_log_duplicates_to_duplicates_table(
 
 
 def test_insert_duplicate_sentences(
-    sentence_repo: SentenceRepository, article_repo: ArticleRepository
+    sentence_repo: SentenceRepository,
+    article_repo: ArticleRepository,
 ):
     """Test duplicate handling in SentenceRepository."""
     # Clear any existing data
@@ -298,12 +299,12 @@ def test_insert_duplicate_sentences(
     # Step 4: Verify results
     main_table_records = conn.execute(
         f"SELECT sentence_id, article_id, text FROM {sentence_repo.table_name} "
-        f"ORDER BY sentence_id"
+        f"ORDER BY sentence_id",
     ).fetchall()
 
     duplicates_records = conn.execute(
         f"SELECT sentence_id, article_id, text FROM {sentence_repo.duplicate_table_name} "
-        f"ORDER BY sentence_id"
+        f"ORDER BY sentence_id",
     ).fetchall()
 
     # Assertions
@@ -345,5 +346,3 @@ def test_insert_duplicate_sentences(
         5,
         "New Sentence Five B (Internal Duplicate)",
     ) in dup_records, "Internal duplicate should be logged"
-
-
