@@ -1,26 +1,26 @@
-# coding=utf-8
-
 import logging
 import os
-import torch
 from glob import glob
-from typing import List, Dict, Any, Tuple
-from easyner.pipeline.ner.factory import NERProcessorFactory
+from typing import Any, Dict, List
+
+import torch
+
 from easyner.io.utils import (
-    get_batch_file_index,
-    filter_batch_files,
-    get_batch_indices,
     check_for_duplicate_batch_indices,
+    filter_batch_files,
+    get_batch_file_index,
+    get_batch_indices,
 )
+from easyner.pipeline.ner.factory import NERProcessorFactory
 
 
 def _find_files(input_dir: str) -> List[str]:
-    """
-    Find input files based on configuration.
+    """Find input files based on configuration.
 
-    Returns:
-    --------
+    Returns
+    -------
     List[str]: List of input files
+
     """
     if not os.path.isdir(input_dir):
         logging.warning(f"Input directory does not exist: {input_dir}")
@@ -39,20 +39,20 @@ class NERPipeline:
     """Main class for the NER pipeline that handles processing workflow."""
 
     def __init__(self, config: Dict[str, Any], cpu_limit: int = 1):
-        """
-        Initialize the NER pipeline.
+        """Initialize the NER pipeline.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         config: Dict[str, Any]
             Configuration for NER processing
         cpu_limit: int
             Maximum number of CPUs to use for multiprocessing
 
-        Raises:
-        -------
+        Raises
+        ------
         KeyError: If required config keys are missing
         ValueError: If paths are invalid
+
         """
         # Validate required configuration
         required_keys = ["input_path", "output_path"]
@@ -76,11 +76,13 @@ class NERPipeline:
                 os.makedirs(self.output_path, exist_ok=True)
             except (OSError, PermissionError) as e:
                 raise ValueError(
-                    f"Cannot create output directory: {self.output_path}. {str(e)}"
+                    f"Cannot create output directory: "
+                    f"{self.output_path}. {str(e)}",
                 )
         elif not os.path.isdir(self.output_path):
             raise ValueError(
-                f"Output path exists but is not a directory: {self.output_path}"
+                f"Output path exists but is not a directory: "
+                f"{self.output_path}",
             )
 
         # Extract frequently used configuration values as class attributes
@@ -105,13 +107,13 @@ class NERPipeline:
         self.processor = NERProcessorFactory.create_processor(config)
 
     def _get_batch_span_from_env_or_config(self):
-        """
-        Get batch span from environment variables or configuration.
+        """Get batch span from environment variables or configuration.
 
-        Returns:
-        --------
+        Returns
+        -------
         batch_span_start: int, batch_span_end: int
             Start and end indices for batch processing
+
         """
         batch_span_start = os.environ.get("NER_ARTICLE_START")
         if batch_span_start is not None:
@@ -119,7 +121,7 @@ class NERPipeline:
                 batch_span_start = int(batch_span_start)
             except ValueError:
                 logging.warning(
-                    f"Invalid NER_ARTICLE_START value: {batch_span_start}"
+                    f"Invalid NER_ARTICLE_START value: {batch_span_start}",
                 )
                 batch_span_start = self.batch_start_index
         else:
@@ -131,7 +133,7 @@ class NERPipeline:
                 batch_span_end = int(batch_span_end)
             except ValueError:
                 logging.warning(
-                    f"Invalid NER_ARTICLE_END value: {batch_span_end}"
+                    f"Invalid NER_ARTICLE_END value: {batch_span_end}",
                 )
                 batch_span_end = self.batch_end_index
         else:
@@ -140,15 +142,15 @@ class NERPipeline:
         return batch_span_start, batch_span_end
 
     def _get_filtered_input_files(self, reprocess: bool = False) -> List[str]:
-        """
-        Find and sort input files based on configuration.
-        Can be overridden by environment variables NER_ARTICLE_START and NER_ARTICLE_END.
+        """Find and sort input files based on configuration.
+        Can be overridden by environment variables NER_ARTICLE_START and
+        NER_ARTICLE_END.
 
-        Returns:
-        --------
+        Returns
+        -------
         List[str]: Sorted list of input files to process
-        """
 
+        """
         try:
             input_files = _find_files(self.input_path)
 
@@ -175,13 +177,12 @@ class NERPipeline:
             return filtered_files
         except Exception as e:
             logging.error(
-                f"Unexpected error while processing input files: {e}"
+                f"Unexpected error while processing input files: {e}",
             )
             raise
 
     def run(self) -> None:
-        """
-        Main entry point for the NER pipeline.
+        """Main entry point for the NER pipeline.
         - Sets up output directory
         - Discovers and filters files
         - Delegates processing to the appropriate processor
@@ -205,15 +206,15 @@ class NERPipeline:
 
 # For backward compatibility
 def run_ner_module(ner_config: Dict[str, Any], cpu_limit: int) -> None:
-    """
-    Legacy entry point for the NER pipeline.
+    """Legacy entry point for the NER pipeline.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     ner_config: Dict[str, Any]
         Configuration for NER processing
     cpu_limit: int
         Maximum number of CPUs to use for multiprocessing
+
     """
     pipeline = NERPipeline(ner_config, cpu_limit)
     pipeline.run()
