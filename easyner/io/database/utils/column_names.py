@@ -52,25 +52,32 @@ articles_columns = extract_column_names_from_sql(SCHEMA_DIR / "articles.sql")
 sentences_columns = extract_column_names_from_sql(SCHEMA_DIR / "sentences.sql")
 entities_columns = extract_column_names_from_sql(SCHEMA_DIR / "entities.sql")
 
-# Article column constants
+# Shared column names
 ARTICLE_ID = "article_id"
+SENTENCE_ID = "sentence_id"
+TEXT = "text"
+START_CHAR = "start_char"
+END_CHAR = "end_char"
+METADATA = "metadata"
+# These use timezone-aware timestamps from beginning of transaction
+CREATED_AT = "created_at"
+UPDATED_AT = "updated_at"
+
+# Article column constants
 TITLE = "title"
 
 # Sentence column constants
-SENTENCE_ID = "sentence_id"
-TEXT = "text"
+SENTENCIZER_MODEL = "sentencizer_model"
+SENTENCIZER_MODEL_METADATA = "sentencizer_model_metadata"
 
 # Entity column constants
 ENTITY_ID = "entity_id"
-START_CHAR = "start_char"
-END_CHAR = "end_char"
+ENTITY_CLASS = "entity_class"
 INFERENCE_MODEL = "inference_model"
 INFERENCE_MODEL_METADATA = "inference_model_metadata"
 
-# Column name mappings for backward compatibility
-COLUMN_MAPPING = {
-    # Old name -> New name
-    "entity": "text",
-    "start_pos": "start_char",
-    "end_pos": "end_char",
-}
+
+# Duplicates column constants
+HIERARCHICAL_DUPLICATE = "hierarchical_duplicate"  # bool
+KEY_DUPLICATE = "key_duplicate"  # bool
+RETURNED_IDS_TABLE = "returned_ids_table"
