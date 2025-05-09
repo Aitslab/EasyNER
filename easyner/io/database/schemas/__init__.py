@@ -1,5 +1,4 @@
-"""
-Schema definitions for EasyNer database tables.
+"""Schema definitions for EasyNer database tables.
 
 This package contains SQL schema definitions for tables used in the EasyNer application.
 """
