@@ -6,6 +6,8 @@ from easyner.io.database.schemas import ARTICLES_TABLE_SQL
 from easyner.io.database.schemas.python_mappings import (
     ARTICLE_ID,
     ARTICLES_TABLE,
+    KEY_DUPLICATE,
+    RETURNED_IDS_TABLE,
     TITLE,
 )
 
@@ -138,3 +140,43 @@ class ArticleRepository(Repository):
         except Exception as e:
             self.logger.error(f"Error inserting article: {e}")
             raise
+
+    def _insert_sql_duplicate_handling(
+        self,
+        view_name: str,
+        session_duplicates_table: str,
+    ) -> None:
+        """Insert view into db.
+
+        Extract duplicates from the view and insert them into the session duplicates table.
+        """
+        # All article duplicates are key duplicates, no hierarchical duplicates
+        # Since article_id is the primary key DuckDB will use a ART index to accelerate
+        # This should be the fastest way to insert non-duplicates
+        insert_non_duplicates_and_return_ids = f"""--sql
+            -- Create a table to hold the IDs of the successfully inserted rows
+            -- The column name in this new table will be whatever is aliased in RETURNING,
+            -- or the original column name if no alias is used.
+            CREATE TEMPORARY TABLE {RETURNED_IDS_TABLE} AS
+            WITH InsertResult AS (
+                INSERT INTO {ARTICLES_TABLE} BY NAME
+                SELECT v.* FROM {view_name} v
+                ON CONFLICT ({ARTICLE_ID}) DO NOTHING
+                -- Return the ID(s) of the successfully inserted rows
+                RETURNING {ARTICLE_ID} AS inserted_article_id
+            )
+            -- Select the results from the RETURNING clause (now in the CTE) into the new table
+            SELECT * FROM InsertResult;
+            """
+
+        insert_duplicates = f"""--sql
+            INSERT INTO {session_duplicates_table} BY NAME
+            -- this is in memory
+            -- used to find hierarchical duplicates of sentences and entities
+            SELECT  v.*,  TRUE AS {KEY_DUPLICATE} -- all article duplicates are key duplicates
+            FROM {view_name} v
+            LEFT JOIN {RETURNED_IDS_TABLE} r ON v.{ARTICLE_ID} = r.inserted_article_id
+            -- here we are a little clever, only joining the small inserted id set and
+            -- relatively small view instead of joining against full articles table
+            WHERE r.inserted_article_id IS NULL
+        """
