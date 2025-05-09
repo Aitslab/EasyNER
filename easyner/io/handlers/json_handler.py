@@ -4,7 +4,8 @@ import concurrent.futures
 import json
 import logging
 import os
-from typing import Any, NoReturn
+from pathlib import Path
+from typing import Any, NoReturn, Optional
 
 from .base import IOHandler
 
@@ -37,7 +38,7 @@ class JsonHandler(IOHandler):
         """
         self.check_file_exists(file_path)
 
-        # Get file size for logging
+        file_size_mb = Path(file_path).stat().st_size / (1024 * 1024)
         file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
 
         # Use memory mapping for large files (>10MB)
@@ -93,7 +94,10 @@ class JsonHandler(IOHandler):
                 raise
 
     def _load_json(self, file_path: str) -> Any:
-        """Helper method to load JSON within executor with error handling."""  # noqa: D401
+        """Load JSON within executor.
+
+        Wrapper with improved error messages
+        """
         # Check for empty file
         if os.path.getsize(file_path) == 0:
             msg = f"Empty file detected: no data in {file_path}"
@@ -104,21 +108,19 @@ class JsonHandler(IOHandler):
                 return json.load(f)
             except json.JSONDecodeError as e:
                 # Wrap JSON decode errors with more descriptive messages
-                msg = f"Error decoding JSON file in {file_path}: {str(e)}"
-                raise ValueError(
-                    msg,
-                ) from e
-
-    from typing import Optional
+                msg = f"Error decoding JSON file {file_path}: {e}"
+                raise ValueError(msg) from e
 
     def write(
         self,
-        data,
+        data: Any,
         file_path: str,
         indent: Optional[int] = None,
         **kwargs: Any,  # noqa: ANN401
     ) -> None:
-        """Write data to a JSON file with orjson optimization when available."""
+        """Writes data to a JSON file with orjson optimization
+        when available.
+        """
         self.ensure_dir_exists(file_path)
 
         try:
@@ -138,7 +140,9 @@ class JsonHandler(IOHandler):
                 with open(file_path, "wb") as f:
                     f.write(json_bytes)
 
-                logger.debug(f"Successfully wrote data to {file_path} using orjson")
+                logger.debug(
+                    f"Successfully wrote data to {file_path} using orjson",
+                )
                 return
 
             except ImportError:
@@ -155,7 +159,9 @@ class JsonHandler(IOHandler):
             with open(file_path, "w", encoding=self.encoding) as f:
                 json.dump(data, f, indent=indent)
 
-            logger.debug(f"Successfully wrote data to {file_path} using standard json")
+            logger.debug(
+                f"Successfully wrote data to {file_path} using standard json",
+            )
 
         except Exception as e:
             error_msg = f"Error writing JSON file {file_path}: {e}"
