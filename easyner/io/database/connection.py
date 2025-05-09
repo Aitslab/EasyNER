@@ -183,6 +183,38 @@ class DatabaseConnection(IDatabaseConnection):
             self.logger.error(f"Error unregistering object: {e}")
             raise
 
+    def is_in_transaction(self) -> bool:
+        """Check if the current connection is in a transaction.
+
+        Returns:
+            True if in a transaction, False otherwise
+
+        """
+        if self._connection is None:
+            self.logger.warning(
+                "Attempted to check transaction status with no active connection",
+            )
+            return False
+
+        try:
+            # For DuckDB, use a more reliable approach
+            # Try to begin a transaction and see if it raises an exception about already being in one
+            try:
+                self._connection.execute("BEGIN TRANSACTION")
+                # If we get here, we weren't in a transaction
+                # But now we are, so roll it back
+                self._connection.execute("ROLLBACK")
+                return False
+            except Exception as e:
+                # If error message contains "already in a transaction", we're in a transaction
+                if "transaction" in str(e).lower():
+                    return True
+                # For any other error, re-raise
+                raise
+        except Exception as e:
+            self.logger.error(f"Error checking transaction status: {e}")
+            raise
+
     def begin_transaction(self) -> None:
         """Begin a database transaction.
 
