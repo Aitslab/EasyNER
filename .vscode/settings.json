@@ -1,10 +1,35 @@
 {
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "data/**.json": true,
+    "supplementary/experiment_scripts/*.ipynb": true,
+  },
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/.hg/store/**": true,
+    ".mypy_cache/**": true,
+    "**/__pycache__/**": true,
+    "supplementary/*": true,
+    "data/Simplified Lund COVID19 corpus.zip": true
+  },
+  "files.exclude": {
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    ".mypy_cache": true,
+    ".pytest_cache": true,
+  },
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
     "source.organizeImports": "explicit"
   },
   "python.testing.pytestArgs": [
-    "tests"
+    "tests",
+    "-v"
   ],
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
