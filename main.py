@@ -11,15 +11,14 @@ from multiprocessing import cpu_count
 import torch
 from tqdm import tqdm
 
+from easyner.pipeline.pubmed import downloader, pubmed_bulk
 from scripts import (
     analysis,
     cord_loader,
-    downloader,
     entity_merger,
     metrics,
     nel,
     ner_main,
-    pubmed_bulk,
     search,
     splitter,
     splitter_pubmed,

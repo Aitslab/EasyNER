@@ -1,29 +1,27 @@
-# coding=utf-8
-
-# import bulk_downloader_pubmed
-# import parse_xml
-# import count_articles_from_json
 import json
 import os
 import time
 import urllib.request
 from glob import glob
+from pathlib import Path
+from typing import Any
 
+import orjson
 import pubmed_parser as pp
 from tqdm import tqdm, trange
 
 
 def bulk_download(
-    n_start=0,
-    n_end=10000,
-    nupdate=False,
-    u_start=1167,
-    u_end=3000,
-    save_path="data/tmp/pubmed/",
-    baseline=23,
+    n_start: int = 0,
+    n_end: int = 10000,
+    nupdate: bool = False,
+    u_start: int = 1167,
+    u_end: int = 3000,
+    save_path: str = "data/tmp/pubmed/",
+    baseline: int = 23,
 ):
-    """
-    bulk download raw pubmed files
+    """Bulk download raw pubmed files.
+
     n_start: start id of baseline files
     n_end: end id of baseline files (included)
     nupdate: include nightly update files (True/False)
@@ -31,12 +29,10 @@ def bulk_download(
     u_end: end id of nightly update files
     save_path: temporary save path for raw files
 
-
+    TODO fix hardcorded values such as n_end
     """
-
-    print(f"Downloading files to: {os.path.abspath(save_path)}")
-
-    os.makedirs(save_path, exist_ok=True)
+    print(f"Downloading files to: {Path(save_path).resolve()}")
+    Path(save_path).mkdir(parents=True, exist_ok=True)
 
     f = open(f"{save_path}err.txt", "w", encoding="utf8")
     for i in trange(n_start, n_end + 1):
@@ -47,8 +43,10 @@ def bulk_download(
             print(f"Downloading {url} to {os.path.abspath(full_path)}")
             urllib.request.urlretrieve(url, filename=full_path)
             # Verify file exists and has size
-            if os.path.exists(full_path):
-                print(f"SUCCESS: {full_path} exists with size: {os.path.getsize(full_path)} bytes")
+            if Path(full_path).exists():
+                print(
+                    f"SUCCESS: {full_path} exists with size: {Path(full_path).stat().st_size} bytes",
+                )
             else:
                 print(f"ERROR: File not created: {full_path}")
         except Exception as e:
@@ -62,12 +60,11 @@ def bulk_download(
     if nupdate:
         print("Downloading Nightly Update Files...")
         for i in trange(u_start, u_end + 1):
-            url = (
-                f"https://ftp.ncbi.nlm.nih.gov/pubmsed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
-            )
+            url = f"https://ftp.ncbi.nlm.nih.gov/pubmsed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
             try:
                 urllib.request.urlretrieve(
-                    url, filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz"
+                    url,
+                    filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz",
                 )
             except:
                 f.write(f"update_{i}\n")
@@ -77,10 +74,8 @@ def bulk_download(
     f.close()
 
 
-def count_articles(input_path, baseline=23):
-    """
-    count articles from converted json files
-    """
+def count_articles(input_path: str, baseline: int = 23):
+    """Count articles from converted json files."""
     count = 0
     pmids = []
     # k is used for keyword to split the filename obtained from pubmed.
@@ -90,18 +85,20 @@ def count_articles(input_path, baseline=23):
     pmid_file = input_path + "pmid_list.txt"
     input_files = sorted(
         glob(f"{input_path}*.json"),
-        key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split(k)[-1]),
+        key=lambda x: int(
+            os.path.splitext(os.path.basename(x))[0].split(k)[-1],
+        ),
     )
     # print(input_files)
-    count_writer = open(count_file, "w", encoding="utf-8")
-    pmid_writer = open(pmid_file, "w", encoding="utf-8")
+    count_writer = Path(count_file).open("w", encoding="utf-8")
+    pmid_writer = Path(pmid_file).open("w", encoding="utf-8")
 
     for infile in tqdm(input_files):
-        with open(infile, "r", encoding="utf-8") as f:
-            full_articles = json.loads(f.read())
+        with open(infile, encoding="utf-8") as f:
+            full_articles = orjson.loads(f.read())
 
         count_writer.write(
-            f"{os.path.splitext(os.path.basename(infile))[0].split(k)[-1]}\t{len(full_articles)}\n"
+            f"{os.path.splitext(os.path.basename(infile))[0].split(k)[-1]}\t{len(full_articles)}\n",
         )
         count += len(full_articles)
         pmids.extend([k for k in full_articles])
@@ -116,7 +113,13 @@ def count_articles(input_path, baseline=23):
 
 class PubMedLoader:
 
-    def __init__(self, input_path, output_path, k: str, require_abstract=False):
+    def __init__(
+        self,
+        input_path: str,
+        output_path: str,
+        k: str,
+        require_abstract: bool = False,
+    ) -> None:
         self.input_path = input_path
         self.output_path = output_path
         self.counter = {}
@@ -131,13 +134,13 @@ class PubMedLoader:
         }
         os.makedirs(output_path, exist_ok=True)
 
-    def get_input_files(self, input_path):
+    def get_input_files(self, input_path: str) -> list[str]:
         # k is used for keyword to split the filename obtained from pubmed.
         # It's different for each annual baseline
         input_files = sorted(
             glob(f"{input_path}*.gz"),
             key=lambda x: int(
-                os.path.splitext(os.path.basename(x))[0].split(self.k + "n")[-1][:-4]
+                os.path.splitext(os.path.basename(x))[0].split(self.k + "n")[-1][:-4],
             ),
         )
         return input_files
@@ -145,11 +148,12 @@ class PubMedLoader:
     def get_counter(self):
         return self.counter
 
-    def load_xml_and_convert(self, input_file):
+    def load_xml_and_convert(self, input_file: str) -> dict[str, Any]:
+        """Load XML file and convert to JSON format."""
         data = pp.parse_medline_xml(input_file, year_info_only=False)
 
-        d_main = {}
-        local_stats = {
+        article: dict[str, Any] = {}
+        local_stats: dict[str, int] = {
             "total": len(data),
             "no_abstract": 0,
             "abstract_not_string": 0,
@@ -185,9 +189,13 @@ class PubMedLoader:
                 local_stats["included"] += 1
 
                 # Create a default empty abstract if it doesn't exist and we're not requiring it
-                abstract = art.get("abstract", "") if not self.require_abstract else art["abstract"]
+                abstract = (
+                    art.get("abstract", "")
+                    if not self.require_abstract
+                    else art["abstract"]
+                )
 
-                d_main[pmid] = {
+                article[pmid] = {
                     "title": art.get("title", ""),
                     "abstract": abstract,
                     "mesh_terms": art.get("mesh_terms", ""),
@@ -208,16 +216,18 @@ class PubMedLoader:
                 #     sys.exit(1)  # Exit the program
 
         self.counter[input_file] = local_stats
-        return d_main
+        return article
 
-    def write_to_json(self, data, input_file):
+    def write_to_json(self, data, input_file: str) -> None:
         outfile = os.path.join(
-            self.output_path, os.path.basename(input_file.split(".xml")[0]) + ".json"
+            self.output_path,
+            os.path.basename(input_file.split(".xml")[0]) + ".json",
         )
         with open(outfile, "w", encoding="utf-8") as f:
             f.write(json.dumps(data, indent=2, ensure_ascii=False))
 
-    def run_loader(self):
+    def run_loader(self) -> None:
+        """Run the loader of PubMed files."""
         input_files_list = self.get_input_files(self.input_path)
 
         for i, input_file in tqdm(enumerate(input_files_list)):
@@ -225,12 +235,15 @@ class PubMedLoader:
             data = self.load_xml_and_convert(input_file)
             self.write_to_json(data, input_file)
 
-    def get_filter_statistics(self):
-        """Return statistics about filtered articles"""
+    def get_filter_statistics(self) -> dict[str, int]:
+        """Return statistics about filtered articles."""
         return self.filter_stats
 
-    def write_statistics_report(self, output_file="filter_statistics.json"):
-        """Write filtering statistics to a JSON file"""
+    def write_statistics_report(
+        self,
+        output_file: str = "filter_statistics.json",
+    ) -> None:
+        """Write filtering statistics to a JSON file."""
         report_path = os.path.join(self.output_path, output_file)
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(
@@ -280,7 +293,10 @@ def run_pbl(pbl_config):
                     baseline=pbl_config["baseline"],
                 )
             else:
-                bulk_download(save_path=download_path, baseline=pbl_config["baseline"])
+                bulk_download(
+                    save_path=download_path,
+                    baseline=pbl_config["baseline"],
+                )
         print("Download complete.")
     else:
         print("Download step skipped based on configuration.")
@@ -301,7 +317,10 @@ def run_pbl(pbl_config):
 
     if pbl_config["count_articles"]:
         print("Counting articles")
-        count_articles(input_path=pbl_config["output_path"], baseline=pbl_config["baseline"])
+        count_articles(
+            input_path=pbl_config["output_path"],
+            baseline=pbl_config["baseline"],
+        )
 
     print("Pubmed processing complete")
 
