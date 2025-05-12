@@ -34,12 +34,13 @@ Examples:
 import argparse
 import json
 import sys
+from typing import Optional
 
 from easyner.config import config_manager
 
 
-def setup_validate_parser(subparsers) -> None:
-    """Setup the validate command parser."""
+def setup_validate_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Set up the validate command parser."""
     parser = subparsers.add_parser(
         "validate",
         help="Validate configuration files",
@@ -47,8 +48,8 @@ def setup_validate_parser(subparsers) -> None:
     parser.add_argument("--quiet", action="store_true", help="Suppress output")
 
 
-def setup_template_parser(subparsers) -> None:
-    """Setup the template command parser."""
+def setup_template_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Set up the template command parser."""
     parser = subparsers.add_parser(
         "template",
         help="Generate a template configuration",
@@ -61,8 +62,8 @@ def setup_template_parser(subparsers) -> None:
     parser.add_argument("--quiet", action="store_true", help="Suppress output")
 
 
-def setup_ensure_parser(subparsers) -> None:
-    """Setup the ensure command parser."""
+def setup_ensure_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Set up the ensure command parser."""
     parser = subparsers.add_parser(
         "ensure",
         help="Ensure config.json exists (create if needed)",
@@ -70,8 +71,8 @@ def setup_ensure_parser(subparsers) -> None:
     parser.add_argument("--quiet", action="store_true", help="Suppress output")
 
 
-def setup_view_parser(subparsers) -> None:
-    """Setup the view command parser."""
+def setup_view_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Set up the view command parser."""
     parser = subparsers.add_parser("view", help="View configuration contents")
     parser.add_argument("--section", type=str, help="View a specific section")
     parser.add_argument(
@@ -82,8 +83,8 @@ def setup_view_parser(subparsers) -> None:
     )
 
 
-def setup_backup_parser(subparsers):
-    """Setup the backup command parser and its subcommands."""
+def setup_backup_parser(subparsers: argparse._SubParsersAction) -> None:
+    """Set up the backup command parser and its subcommands."""
     parser = subparsers.add_parser(
         "backup",
         help="Backup management operations",
@@ -129,8 +130,8 @@ def setup_backup_parser(subparsers):
     )
 
 
-def setup_parsers(parser):
-    """Setup the config command parser and its subcommands."""
+def setup_parsers(parser: argparse.ArgumentParser) -> None:
+    """Set up the config command parser and its subcommands."""
     subparsers = parser.add_subparsers(dest="subcommand", required=True)
 
     setup_validate_parser(subparsers)
@@ -140,7 +141,7 @@ def setup_parsers(parser):
     setup_backup_parser(subparsers)
 
 
-def handle_validate(args):
+def handle_validate(args: argparse.Namespace) -> int:
     """Handle the validate command."""
     # Update quiet flag if needed
     if args.quiet:
@@ -156,7 +157,7 @@ def handle_validate(args):
     return 0 if result else 1
 
 
-def handle_template(args) -> int:
+def handle_template(args: argparse.Namespace) -> int:
     """Handle the template command."""
     # Update quiet flag if needed
     if args.quiet:
@@ -174,7 +175,7 @@ def handle_template(args) -> int:
     return 0 if result else 1
 
 
-def handle_ensure(args):
+def handle_ensure(args: argparse.Namespace) -> int:
     """Handle the ensure command."""
     # Update quiet flag if needed
     if args.quiet:
@@ -190,31 +191,44 @@ def handle_ensure(args):
     return 0 if result else 1
 
 
-def handle_view(args):
+def _print_config_data(
+    data: dict,
+    format_type: str,
+    section_name: Optional[str] = None,
+) -> None:
+    """Print configuration data in the specified format."""
+    if section_name:
+        print(f"=== Configuration Section: {section_name} ===")
+    else:
+        print("=== Complete Configuration ===")
+
+    if format_type == "pretty":
+        print(json.dumps(data, indent=2, sort_keys=False))
+    else:
+        print(json.dumps(data))
+
+
+def handle_view(args: argparse.Namespace) -> int:
     """Handle the view command."""
     try:
+        quiet = getattr(args, "quiet", False)
+        data = None
+        section_to_print = None
+
         if args.section:
-            # View a specific section using dictionary access
             try:
                 data = config_manager[args.section]
-                if not getattr(args, "quiet", False):
-                    print(f"=== Configuration Section: {args.section} ===")
+                section_to_print = args.section
             except KeyError:
                 print(
                     f"Error: Section '{args.section}' not found in configuration",
                 )
                 return 1
         else:
-            # View the entire configuration
             data = config_manager.get_config()
-            if not getattr(args, "quiet", False):
-                print("=== Complete Configuration ===")
 
-        # Output the data in the requested format
-        if args.format == "pretty":
-            print(json.dumps(data, indent=2, sort_keys=False))
-        else:
-            print(json.dumps(data))
+        if not quiet and data is not None:
+            _print_config_data(data, args.format, section_to_print)
 
         return 0
     except Exception as e:
@@ -222,7 +236,7 @@ def handle_view(args):
         return 1
 
 
-def handle_backup_create(args):
+def handle_backup_create(args: argparse.Namespace) -> int:
     """Create a backup of the current configuration using the ConfigManager."""
     try:
         # Create backup using the ConfigManager
@@ -234,7 +248,7 @@ def handle_backup_create(args):
         return 1
 
 
-def handle_backup_list(args) -> int:
+def handle_backup_list(args: argparse.Namespace) -> int:
     """List all available configuration backups using ConfigManager."""
     try:
         # Get all backups
@@ -265,7 +279,7 @@ def handle_backup_list(args) -> int:
         return 1
 
 
-def handle_backup_restore(args):
+def handle_backup_restore(args: argparse.Namespace) -> int:
     """Restore a configuration from a backup using the ConfigManager."""
     backup_name = args.name
 
@@ -289,7 +303,7 @@ def handle_backup_restore(args):
         return 1
 
 
-def handle_backup_delete(args):
+def handle_backup_delete(args: argparse.Namespace) -> int:
     """Delete a backup using the ConfigManager."""
     backup_name = args.name
 
@@ -313,40 +327,39 @@ def handle_backup_delete(args):
         return 1
 
 
-def handle_backup(args):
+def handle_backup(args: argparse.Namespace) -> int:
     """Handle the backup command and its subcommands."""
-    if args.backup_cmd == "create":
-        return handle_backup_create(args)
-    elif args.backup_cmd == "list":
-        return handle_backup_list(args)
-    elif args.backup_cmd == "restore":
-        return handle_backup_restore(args)
-    elif args.backup_cmd == "delete":
-        return handle_backup_delete(args)
+    backup_actions = {
+        "create": handle_backup_create,
+        "list": handle_backup_list,
+        "restore": handle_backup_restore,
+        "delete": handle_backup_delete,
+    }
+    if args.backup_cmd in backup_actions:
+        return backup_actions[args.backup_cmd](args)
     else:
         print(f"Unknown backup command: {args.backup_cmd}")
         return 1
 
 
-def handle_command(args):
+def handle_command(args: argparse.Namespace) -> int:
     """Handle the config command and its subcommands."""
-    if args.subcommand == "validate":
-        return handle_validate(args)
-    elif args.subcommand == "template":
-        return handle_template(args)
-    elif args.subcommand == "ensure":
-        return handle_ensure(args)
-    elif args.subcommand == "view":
-        return handle_view(args)
-    elif args.subcommand == "backup":
-        return handle_backup(args)
+    command_handlers = {
+        "validate": handle_validate,
+        "template": handle_template,
+        "ensure": handle_ensure,
+        "view": handle_view,
+        "backup": handle_backup,
+    }
+    if args.subcommand in command_handlers:
+        return command_handlers[args.subcommand](args)
     else:
         print(f"Unknown config subcommand: {args.subcommand}")
         return 1
 
 
-def main():
-    """Main entry point for direct execution of the configuration CLI tool.
+def main() -> int:
+    """Run the main entry point for direct execution of the configuration CLI tool.
 
     This is kept for backwards compatibility but the preferred way is to use
     the unified CLI with: easyner config [command]
