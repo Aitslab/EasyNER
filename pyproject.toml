@@ -31,8 +31,18 @@ dev = [
 [tool.setuptools]
 packages = ["easyner"]
 
-[tool.pytest]
-testpaths = ["tests"]
+[tool.pytest.ini_options]
+testpaths = ["tests/*"]
+norecursedirs = [".svn", "_build", "/tmp*", "/temp", "/venv*", "**/.tox", "**/.eggs", "**/.git", "**/__pycache__", "**/build", "**/dist", "easyner/*"]
+log_level = "DEBUG"
+addopts = [
+    "--durations=10",
+    "--nf",
+]
+
+# lf = last-failed
+# nf = new-first (runs the last modified test files first)
+# --sw, --stepwise Exit on test failure and continue from last failing test next time
 
 [tool.black]
 line-length = 88
