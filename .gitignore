@@ -2,6 +2,9 @@
 !.github
 !.vscode
 
+# Git
+.github/prompts/
+
 # Editor files
 .vscode/launch.json
 .vscode/tasks.json
