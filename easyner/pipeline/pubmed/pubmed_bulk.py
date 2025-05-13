@@ -3,6 +3,7 @@ import os
 import time
 import urllib.request
 from glob import glob
+from io import TextIOWrapper
 from pathlib import Path
 from typing import Any
 
@@ -34,7 +35,7 @@ def bulk_download(
     print(f"Downloading files to: {Path(save_path).resolve()}")
     Path(save_path).mkdir(parents=True, exist_ok=True)
 
-    f = open(f"{save_path}err.txt", "w", encoding="utf8")
+    error_log_file: TextIOWrapper = open(f"{save_path}err.txt", "w", encoding="utf8")
     for i in trange(n_start, n_end + 1):
         # url = f'https://data.lhncbc.nlm.nih.gov/public/ii/information/MBR/Baselines/2023/pubmed23n{i:04d}.xml.gz'
         url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed{baseline}n{i:04d}.xml.gz"
@@ -51,7 +52,7 @@ def bulk_download(
                 print(f"ERROR: File not created: {full_path}")
         except Exception as e:
             print(f"ERROR downloading {i}: {str(e)}")
-            f.write(f"{i}\t{str(e)}\n")
+            error_log_file.write(f"{i}\t{str(e)}\n")
             continue
 
         if i % 3 == 0:
@@ -67,11 +68,11 @@ def bulk_download(
                     filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz",
                 )
             except:
-                f.write(f"update_{i}\n")
+                error_log_file.write(f"update_{i}\n")
                 continue
             if i % 3 == 0:
                 time.sleep(0.1)
-    f.close()
+    error_log_file.close()
 
 
 def count_articles(input_path: str, baseline: int = 23):
