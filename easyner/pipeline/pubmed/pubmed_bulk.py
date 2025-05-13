@@ -13,13 +13,13 @@ from tqdm import tqdm, trange
 
 
 def bulk_download(
+    baseline: int,
     n_start: int = 0,
     n_end: int = 10000,
     nupdate: bool = False,
     u_start: int = 1167,
     u_end: int = 3000,
     save_path: str = "data/tmp/pubmed/",
-    baseline: int = 23,
 ):
     """Bulk download raw pubmed files.
 
@@ -32,6 +32,21 @@ def bulk_download(
 
     TODO fix hardcorded values such as n_end
     """
+    # Baseline must be a two digit integer, could be 00, 99
+    if not isinstance(baseline, int) or baseline < 0 or baseline > 99:
+        msg = (
+            f"Baseline year {baseline} must be a two digit integer "
+            f"between 0 and 99."
+        )
+        raise ValueError(msg)
+    current_year = time.localtime().tm_year
+    if baseline > current_year % 100:
+        msg = (
+            f"Baseline year {baseline} is larger than the current year "
+            f"{current_year % 100}."
+        )
+        raise ValueError(msg)
+
     print(f"Downloading files to: {Path(save_path).resolve()}")
     Path(save_path).mkdir(parents=True, exist_ok=True)
 
