@@ -1,23 +1,21 @@
-# coding=utf-8
-
 import json
 import os
-import pubmed_parser as pp
-import requests
 import shutil
 import sys
-
 from typing import Any, List
 
+import pubmed_parser as pp
+import requests
 
-def _make_batches(xs: List[Any], size: int):
+
+def _make_batches(xs: list[Any], size: int):
     for i in range(0, len(xs), size):
-        yield xs[i:i+size]
+        yield xs[i : i + size]
 
 
 def _run(input_file: str, output_file: str, batch_size: int):
     lines = []
-    for line in open(input_file, "r"):
+    for line in open(input_file):
         lines.append(line.strip())
 
     pmid_batches = []
@@ -29,33 +27,34 @@ def _run(input_file: str, output_file: str, batch_size: int):
     for pmid_batch in pmid_batches:
         i += 1
         n += len(pmid_batch)
-        print("Downloading and saving batch {}...".format(i))
+        print(f"Downloading and saving batch {i}...")
 
         api_url = _build_api_url(pmid_batch, retmode="xml")
         new_data = _download_data(api_url)
         _append_json(output_file, new_data)
 
-        print("Saved {}/{} articles so far.\n".format(n, len(lines)))
+        print(f"Saved {n}/{len(lines)} articles so far.\n")
 
 
-def _build_api_url(pmid_list: List[str], retmode="xml"):
-# builds the URL to be used with the NCBI eFetch utility, can also be used for other NCBI databases
-# see here: https://www.ncbi.nlm.nih.gov/books/NBK25499/
-    return ("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
-            "?db=pubmed&id={}&retmode={}&rettype=abstract"
-            ).format(",".join(pmid_list), retmode)
+def _build_api_url(pmid_list: list[str], retmode="xml"):
+    # builds the URL to be used with the NCBI eFetch utility, can also be used for other NCBI databases
+    # see here: https://www.ncbi.nlm.nih.gov/books/NBK25499/
+    return (
+        "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+        "?db=pubmed&id={}&retmode={}&rettype=abstract"
+    ).format(",".join(pmid_list), retmode)
 
 
 def _download_data(api_url: str):
     res = requests.get(api_url)
     if res.status_code != 200:
-        print (api_url)
+        print(api_url)
         raise requests.HTTPError(res.reason)
 
-    with open("{}/medline.xml".format(_tmp_dir), "w",encoding="utf-8") as f:
+    with open(f"{_tmp_dir}/medline.xml", "w", encoding="utf-8") as f:
         f.write(res.text)
 
-    medline_json_list = pp.parse_medline_xml("{}/medline.xml".format(_tmp_dir))
+    medline_json_list = pp.parse_medline_xml(f"{_tmp_dir}/medline.xml")
 
     # Map PMID to article
     new_data = {}
@@ -70,7 +69,7 @@ def _append_json(path: str, new_data: dict):
         with open(path, "w", encoding="utf-8") as f:
             f.write("{}")
 
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         old_data = json.loads(f.read())
 
     data = {**old_data, **new_data}  # Merge dicts (new overwrites old)
@@ -105,8 +104,7 @@ Arguments:
 if __name__ == "__main__":
 
     if len(sys.argv) < 3 or len(sys.argv) > 4:
-        sys.exit(
-            "usage: {} input_path output_path [batch_size]".format(sys.argv[0]))
+        sys.exit(f"usage: {sys.argv[0]} input_path output_path [batch_size]")
 
     input_file = sys.argv[1]
     output_file = sys.argv[2]
@@ -118,13 +116,13 @@ if __name__ == "__main__":
         except ValueError:
             sys.exit("error: batch_size must be an integer")
 
-    print("input_file  = {}".format(input_file))
-    print("output_file = {}".format(output_file))
-    print("batch_size  = {}".format(batch_size))
+    print(f"input_file  = {input_file}")
+    print(f"output_file = {output_file}")
+    print(f"batch_size  = {batch_size}")
     print()
 
     run(
         input_file=input_file,
         output_file=output_file,
-        batch_size=batch_size
+        batch_size=batch_size,
     )
