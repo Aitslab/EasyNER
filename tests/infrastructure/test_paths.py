@@ -1,26 +1,36 @@
+"""Tests for verifying the correctness of path constants and their relationships.
+
+This module includes tests to ensure that:
+- The project root and standard directories exist.
+- Config and schema files are present.
+- Path relationships between directories are correct.
+"""
+
 import os
+from pathlib import Path
+
 import pytest
 
 # Import path constants from the infrastructure package
 from easyner.infrastructure.paths import (
-    PROJECT_ROOT,
-    DATA_DIR,
-    RESULTS_DIR,
-    MODELS_DIR,
-    SCRIPTS_DIR,
-    NER_RESULTS_DIR,
-    DATALOADER_RESULTS_DIR,
-    SPLITTER_RESULTS_DIR,
     ANALYSIS_RESULTS_DIR,
     CONFIG_PATH,
-    TEMPLATE_PATH,
+    DATA_DIR,
+    DATALOADER_RESULTS_DIR,
+    MODELS_DIR,
+    NER_RESULTS_DIR,
+    PROJECT_ROOT,
+    RESULTS_DIR,
     SCHEMA_PATH,
+    SCRIPTS_DIR,
+    SPLITTER_RESULTS_DIR,
+    TEMPLATE_PATH,
 )
 
 
 # Fixture to provide absolute paths for testing
 @pytest.fixture
-def absolute_paths():
+def absolute_paths() -> dict[str, Path]:
     """Convert relative paths to absolute paths based on project root."""
     return {
         "DATA_DIR": PROJECT_ROOT / DATA_DIR,
@@ -37,17 +47,13 @@ def absolute_paths():
     }
 
 
-def test_project_root_exists():
+def test_project_root_exists() -> None:
     """Test that the project root directory exists."""
-    assert (
-        PROJECT_ROOT.exists()
-    ), f"Project root does not exist: {PROJECT_ROOT}"
-    assert (
-        PROJECT_ROOT.is_dir()
-    ), f"Project root is not a directory: {PROJECT_ROOT}"
+    assert PROJECT_ROOT.exists(), f"Project root does not exist: {PROJECT_ROOT}"
+    assert PROJECT_ROOT.is_dir(), f"Project root is not a directory: {PROJECT_ROOT}"
 
 
-def test_standard_directories_exist(absolute_paths):
+def test_standard_directories_exist(absolute_paths: dict[str, Path]) -> None:
     """Test that the standard directories exist."""
     # Check each standard directory
     for name, path in absolute_paths.items():
@@ -63,23 +69,23 @@ def test_standard_directories_exist(absolute_paths):
                 pytest.skip(f"{name} does not exist: {path}")
 
 
-def test_config_files(absolute_paths):
+def test_config_files(absolute_paths: dict[str, Path]) -> None:
     """Test the config file paths."""
     # Check that at least the default config exists
     assert absolute_paths["DEFAULT_CONFIG_PATH"].exists(), (
-        f"Default config file does not exist at: {absolute_paths['DEFAULT_CONFIG_PATH']} \n"
-        f"Please generate a config file using the generator or restore from personal backups."
+        "Default config file does not exist at: "
+        f"{absolute_paths['DEFAULT_CONFIG_PATH']} \n"
+        "Please generate a config file using the generator "
+        "or restore from personal backups."
     )
 
     # Check schema path
     assert absolute_paths[
         "DEFAULT_SCHEMA_PATH"
-    ].exists(), (
-        f"Schema file does not exist: {absolute_paths['DEFAULT_SCHEMA_PATH']}"
-    )
+    ].exists(), f"Schema file does not exist: {absolute_paths['DEFAULT_SCHEMA_PATH']}"
 
 
-def test_path_relationships():
+def test_path_relationships() -> None:
     """Test the relationships between paths."""
     # Test that subdirectories are correctly related to their parent directories
     assert NER_RESULTS_DIR.parent == RESULTS_DIR
