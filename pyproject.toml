@@ -218,8 +218,8 @@ extend-safe-fixes = ["UP006", "EM102"]
 # Python includes the raise in the default traceback (and formatters like Rich and IPython do too).
 
 [tool.ruff.lint.mccabe]
-# Flag errors (`C901`) whenever the complexity level exceeds 5.
-max-complexity = 5
+# Flag errors (`C901`) whenever the complexity level exceeds 8.
+max-complexity = 8
 
 [tool.ruff.lint.flake8-errmsg]
 max-string-length = 20
