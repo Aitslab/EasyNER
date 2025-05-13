@@ -183,7 +183,7 @@ select = [
     "N",
     # Enable pep8-naming (N),
     # flake8-use-pathlib (PTH),
-    "PTH",
+    # "PTH",
     # Perflint (PERF)
     "PERF",
     # pyupgrade (UP)
