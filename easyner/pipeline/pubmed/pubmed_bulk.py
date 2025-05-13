@@ -60,7 +60,7 @@ def bulk_download(
     if nupdate:
         print("Downloading Nightly Update Files...")
         for i in trange(u_start, u_end + 1):
-            url = f"https://ftp.ncbi.nlm.nih.gov/pubmsed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
+            url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
             try:
                 urllib.request.urlretrieve(
                     url,
