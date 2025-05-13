@@ -59,20 +59,40 @@ def bulk_download(
             time.sleep(0.1)
 
     if nupdate:
-        print("Downloading Nightly Update Files...")
-        for i in trange(u_start, u_end + 1):
-            url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
-            try:
-                urllib.request.urlretrieve(
-                    url,
-                    filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz",
-                )
-            except:
-                error_log_file.write(f"update_{i}\n")
-                continue
-            if i % 3 == 0:
-                time.sleep(0.1)
+        _download_nightly_update_files(
+            update_start_file=u_start,
+            update_end_file=u_end,
+            save_path=save_path,
+            baseline=baseline,
+            error_log_file=error_log_file,
+        )
+
     error_log_file.close()
+
+
+def _download_nightly_update_files(
+    update_start_file: int,
+    update_end_file: int,
+    save_path: str,
+    baseline: int,
+    error_log_file: TextIOWrapper,
+) -> None:
+    """Download nightly update files."""
+    print("Downloading Nightly Update Files...")
+    for i in trange(update_start_file, update_end_file + 1):
+        url = f"https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/pubmed{baseline}n{i:04d}.xml.gz"
+        try:
+            urllib.request.urlretrieve(
+                url,
+                filename=f"{save_path}pubmed{baseline}n{i:04d}.xml.gz",
+            )
+        except Exception as e:
+            msg = f"ERROR downloading {i}: {str(e)}"
+            print(msg)
+            error_log_file.write(f"update_{i}\n")
+            continue
+        if i % 3 == 0:
+            time.sleep(0.1)
 
 
 def count_articles(input_path: str, baseline: int = 23):
