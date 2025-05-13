@@ -1,5 +1,4 @@
-"""
-Configuration Manager Module
+"""Configuration Manager Module.
 
 This module provides a central class for managing all
 configuration-related operations, including loading,
@@ -7,17 +6,18 @@ validation, generation and backup.
 """
 
 import json
+from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Any, Dict, Union, Optional, List, Iterator, Iterable
+from typing import Any, Optional, Union
 
+from easyner.config.backup import ConfigBackup, ConfigBackupManager
+from easyner.config.generator import ConfigGenerator
+from easyner.config.validator import ConfigValidator
 from easyner.infrastructure.paths import (
     CONFIG_PATH,
-    TEMPLATE_PATH,
     SCHEMA_PATH,
+    TEMPLATE_PATH,
 )
-from easyner.config.validator import ConfigValidator
-from easyner.config.generator import ConfigGenerator
-from easyner.config.backup import ConfigBackupManager, ConfigBackup
 
 
 class ConfigManager:
@@ -40,6 +40,7 @@ class ConfigManager:
         template_path: Path to the template configuration file
         schema_path: Path to the JSON schema file
         quiet: Whether to suppress standard output messages
+
     """
 
     def __init__(
@@ -56,6 +57,7 @@ class ConfigManager:
             template_path: Path to the template configuration file
             schema_path: Path to the JSON schema file
             quiet: Whether to suppress standard output messages
+
         """
         self.config_path = Path(config_path)
         self.template_path = Path(template_path)
@@ -66,22 +68,24 @@ class ConfigManager:
         self.validator = ConfigValidator(schema_path, quiet)
         self.generator = ConfigGenerator(schema_path, quiet)
         self.backup_manager = ConfigBackupManager(
-            config_path=self.config_path, template_path=self.template_path
+            config_path=self.config_path,
+            template_path=self.template_path,
         )
 
         # Cache for loaded configuration
-        self._config: Optional[Dict[str, Any]] = None
+        self._config: Optional[dict[str, Any]] = None
 
     def _print_message(self, message: str) -> None:
         """Print a message if quiet mode is not enabled.
 
         Args:
             message: The message to print
+
         """
         if not self.quiet:
             print(message)
 
-    def load_config(self, validate: bool = True) -> Dict[str, Any]:
+    def load_config(self, validate: bool = True) -> dict[str, Any]:
         """Load and optionally validate the configuration file.
 
         Args:
@@ -93,43 +97,43 @@ class ConfigManager:
         Raises:
             FileNotFoundError: If the config file doesn't exist
             json.JSONDecodeError: If the config file contains invalid JSON
+
         """
         # Check if config exists, if not try to create it
         if not self.config_path.exists():
-            self._print_message(
-                f"Configuration file not found: {self.config_path}"
-            )
+            self._print_message(f"Configuration file not found: {self.config_path}")
             if self.template_path.exists():
                 self._print_message("Attempting to create from template...")
                 success = self.generator.copy_template_to_config(
-                    self.template_path, self.config_path
+                    self.template_path,
+                    self.config_path,
                 )
                 if not success:
+                    msg = f"Configuration file not found: {self.config_path}"
                     raise FileNotFoundError(
-                        f"Configuration file not found: {self.config_path}"
+                        msg,
                     )
             else:
+                msg = f"Configuration file not found: {self.config_path}"
                 raise FileNotFoundError(
-                    f"Configuration file not found: {self.config_path}"
+                    msg,
                 )
 
         # Validate the config if requested
         if validate:
             is_valid = self.validator.validate_config(self.config_path)
             if not is_valid:
-                self._print_message(
-                    "Warning: Configuration has validation issues"
-                )
+                self._print_message("Warning: Configuration has validation issues")
 
         # Load the configuration
-        with open(self.config_path, "r", encoding="utf-8") as f:
+        with open(self.config_path, encoding="utf-8") as f:
             config = json.load(f)
 
         # Cache the loaded config
         self._config = config
         return config
 
-    def get_config(self, reload: bool = False) -> Dict[str, Any]:
+    def get_config(self, reload: bool = False) -> dict[str, Any]:
         """Get the configuration, loading it if necessary.
 
         Args:
@@ -137,6 +141,7 @@ class ConfigManager:
 
         Returns:
             Dict containing the configuration
+
         """
         if self._config is None or reload:
             return self.load_config()
@@ -147,28 +152,28 @@ class ConfigManager:
 
         Returns:
             bool: True if the config file exists or was created, False on error
+
         """
         if self.config_path.exists():
-            self._print_message(
-                f"Config file already exists at: {self.config_path}"
-            )
+            self._print_message(f"Config file already exists at: {self.config_path}")
             return True
 
         # Check if template exists, if not generate it
         if not self.template_path.exists():
             self._print_message(
-                f"Template file not found at {self.template_path}, generating..."
+                f"Template file not found at {self.template_path}, generating...",
             )
             success = self.generator.generate_template(self.template_path)
             if not success:
                 self._print_message(
-                    f"Failed to generate template at {self.template_path}"
+                    f"Failed to generate template at {self.template_path}",
                 )
                 return False
 
         # Copy template to config
         return self.generator.copy_template_to_config(
-            self.template_path, self.config_path
+            self.template_path,
+            self.config_path,
         )
 
     def generate_template(self, skip_prettier: bool = False) -> bool:
@@ -179,22 +184,20 @@ class ConfigManager:
 
         Returns:
             bool: True if template generation succeeded, False otherwise
+
         """
-        return self.generator.generate_template(
-            self.template_path, skip_prettier
-        )
+        return self.generator.generate_template(self.template_path, skip_prettier)
 
     def validate_all(self) -> bool:
         """Validate all configuration files.
 
         Returns:
             bool: True if all validation tests pass, False otherwise
-        """
-        return self.validator.run_validation_tests(
-            self.config_path, self.template_path
-        )
 
-    def save_config(self, config_data: Dict[str, Any]) -> bool:
+        """
+        return self.validator.run_validation_tests(self.config_path, self.template_path)
+
+    def save_config(self, config_data: dict[str, Any]) -> bool:
         """Save configuration data to the config file.
 
         Args:
@@ -202,6 +205,7 @@ class ConfigManager:
 
         Returns:
             bool: True if saving succeeded, False otherwise
+
         """
         try:
             with open(self.config_path, "w", encoding="utf-8") as f:
@@ -214,7 +218,7 @@ class ConfigManager:
             is_valid = self.validator.validate_config(self.config_path)
             if not is_valid:
                 self._print_message(
-                    "Warning: Saved configuration has validation issues"
+                    "Warning: Saved configuration has validation issues",
                 )
 
             return True
@@ -235,20 +239,20 @@ class ConfigManager:
         Raises:
             FileNotFoundError: If the config file doesn't exist
             IOError: If there's an issue creating the backup
+
         """
         return self.backup_manager.create_backup(description)
 
-    def list_backups(self) -> List[ConfigBackup]:
+    def list_backups(self) -> list[ConfigBackup]:
         """List all available configuration backups.
 
         Returns:
             List of ConfigBackup objects representing available backups
+
         """
         return self.backup_manager.list_backups()
 
-    def restore_backup(
-        self, backup_identifier: Union[str, Path, ConfigBackup]
-    ) -> bool:
+    def restore_backup(self, backup_identifier: Union[str, Path, ConfigBackup]) -> bool:
         """Restore configuration from a backup.
 
         Args:
@@ -261,12 +265,11 @@ class ConfigManager:
         Raises:
             ValueError: If the backup identifier is invalid
             FileNotFoundError: If the backup file doesn't exist
+
         """
         return self.backup_manager.restore_backup(backup_identifier)
 
-    def delete_backup(
-        self, backup_identifier: Union[str, Path, ConfigBackup]
-    ) -> bool:
+    def delete_backup(self, backup_identifier: Union[str, Path, ConfigBackup]) -> bool:
         """Delete a backup file.
 
         Args:
@@ -279,6 +282,7 @@ class ConfigManager:
         Raises:
             ValueError: If the backup identifier is invalid
             FileNotFoundError: If the backup file doesn't exist
+
         """
         return self.backup_manager.delete_backup(backup_identifier)
 
@@ -294,12 +298,14 @@ class ConfigManager:
 
         Raises:
             KeyError: If the key doesn't exist in the configuration
+
         """
         config = self.get_config()
         try:
             return config[key]
-        except KeyError:
-            raise KeyError(f"Key '{key}' not found in configuration")
+        except KeyError as e:
+            msg = f"Key '{key}' not found in configuration: {e}"
+            raise KeyError(msg) from e
 
     def __setitem__(self, key: str, value: Any) -> None:
         """Set a configuration value using dictionary syntax.
@@ -311,6 +317,7 @@ class ConfigManager:
         Note:
             This doesn't automatically save the configuration to disk.
             Call save_config() to persist changes.
+
         """
         config = self.get_config()
         config[key] = value
@@ -323,6 +330,7 @@ class ConfigManager:
 
         Returns:
             True if the key exists, False otherwise
+
         """
         config = self.get_config()
         return key in config
@@ -332,6 +340,7 @@ class ConfigManager:
 
         Returns:
             Iterator over configuration keys
+
         """
         config = self.get_config()
         return iter(config)
@@ -341,6 +350,7 @@ class ConfigManager:
 
         Returns:
             The number of top-level configuration entries
+
         """
         config = self.get_config()
         return len(config)
@@ -354,6 +364,7 @@ class ConfigManager:
 
         Returns:
             The value associated with the key, or the default if not found
+
         """
         config = self.get_config()
         return config.get(key, default)
@@ -363,6 +374,7 @@ class ConfigManager:
 
         Returns:
             Iterable over configuration keys
+
         """
         config = self.get_config()
         return config.keys()
@@ -372,6 +384,7 @@ class ConfigManager:
 
         Returns:
             Iterator over configuration values
+
         """
         config = self.get_config()
         return config.values()
@@ -381,6 +394,7 @@ class ConfigManager:
 
         Returns:
             Iterator over configuration key-value pairs
+
         """
         config = self.get_config()
         return config.items()

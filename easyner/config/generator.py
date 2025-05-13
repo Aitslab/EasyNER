@@ -1,5 +1,4 @@
-"""
-Configuration Template Generator Module
+"""Configuration Template Generator Module.
 
 This module provides a class for generating configuration templates from a JSON schema.
 The generator ensures templates are properly formatted and preserves existing values
@@ -10,7 +9,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, Dict, Union, Optional
+from typing import Any, Optional, Union
 
 from easyner.config.validator import ConfigValidator
 from easyner.infrastructure.paths import (
@@ -30,28 +29,29 @@ class ConfigGenerator:
         schema_path: Path to the JSON schema file
         quiet: Whether to suppress standard output messages
         validator: The validator instance used to validate templates
+
     """
 
-    def __init__(
-        self, schema_path: Path = SCHEMA_PATH, quiet: bool = False
-    ) -> None:
+    def __init__(self, schema_path: Path = SCHEMA_PATH, quiet: bool = False) -> None:
         """Initialize a ConfigGenerator instance.
 
         Args:
             schema_path: Path to the JSON schema file
             quiet: Whether to suppress standard output messages
+
         """
         self.schema_path: str = str(SCHEMA_PATH.relative_to(PROJECT_ROOT))
         self.quiet = quiet
         self.validator = ConfigValidator(schema_path, quiet)
-        self._schema: Optional[Dict[str, Any]] = None
+        self._schema: Optional[dict[str, Any]] = None
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> dict[str, Any]:
         """Get the schema, loading it if necessary.
 
         Returns:
             Dict containing the loaded schema
+
         """
         if self._schema is None:
             self._schema = self.validator.schema
@@ -62,6 +62,7 @@ class ConfigGenerator:
 
         Args:
             message: The message to print
+
         """
         if not self.quiet:
             print(message)
@@ -74,6 +75,7 @@ class ConfigGenerator:
 
         Returns:
             bool: True if formatting succeeded, False otherwise
+
         """
         try:
             # Check if prettier is installed first
@@ -85,11 +87,9 @@ class ConfigGenerator:
             )
 
             if check_result.returncode != 0:
+                self._print_message("  - Prettier not installed or not found in PATH")
                 self._print_message(
-                    "  - Prettier not installed or not found in PATH"
-                )
-                self._print_message(
-                    "  - To install prettier: npm install --global prettier"
+                    "  - To install prettier: npm install --global prettier",
                 )
                 self._print_message("  - Skipping formatting step")
                 return False
@@ -105,18 +105,16 @@ class ConfigGenerator:
 
             if result.returncode != 0:
                 error_msg = result.stderr.strip() or "Unknown error"
-                self._print_message(
-                    f"  - Failed to format with prettier: {error_msg}"
-                )
+                self._print_message(f"  - Failed to format with prettier: {error_msg}")
                 self._print_message("  - To fix prettier issues:")
                 self._print_message(
-                    "    1. Ensure Node.js is installed (https://nodejs.org/)"
+                    "    1. Ensure Node.js is installed (https://nodejs.org/)",
                 )
                 self._print_message(
-                    "    2. Install prettier: npm install --global prettier"
+                    "    2. Install prettier: npm install --global prettier",
                 )
                 self._print_message(
-                    "    3. Check that the file exists and is accessible"
+                    "    3. Check that the file exists and is accessible",
                 )
                 self._print_message("  - Skipping formatting step")
                 return False
@@ -127,19 +125,21 @@ class ConfigGenerator:
             self._print_message(f"  - Error running prettier: {e}")
             self._print_message("  - To fix prettier issues:")
             self._print_message(
-                "    1. Ensure Node.js is installed (https://nodejs.org/)"
+                "    1. Ensure Node.js is installed (https://nodejs.org/)",
             )
             self._print_message(
-                "    2. Install prettier: npm install --global prettier"
+                "    2. Install prettier: npm install --global prettier",
             )
             self._print_message(
-                "    3. Make sure the npx command is available in your PATH"
+                "    3. Make sure the npx command is available in your PATH",
             )
             self._print_message("  - Skipping formatting step")
             return False
 
-    def create_default_value(
-        self, schema_property: Dict[str, Any], property_path: str = ""
+    def create_default_value(  # noqa: C901
+        self,
+        schema_property: dict[str, Any],
+        property_path: str = "",
     ) -> Any:
         """Create a default value based on a schema property definition.
 
@@ -149,6 +149,7 @@ class ConfigGenerator:
 
         Returns:
             The default value for the property
+
         """
         if "default" in schema_property:  # Top-level default value
             return schema_property["default"]
@@ -203,8 +204,7 @@ class ConfigGenerator:
                     return [0, 0]  # Default for other integer arrays
                 elif (
                     "$ref" in schema_property["items"]
-                    and schema_property["items"]["$ref"]
-                    == "#/definitions/path"
+                    and schema_property["items"]["$ref"] == "#/definitions/path"
                 ):
                     return []
                 else:
@@ -216,7 +216,7 @@ class ConfigGenerator:
         else:
             return None
 
-    def generate_template(
+    def generate_template(  # noqa: C901
         self,
         template_path: Union[str, Path],
         skip_prettier: bool = False,
@@ -224,7 +224,8 @@ class ConfigGenerator:
         """Generate a template config file from the JSON schema.
 
         This method creates a config.template.json file based on the schema definition.
-        If the template already exists, existing values will be preserved and only missing fields added.
+        If the template already exists, existing values will be preserved and only
+        missing fields added.
 
         Args:
             template_path: Path where the template file will be saved
@@ -232,76 +233,68 @@ class ConfigGenerator:
 
         Returns:
             bool: True if template generation succeeded, False otherwise
+
         """
         # Print header
-        self._print_message(
-            "\n=== EasyNER Configuration Template Generator ==="
-        )
+        self._print_message("\n=== EasyNER Configuration Template Generator ===")
 
         # Step 1: Generate the template
         template_path_str = str(template_path)
-        self._print_message(
-            f"Generating template from schema to: {template_path_str}"
-        )
+        self._print_message(f"Generating template from schema to: {template_path_str}")
 
         # Check if template already exists, if so load existing values
         existing_template = {}
         if Path(template_path).exists():
             try:
                 self._print_message(
-                    f"Found existing template at {template_path_str}, preserving values..."
+                    f"Found existing template at {template_path_str}, "
+                    "preserving values...",
                 )
-                with open(template_path, "r") as f:
+                with open(template_path) as f:
                     existing_template = json.load(f)
             except json.JSONDecodeError:
                 self._print_message(
-                    "Warning: Existing template could not be parsed, creating a new one"
+                    "Warning: Existing template could not be parsed, "
+                    "creating a new one",
                 )
             except Exception as e:
                 self._print_message(
-                    f"Warning: Error reading existing template: {e}, creating a new one"
+                    f"Warning: Error reading existing template: {e}, "
+                    "creating a new one",
                 )
 
         # Create a template based on the schema
         template = {}
 
         # Add schema reference to enable IDE Code validation and autocompletion
-        template["$schema"] = existing_template.get(
-            "$schema", self.schema_path
-        )
+        template["$schema"] = existing_template.get("$schema", self.schema_path)
 
         # Process all properties
-        for prop_name, prop_schema in self.schema.get(
-            "properties", {}
-        ).items():
+        for prop_name, prop_schema in self.schema.get("properties", {}).items():
             # Skip schema metadata properties
             if prop_name.startswith("$"):
                 continue
 
             # Create default value or use existing value
             if prop_name in existing_template:
-                if (
-                    prop_schema.get("type") == "object"
-                    and "properties" in prop_schema
-                ):
-                    # Handle nested objects - preserve existing values but ensure all required fields exist
+                if prop_schema.get("type") == "object" and "properties" in prop_schema:
+                    # Handle nested objects - preserve existing values but ensure all
+                    # required fields exist
                     nested_obj = {}
                     existing_nested = existing_template.get(prop_name, {})
 
                     for nested_prop, nested_schema in prop_schema.get(
-                        "properties", {}
+                        "properties",
+                        {},
                     ).items():
                         nested_path = f"{prop_name}.{nested_prop}"
                         if nested_prop in existing_nested:
-                            nested_obj[nested_prop] = existing_nested[
-                                nested_prop
-                            ]
+                            nested_obj[nested_prop] = existing_nested[nested_prop]
                         else:
                             # Add missing fields in the nested object
-                            nested_obj[nested_prop] = (
-                                self.create_default_value(
-                                    nested_schema, nested_path
-                                )
+                            nested_obj[nested_prop] = self.create_default_value(
+                                nested_schema,
+                                nested_path,
                             )
                     template[prop_name] = nested_obj
                 else:
@@ -324,29 +317,26 @@ class ConfigGenerator:
                         "Type hints should be provided in most editors."
                     ),
                 }
-            elif (
-                prop_schema.get("type") == "object"
-                and "properties" in prop_schema
-            ):
+            elif prop_schema.get("type") == "object" and "properties" in prop_schema:
                 # Handle nested objects
                 nested_obj = {}
                 existing_nested = existing_template.get(prop_name, {})
 
                 for nested_prop, nested_schema in prop_schema.get(
-                    "properties", {}
+                    "properties",
+                    {},
                 ).items():
                     nested_path = f"{prop_name}.{nested_prop}"
                     if nested_prop in existing_nested:
                         nested_obj[nested_prop] = existing_nested[nested_prop]
                     else:
                         nested_obj[nested_prop] = self.create_default_value(
-                            nested_schema, nested_path
+                            nested_schema,
+                            nested_path,
                         )
                 template[prop_name] = nested_obj
             else:
-                template[prop_name] = self.create_default_value(
-                    prop_schema, prop_name
-                )
+                template[prop_name] = self.create_default_value(prop_schema, prop_name)
 
         # Write the template to a file with nice formatting
         with open(template_path, "w") as f:
@@ -358,10 +348,10 @@ class ConfigGenerator:
             success = self.format_with_prettier(template_path)
             if not success:
                 self._print_message(
-                    "Note: Template was generated but not formatted with prettier"
+                    "Note: Template was generated but not formatted with prettier",
                 )
                 self._print_message(
-                    "      The template will work fine without formatting"
+                    "      The template will work fine without formatting",
                 )
 
         # Step 3: Validate the template against the schema
@@ -373,13 +363,11 @@ class ConfigGenerator:
             return True
         else:
             self._print_message(
-                "✗ Template generation completed with validation issues"
+                "✗ Template generation completed with validation issues",
             )
             return False
 
-    def copy_template_to_config(
-        self, template_path: Path, config_path: Path
-    ) -> bool:
+    def copy_template_to_config(self, template_path: Path, config_path: Path) -> bool:
         """Copy a template file to a config file.
 
         Args:
@@ -388,12 +376,13 @@ class ConfigGenerator:
 
         Returns:
             bool: True if the copy was successful, False otherwise
+
         """
         try:
             self._print_message(f"Creating config file at: {config_path}")
 
             # Read template content
-            with open(template_path, "r") as src:
+            with open(template_path) as src:
                 template_content = src.read()
 
             # Write to config.json
@@ -401,9 +390,7 @@ class ConfigGenerator:
                 dst.write(template_content)
 
             self._print_message(f"✓ Config file created at: {config_path}")
-            self._print_message(
-                "  Edit this file to customize your configuration"
-            )
+            self._print_message("  Edit this file to customize your configuration")
             return True
 
         except Exception as e:
@@ -413,23 +400,26 @@ class ConfigGenerator:
 
 if __name__ == "__main__":
     import argparse
+
     from easyner.infrastructure.paths import CONFIG_PATH, TEMPLATE_PATH
 
     parser = argparse.ArgumentParser(description="Generate a config template")
     parser.add_argument(
-        "--output", default=TEMPLATE_PATH, help="Output template file path"
+        "--output",
+        default=TEMPLATE_PATH,
+        help="Output template file path",
     )
     parser.add_argument(
-        "--skip-prettier", action="store_true", help="Skip prettier formatting"
+        "--skip-prettier",
+        action="store_true",
+        help="Skip prettier formatting",
     )
     parser.add_argument(
         "--no-config",
         action="store_true",
         help="Skip creating config.json even if it doesn't exist",
     )
-    parser.add_argument(
-        "--quiet", action="store_true", help="Suppress output messages"
-    )
+    parser.add_argument("--quiet", action="store_true", help="Suppress output messages")
     args = parser.parse_args()
 
     # Create generator

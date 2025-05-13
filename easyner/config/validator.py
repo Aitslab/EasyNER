@@ -1,25 +1,25 @@
-"""
-Configuration Validation Module
+"""Configuration Validation Module.
 
 This module provides classes for validating configuration files against
 a JSON schema.
 """
 
+import argparse
 import json
 import re
 import sys
-import jsonschema
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional, Union, Iterable
-import argparse
+from typing import Any, Optional, Union
+
+import jsonschema
+import jsonschema.exceptions
 
 from easyner.infrastructure.paths import (
-    SCHEMA_PATH,
     CONFIG_PATH,
+    SCHEMA_PATH,
     TEMPLATE_PATH,
 )
-
-import jsonschema.exceptions
 
 
 class ConfigValidator:
@@ -32,30 +32,30 @@ class ConfigValidator:
     Attributes:
         schema_path: Path to the JSON schema file
         quiet: Whether to suppress standard output messages
+
     """
 
     # Format constants to avoid duplication
     HEADER_DIVIDER = "=" * 80
     SECTION_DIVIDER = "-" * 80
 
-    def __init__(
-        self, schema_path: Path = SCHEMA_PATH, quiet: bool = False
-    ) -> None:
+    def __init__(self, schema_path: Path = SCHEMA_PATH, quiet: bool = False) -> None:
         """Initialize a ConfigValidator instance.
 
         Args:
             schema_path: Path to the JSON schema file
             quiet: Whether to suppress standard output messages
+
         """
         self.schema_path = schema_path
         self.quiet = quiet
-        self._schema: Optional[Dict[str, Any]] = None
-        self._errors: List[str] = []
-        self._warnings: List[str] = []
-        self._empty_paths: List[str] = []
+        self._schema: Optional[dict[str, Any]] = None
+        self._errors: list[str] = []
+        self._warnings: list[str] = []
+        self._empty_paths: list[str] = []
 
     @property
-    def schema(self) -> Dict[str, Any]:
+    def schema(self) -> dict[str, Any]:
         """Load and return the JSON schema, caching it for future use.
 
         Returns:
@@ -64,12 +64,13 @@ class ConfigValidator:
         Raises:
             FileNotFoundError: If schema file not found
             json.JSONDecodeError: If schema contains invalid JSON
+
         """
         if self._schema is None:
             self._schema = self._load_schema()
         return self._schema
 
-    def _load_schema(self) -> Dict[str, Any]:
+    def _load_schema(self) -> dict[str, Any]:
         """Load the schema from file.
 
         Returns:
@@ -78,9 +79,10 @@ class ConfigValidator:
         Raises:
             FileNotFoundError: If schema file not found
             json.JSONDecodeError: If schema contains invalid JSON
+
         """
         try:
-            with open(self.schema_path, "r") as f:
+            with open(self.schema_path) as f:
                 schema = json.load(f)
             return schema
         except FileNotFoundError:
@@ -96,6 +98,7 @@ class ConfigValidator:
         Args:
             title: The title to display
             is_header: Whether this is a main header (True) or section (False)
+
         """
         if self.quiet:
             return
@@ -111,20 +114,22 @@ class ConfigValidator:
         Args:
             message: The message to display
             prefix: Optional prefix for the message (e.g., indentation)
+
         """
         if self.quiet:
             return
 
         print(f"{prefix}{message}")
 
-    def validate_config(self, config_file: Union[str, Path]) -> bool:
-        """Validates the config file against the schema.
+    def validate_config(self, config_file: Union[str, Path]) -> bool:  # noqa: C901
+        """Validate the config file against the schema.
 
         Args:
             config_file: Path to the config file to validate
 
         Returns:
             bool: True if validation succeeds, False otherwise
+
         """
         # Reset validation state
         self._errors = []
@@ -139,12 +144,10 @@ class ConfigValidator:
             config_file_name = config_file_path.name
 
             if not self.quiet:
-                self._print_section(
-                    f"VALIDATING: {config_file_name}", is_header=True
-                )
+                self._print_section(f"VALIDATING: {config_file_name}", is_header=True)
 
             # Load config data
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 config_data = json.load(f)
 
             # Check path types first
@@ -168,9 +171,7 @@ class ConfigValidator:
 
             # Print empty paths
             if self._empty_paths and not self.quiet:
-                self._print_section(
-                    "INFO: The following path fields are left empty:"
-                )
+                self._print_section("INFO: The following path fields are left empty:")
                 for path in self._empty_paths:
                     self._print_message(path, prefix="  • ")
 
@@ -179,12 +180,8 @@ class ConfigValidator:
                 jsonschema.validate(instance=config_data, schema=self.schema)
             except jsonschema.exceptions.ValidationError as e:
                 # Enhanced validation error reporting
-                error_path = (
-                    ".".join([str(p) for p in e.path]) if e.path else "root"
-                )
-                error_msg = (
-                    f"Schema validation error at '{error_path}': {e.message}"
-                )
+                error_path = ".".join([str(p) for p in e.path]) if e.path else "root"
+                error_msg = f"Schema validation error at '{error_path}': {e.message}"
 
                 # Show the invalid value
                 if e.instance is not None:
@@ -201,7 +198,7 @@ class ConfigValidator:
                         "pattern",
                         "enum",
                     ]:
-                        if key in e.schema:
+                        if isinstance(e.schema, dict) and key in e.schema:
                             validation_info[key] = e.schema[key]
                     if validation_info:
                         error_msg += f"\nExpected: {validation_info}"
@@ -211,9 +208,7 @@ class ConfigValidator:
                 return False
 
             if not self.quiet:
-                self._print_section(
-                    "RESULT: Configuration validation successful!"
-                )
+                self._print_section("RESULT: Configuration validation successful!")
 
             return True
 
@@ -231,7 +226,7 @@ class ConfigValidator:
     def _handle_validation_error(
         self,
         error: jsonschema.exceptions.ValidationError,
-        config_data: Optional[Dict[str, Any]] = None,
+        config_data: Optional[dict[str, Any]] = None,
     ) -> bool:
         """Handle validation errors from jsonschema.
 
@@ -241,10 +236,9 @@ class ConfigValidator:
 
         Returns:
             bool: Always False (validation failed)
+
         """
-        error_path = (
-            ".".join([str(p) for p in error.path]) if error.path else "root"
-        )
+        error_path = ".".join([str(p) for p in error.path]) if error.path else "root"
 
         self._print_section("VALIDATION ERROR:")
 
@@ -255,7 +249,8 @@ class ConfigValidator:
                 error_type = type(error_value).__name__
             else:
                 self._print_message(
-                    "Unexpected error: config_data not available", prefix="  "
+                    "Unexpected error: config_data not available",
+                    prefix="  ",
                 )
                 return False
 
@@ -269,9 +264,7 @@ class ConfigValidator:
             elif error_value == "":
                 # Empty strings are allowed with an info message
                 self._print_section("INFO:")
-                self._print_message(
-                    f"Path field '{error_path}' is empty", prefix="  "
-                )
+                self._print_message(f"Path field '{error_path}' is empty", prefix="  ")
                 # Return True to allow empty paths
                 return True
             else:
@@ -284,34 +277,36 @@ class ConfigValidator:
         else:
             # For other validation errors
             self._print_message(
-                f"Error at '{error_path}': {error.message}", prefix="  "
+                f"Error at '{error_path}': {error.message}",
+                prefix="  ",
             )
 
         return False
 
-    def _check_schema_reference(self, config_data: Dict[str, Any]) -> None:
+    def _check_schema_reference(self, config_data: dict[str, Any]) -> None:
         """Check if the $schema field is correctly set in the configuration.
 
         Args:
             config_data: The configuration data
+
         """
         if "$schema" not in config_data:
             self._warnings.append(
                 f"$schema field is missing. It should be set to \n"
-                f"{self.schema_path} to provide type hints"
+                f"{self.schema_path} to provide type hints",
             )
         elif config_data["$schema"] != str(self.schema_path):
             self._warnings.append(
                 f"$schema has unexpected value: "
                 f"'{config_data['$schema']}'. "
-                f"Expected: '{self.schema_path}'"
+                f"Expected: '{self.schema_path}'",
             )
 
-    def _check_path_types(
+    def _check_path_types(  # noqa: C901
         self,
         data: Any,
-        schema_part: Dict[str, Any],
-        path: Optional[List[Any]] = None,  # Changed List[str] to List[Any]
+        schema_part: dict[str, Any],
+        path: Optional[list[Any]] = None,  # Changed List[str] to List[Any]
     ) -> None:
         """Recursively check for path fields with non-string values.
 
@@ -319,6 +314,7 @@ class ConfigValidator:
             data: The data to check (can be dict or list)
             schema_part: The schema part to check against
             path: Current path in the data structure (list of keys/indices)
+
         """
         if path is None:
             path = []
@@ -327,8 +323,8 @@ class ConfigValidator:
         if isinstance(data, dict) and isinstance(schema_part, dict):
             # Check each property in this object
             for key, value in data.items():
-                current_path: List[Any] = path + [
-                    key
+                current_path: list[Any] = path + [
+                    key,
                 ]  # Ensure current_path is List[Any]
                 path_str = ".".join(str(p) for p in current_path)
 
@@ -341,14 +337,13 @@ class ConfigValidator:
                         if not isinstance(value, str):
                             self._errors.append(
                                 f"Path field '{path_str}' must be a string, "
-                                f"but got {type(value).__name__}: {value}"
+                                f"but got {type(value).__name__}: {value}",
                             )
                         elif value == "":
                             self._empty_paths.append(path_str)
                     # If this is an object, recurse
                     elif (
-                        isinstance(value, dict)
-                        and prop_schema.get("type") == "object"
+                        isinstance(value, dict) and prop_schema.get("type") == "object"
                     ):
                         self._check_path_types(
                             value,
@@ -356,10 +351,7 @@ class ConfigValidator:
                             current_path,
                         )
                     # If this is an array, recurse through items
-                    elif (
-                        isinstance(value, list)
-                        and prop_schema.get("type") == "array"
-                    ):
+                    elif isinstance(value, list) and prop_schema.get("type") == "array":
                         item_schema = prop_schema.get("items", {})
                         # If the array items are paths
                         if item_schema.get("$ref") == "#/definitions/path":
@@ -368,14 +360,15 @@ class ConfigValidator:
                                 if not isinstance(item, str):
                                     self._errors.append(
                                         f"Path field '{item_path}' must be a string, "
-                                        f"but got {type(item).__name__}: {item}"
+                                        f"but got {type(item).__name__}: {item}",
                                     )
                                 elif item == "":
                                     self._empty_paths.append(item_path)
                         # Otherwise, if it's an array of objects or arrays, recurse
                         else:
                             for i, item in enumerate(value):
-                                # Only recurse if item is dict or list and schema expects it
+                                # Only recurse if item is dict or list and
+                                # schema expects it
                                 if isinstance(item, (dict, list)):
                                     self._check_path_types(
                                         item,
@@ -404,6 +397,7 @@ class ConfigValidator:
 
         Returns:
             The value at the specified path
+
         """
         current = data
         for part in path:
@@ -421,7 +415,7 @@ class ConfigValidator:
     def check_absolute_paths(
         self,
         config_file: Union[str, Path],
-        section_keys: Optional[List[str]] = None,
+        section_keys: Optional[list[str]] = None,
     ) -> bool:
         """Check for absolute paths in a config file.
 
@@ -431,26 +425,26 @@ class ConfigValidator:
 
         Returns:
             bool: True if no absolute paths are found, False otherwise
+
         """
         try:
             config_path = Path(config_file)
-            with open(config_path, "r") as f:
+            with open(config_path) as f:
                 config_data = json.load(f)
 
             # If looking at template file, we need to check for placeholders
             if "template" in config_path.name:
-                found_paths: List[Tuple[str, str]] = []
+                found_paths: list[tuple[str, str]] = []
                 self._find_absolute_paths(config_data, found_paths)
 
                 if found_paths:
                     self._print_section("ABSOLUTE PATHS ERROR:")
                     self._print_message(
-                        "Absolute paths found in template file:", prefix="  "
+                        "Absolute paths found in template file:",
+                        prefix="  ",
                     )
                     for path, value in found_paths:
-                        self._print_message(
-                            f"{path}: {value}", prefix="    • "
-                        )
+                        self._print_message(f"{path}: {value}", prefix="    • ")
                     return False
 
             return True
@@ -459,8 +453,11 @@ class ConfigValidator:
             self._print_message(f"Error checking paths: {e}", prefix="  ")
             return False
 
-    def _find_absolute_paths(
-        self, obj: Any, found_paths: List[Tuple[str, str]], path: str = ""
+    def _find_absolute_paths(  # noqa: C901
+        self,
+        obj: Any,
+        found_paths: list[tuple[str, str]],
+        path: str = "",
     ) -> None:
         """Recursively find absolute paths in an object.
 
@@ -468,6 +465,7 @@ class ConfigValidator:
             obj: The object to search
             found_paths: List to store found absolute paths
             path: Current path string for reporting
+
         """
         if isinstance(obj, dict):
             for key, value in obj.items():
@@ -497,8 +495,9 @@ class ConfigValidator:
         config_path: Path = CONFIG_PATH,
         template_path: Path = TEMPLATE_PATH,
     ) -> bool:
-        """Run validation tests on the config files. Defaults to
-        default paths.
+        """Run validation tests on the config files.
+
+        Defaults to default paths.
 
         Args:
             config_path: Path to the configuration file
@@ -506,6 +505,7 @@ class ConfigValidator:
 
         Returns:
             bool: True if all validation tests pass, False otherwise
+
         """
         # Check if the config file exists
         if not config_path.exists():
@@ -516,9 +516,7 @@ class ConfigValidator:
         # Check if the template file exists
         if not template_path.exists():
             self._print_section("FILE ERROR:")
-            self._print_message(
-                f"Error: {template_path} not found", prefix="  "
-            )
+            self._print_message(f"Error: {template_path} not found", prefix="  ")
             return False
 
         # Validate both files against the schema
@@ -532,14 +530,12 @@ class ConfigValidator:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Validate configuration files"
-    )
+    parser = argparse.ArgumentParser(description="Validate configuration files")
+    parser.add_argument("file", nargs="?", default=None, help="Config file to validate")
     parser.add_argument(
-        "file", nargs="?", default=None, help="Config file to validate"
-    )
-    parser.add_argument(
-        "--quiet", action="store_true", help="Suppress success messages"
+        "--quiet",
+        action="store_true",
+        help="Suppress success messages",
     )
     args = parser.parse_args()
 
@@ -547,7 +543,7 @@ if __name__ == "__main__":
         # Validate a specific file
         validator = ConfigValidator(quiet=args.quiet)
         success = validator.validate_config(
-            args.file
+            args.file,
         ) and validator.check_absolute_paths(args.file)
     else:
         # Run all validation tests using default paths

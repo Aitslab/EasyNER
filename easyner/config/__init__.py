@@ -1,7 +1,7 @@
-"""
-EasyNER Configuration Management
+"""EasyNER Configuration Management.
 
-This module provides tools for creating, validating, and working with configuration files.
+This module provides tools for creating, validating, and working
+with configuration files.
 
 Example Usage:
 -------------
@@ -51,12 +51,12 @@ Example Usage:
    ```
 """
 
+from easyner.config.manager import ConfigManager
 from easyner.infrastructure.paths import (
     CONFIG_PATH,
-    TEMPLATE_PATH,
     SCHEMA_PATH,
+    TEMPLATE_PATH,
 )
-from easyner.config.manager import ConfigManager
 
 # Create a default instance of ConfigManager for convenient access
 config_manager = ConfigManager(

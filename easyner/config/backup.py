@@ -1,5 +1,4 @@
-"""
-Configuration Backup Utility
+"""Configuration Backup Utility.
 
 This module provides tools for creating, listing, and restoring configuration
 backups.
@@ -35,12 +34,12 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 from easyner.infrastructure.paths import (
+    BACKUPS_DIR,
     CONFIG_PATH,
     TEMPLATE_PATH,
-    BACKUPS_DIR,
 )
 
 
@@ -72,13 +71,14 @@ class ConfigBackupManager:
         config_path: Optional[Path] = None,
         template_path: Optional[Path] = None,
         backups_dir: Optional[Path] = None,
-    ):
+    ) -> None:
         """Initialize the backup manager.
 
         Args:
             config_path: Path to the config file (default: from paths)
             template_path: Path to the template file (default: from paths)
             backups_dir: Directory to store backups (default: from paths)
+
         """
         self.config_path = config_path or CONFIG_PATH
         self.template_path = template_path or TEMPLATE_PATH
@@ -100,6 +100,7 @@ class ConfigBackupManager:
 
         Returns:
             A filename string for the backup
+
         """
         timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
         if label:
@@ -109,7 +110,9 @@ class ConfigBackupManager:
         return f"config-backup-{timestamp}.json"
 
     def create_backup(
-        self, description: Optional[str] = None, include_metadata: bool = True
+        self,
+        description: Optional[str] = None,
+        include_metadata: bool = True,
     ) -> Path:
         """Create a backup of the current configuration.
 
@@ -123,20 +126,19 @@ class ConfigBackupManager:
         Raises:
             FileNotFoundError: If the config file doesn't exist
             IOError: If there's an issue creating the backup
+
         """
         if not self.config_path.exists():
-            raise FileNotFoundError(
-                f"Config file not found at {self.config_path}"
-            )
+            msg = f"Config file not found at {self.config_path}"
+            raise FileNotFoundError(msg)
 
         # Read the current config
-        with open(self.config_path, "r", encoding="utf-8") as f:
+        with open(self.config_path, encoding="utf-8") as f:
             try:
                 config_data = json.load(f)
-            except json.JSONDecodeError:
-                raise IOError(
-                    f"Invalid JSON in config file: {self.config_path}"
-                )
+            except json.JSONDecodeError as e:
+                msg = f"Invalid JSON in config file: {self.config_path}"
+                raise OSError(msg) from e
 
         # Generate backup filename and path
         backup_filename = self._generate_backup_filename(description)
@@ -161,11 +163,12 @@ class ConfigBackupManager:
 
         return backup_path
 
-    def list_backups(self) -> List[ConfigBackup]:
+    def list_backups(self) -> list[ConfigBackup]:
         """List all available configuration backups.
 
         Returns:
             List of ConfigBackup objects representing available backups
+
         """
         backups = []
 
@@ -185,23 +188,19 @@ class ConfigBackupManager:
                 timestamp_str = "-".join(timestamp_str)
 
                 try:
-                    timestamp = datetime.strptime(
-                        timestamp_str, "%Y%m%d-%H%M%S"
-                    )
+                    timestamp = datetime.strptime(timestamp_str, "%Y%m%d-%H%M%S")
                 except ValueError:
                     # If timestamp parsing fails, use file creation time
-                    timestamp = datetime.fromtimestamp(
-                        backup_file.stat().st_ctime
-                    )
+                    timestamp = datetime.fromtimestamp(backup_file.stat().st_ctime)
 
                 # Extract description from metadata if available
                 description = None
                 try:
-                    with open(backup_file, "r", encoding="utf-8") as f:
+                    with open(backup_file, encoding="utf-8") as f:
                         data = json.load(f)
                         if isinstance(data, dict) and "metadata" in data:
                             description = data["metadata"].get("description")
-                except (json.JSONDecodeError, IOError):
+                except (OSError, json.JSONDecodeError):
                     # Can't read metadata -> continue without description
                     pass
 
@@ -211,19 +210,17 @@ class ConfigBackupManager:
                         name=backup_file.stem,
                         timestamp=timestamp,
                         description=description,
-                    )
+                    ),
                 )
 
-            except Exception as e:
+            except Exception as e:  # noqa: PERF203
                 # Skip invalid backups but don't crash
                 print(f"Warning: Could not process backup {backup_file}: {e}")
 
         # Sort backups by timestamp, newest first
         return sorted(backups, key=lambda x: x.timestamp, reverse=True)
 
-    def restore_backup(
-        self, backup_identifier: Union[str, Path, ConfigBackup]
-    ) -> bool:
+    def restore_backup(self, backup_identifier: Union[str, Path, ConfigBackup]) -> bool:
         """Restore configuration from a backup.
 
         Args:
@@ -236,16 +233,18 @@ class ConfigBackupManager:
         Raises:
             ValueError: If the backup identifier is invalid
             FileNotFoundError: If the backup file doesn't exist
+
         """
         # Determine the backup path
         backup_path = self._resolve_backup_path(backup_identifier)
 
         # Read the backup
-        with open(backup_path, "r", encoding="utf-8") as f:
+        with open(backup_path, encoding="utf-8") as f:
             try:
                 backup_data = json.load(f)
-            except json.JSONDecodeError:
-                raise IOError(f"Invalid JSON in backup file: {backup_path}")
+            except json.JSONDecodeError as e:
+                msg = f"Invalid JSON in backup file: {backup_path}"
+                raise OSError(msg) from e
 
         # Extract config data (handle both with and without metadata)
         config_data = backup_data.get("config", backup_data)
@@ -259,9 +258,7 @@ class ConfigBackupManager:
 
         return True
 
-    def delete_backup(
-        self, backup_identifier: Union[str, Path, ConfigBackup]
-    ) -> bool:
+    def delete_backup(self, backup_identifier: Union[str, Path, ConfigBackup]) -> bool:
         """Delete a backup file.
 
         Args:
@@ -274,6 +271,7 @@ class ConfigBackupManager:
         Raises:
             ValueError: If the backup identifier is invalid
             FileNotFoundError: If the backup file doesn't exist
+
         """
         # Determine the backup path (reusing logic from restore_backup)
         backup_path = self._resolve_backup_path(backup_identifier)
@@ -282,8 +280,9 @@ class ConfigBackupManager:
         backup_path.unlink()
         return True
 
-    def _resolve_backup_path(
-        self, backup_identifier: Union[str, Path, ConfigBackup]
+    def _resolve_backup_path(  # noqa: C901
+        self,
+        backup_identifier: Union[str, Path, ConfigBackup],
     ) -> Path:
         """Resolve a backup identifier to an actual file path.
 
@@ -298,6 +297,7 @@ class ConfigBackupManager:
             ValueError: If the backup identifier is invalid or
             matches multiple backups
             FileNotFoundError: If the backup file doesn't exist
+
         """
         backup_path = None
 
@@ -322,22 +322,25 @@ class ConfigBackupManager:
                     backup_path = potential_path
                 else:
                     # Search by partial name
-                    matches = list(
-                        self.backups_dir.glob(f"*{backup_identifier}*.json")
-                    )
+                    matches = list(self.backups_dir.glob(f"*{backup_identifier}*.json"))
                     if len(matches) == 1:
                         backup_path = matches[0]
                     elif len(matches) > 1:
                         match_names = [m.name for m in matches]
-                        raise ValueError(
+                        msg = (
                             "Multiple matching backups found: "
                             f"{', '.join(match_names)}"
                         )
+                        raise ValueError(
+                            msg,
+                        )
 
         if not backup_path:
-            raise ValueError(f"Could not find backup: {backup_identifier}")
+            msg = f"Could not find backup: {backup_identifier}"
+            raise ValueError(msg)
 
         if not backup_path.exists():
-            raise FileNotFoundError(f"Backup file not found: {backup_path}")
+            msg = f"Backup file not found: {backup_path}"
+            raise FileNotFoundError(msg)
 
         return backup_path

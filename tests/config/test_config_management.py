@@ -1,18 +1,25 @@
+"""Tests for configuration management in EasyNer.
+
+This module contains unit tests for validating and generating configuration files
+used in the EasyNer project. It includes tests for schema validation, template
+generation, and handling of various edge cases in configuration files.
+"""
+
+import io
 import json
 import shutil
 import tempfile
-from pathlib import Path
-from typing import Any, Dict, Generator
+from collections.abc import Generator
 from contextlib import redirect_stdout
-import io
+from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
+
 import pytest
 
-from easyner.config.validator import ConfigValidator
 from easyner.config.generator import ConfigGenerator
-from easyner.infrastructure.paths import PROJECT_ROOT
-
-from easyner.infrastructure.paths import SCHEMA_PATH
+from easyner.config.validator import ConfigValidator
+from easyner.infrastructure.paths import PROJECT_ROOT, SCHEMA_PATH
 
 # Constants for frequently used filenames and values using SimpleNamespace
 # for better attribute access and IDE autocomplete support
@@ -31,9 +38,7 @@ TEST_FILENAMES = SimpleNamespace(
 
 
 # Helper functions for common operations
-def create_json_file(
-    directory: Path, filename: str, content: Dict[str, Any]
-) -> Path:
+def create_json_file(directory: Path, filename: str, content: dict[str, Any]) -> Path:
     """Create a JSON file with the given content and return its path."""
     file_path = directory / filename
     with open(file_path, "w") as f:
@@ -41,13 +46,13 @@ def create_json_file(
     return file_path
 
 
-def load_json(file_path: Path) -> Dict[str, Any]:
+def load_json(file_path: Path) -> dict[str, Any]:
     """Load JSON from file."""
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         return json.load(f)
 
 
-def create_minimal_valid_config() -> Dict[str, Any]:
+def create_minimal_valid_config() -> dict[str, Any]:
     """Create a minimally valid configuration."""
     return {
         "CPU_LIMIT": 5,
@@ -77,7 +82,7 @@ def temp_test_dir() -> Generator[str, None, None]:
 
 
 @pytest.fixture
-def sample_config() -> Dict[str, Any]:
+def sample_config() -> dict[str, Any]:
     """Create a sample configuration for testing."""
     return {
         "CPU_LIMIT": 5,
@@ -119,9 +124,7 @@ def sample_config() -> Dict[str, Any]:
 
 
 @pytest.fixture
-def config_files(
-    temp_test_dir: str, sample_config: Dict[str, Any]
-) -> Dict[str, str]:
+def config_files(temp_test_dir: str, sample_config: dict[str, Any]) -> dict[str, str]:
     """Create config files for testing."""
     config_path = Path(temp_test_dir) / "config.json"
     with open(config_path, "w") as f:
@@ -148,8 +151,8 @@ def generator() -> ConfigGenerator:
 
 
 def test_generate_template(
-    config_files: Dict[str, str],
-    sample_config: Dict[str, Any],
+    config_files: dict[str, str],
+    sample_config: dict[str, Any],
     generator: ConfigGenerator,
 ) -> None:
     """Test the template generation functionality."""
@@ -184,7 +187,7 @@ def test_generate_template(
 
 
 def test_validate_config(
-    config_files: Dict[str, str],
+    config_files: dict[str, str],
     validator: ConfigValidator,
     generator: ConfigGenerator,
 ) -> None:
@@ -226,7 +229,8 @@ def test_validate_config(
 
 
 def test_validate_config_missing_fields(
-    temp_test_dir: str, validator: ConfigValidator
+    temp_test_dir: str,
+    validator: ConfigValidator,
 ) -> None:
     """Test validation of configs missing required fields."""
     # Test invalid config - missing required fields
@@ -242,7 +246,7 @@ def test_validate_config_missing_fields(
 
 def test_validate_config_wrong_types(
     temp_test_dir: str,
-    sample_config: Dict[str, Any],
+    sample_config: dict[str, Any],
     validator: ConfigValidator,
 ) -> None:
     """Test validation of configs with incorrect data types."""
@@ -262,7 +266,8 @@ def test_validate_config_wrong_types(
 
 
 def test_validate_config_path_types(
-    temp_test_dir: str, validator: ConfigValidator
+    temp_test_dir: str,
+    validator: ConfigValidator,
 ) -> None:
     """Test that config validation requires paths to be strings."""
     invalid_config_path = create_json_file(
@@ -296,9 +301,7 @@ def test_validate_config_path_types(
     assert not result, "Config with non-string path should fail validation"
 
 
-def test_config_path_types(
-    temp_test_dir: str, validator: ConfigValidator
-) -> None:
+def test_config_path_types(temp_test_dir: str, validator: ConfigValidator) -> None:
     """Test that path fields in the current config are valid strings."""
     # Copy the project config to a temp location to avoid modifying original
     project_config_path = PROJECT_ROOT / "config.json"
@@ -311,7 +314,7 @@ def test_config_path_types(
 
 
 def test_check_absolute_paths(
-    config_files: Dict[str, str],
+    config_files: dict[str, str],
     validator: ConfigValidator,
     generator: ConfigGenerator,
 ) -> None:
@@ -325,7 +328,7 @@ def test_check_absolute_paths(
 
 
 def test_check_absolute_paths_failure(
-    config_files: Dict[str, str],
+    config_files: dict[str, str],
     temp_test_dir: str,
     validator: ConfigValidator,
     generator: ConfigGenerator,
@@ -344,9 +347,7 @@ def test_check_absolute_paths_failure(
     template["ner"]["input_path"] = "C:/some/path"
 
     # Save the modified template
-    create_json_file(
-        Path(temp_test_dir), TEST_FILENAMES.BAD_TEMPLATE, template
-    )
+    create_json_file(Path(temp_test_dir), TEST_FILENAMES.BAD_TEMPLATE, template)
 
     # Suppress output during this test to avoid confusing error messages
     f = io.StringIO()
@@ -368,7 +369,8 @@ def test_schema_loading(validator: ConfigValidator) -> None:
 
 
 def test_validate_current_config(
-    temp_test_dir: str, validator: ConfigValidator
+    temp_test_dir: str,
+    validator: ConfigValidator,
 ) -> None:
     """Test validation of the current config.json file.
 
@@ -385,9 +387,10 @@ def test_validate_current_config(
 
     # Validate the copy instead of the original
     result = validator.validate_config(str(temp_config_path))
-    assert (
-        result
-    ), "Current config.json failed validation - check for path format issues or invalid values"
+    assert result, (
+        "Current config.json failed validation - check for path format issues or "
+        "invalid values"
+    )
 
     # Check for absolute paths in the config copy
     result = validator.check_absolute_paths(str(temp_config_path))
@@ -395,22 +398,25 @@ def test_validate_current_config(
 
 
 def test_validator_run_validation_tests(
-    temp_test_dir: str, validator: ConfigValidator
+    temp_test_dir: str,
+    validator: ConfigValidator,
 ) -> None:
     """Test the run_validation_tests method."""
     # This test verifies the behavior of run_validation_tests
-    # In a real environment it would pass if both the config.json and config.template.json files exist
-    # Since we're testing in isolation, we expect it to fail because those files don't exist
+    # In a real environment it would pass if both the config.json
+    # and config.template.json files exist
+    # Since we're testing in isolation, we expect it to fail because
+    # those files don't exist
     result = validator.run_validation_tests()
-    assert isinstance(
-        result, bool
-    ), "run_validation_tests should return a boolean"
+    assert isinstance(result, bool), "run_validation_tests should return a boolean"
 
 
 def test_generate_template_preserves_values(
-    temp_test_dir: str, validator: ConfigValidator, generator: ConfigGenerator
+    temp_test_dir: str,
+    validator: ConfigValidator,
+    generator: ConfigGenerator,
 ) -> None:
-    """Test that generate_template preserves existing values and only adds missing fields."""
+    """Test generate_template preserves existing values and only adds missing fields."""
     # Create a partial config with some values in a temporary file
     temp_dir = Path(temp_test_dir)
 
@@ -426,7 +432,9 @@ def test_generate_template_preserves_values(
 
     # Create input file that will also serve as the output
     partial_config_path = create_json_file(
-        temp_dir, TEST_FILENAMES.PARTIAL_CONFIG, partial_config
+        temp_dir,
+        TEST_FILENAMES.PARTIAL_CONFIG,
+        partial_config,
     )
 
     # Make a backup copy to verify original content isn't lost
@@ -441,9 +449,7 @@ def test_generate_template_preserves_values(
     original_content = load_json(original_backup_path)
 
     # Check that original values are preserved
-    assert (
-        updated_config["CPU_LIMIT"] == 8
-    ), "Custom CPU_LIMIT value was not preserved"
+    assert updated_config["CPU_LIMIT"] == 8, "Custom CPU_LIMIT value was not preserved"
     assert (
         updated_config["TIMEKEEP"] is False
     ), "Custom TIMEKEEP value was not preserved"
@@ -459,19 +465,17 @@ def test_generate_template_preserves_values(
         "text_loader" in updated_config["ignore"]
     ), "Missing ignore.text_loader field was not added"
     assert "ner" in updated_config, "Missing ner section was not added"
-    assert (
-        "downloader" in updated_config
-    ), "Missing downloader section was not added"
+    assert "downloader" in updated_config, "Missing downloader section was not added"
 
     # Check that validation passes on the completed template
     assert validator.validate_config(
-        str(partial_config_path)
+        str(partial_config_path),
     ), "Generated template fails validation"
 
-    # Verify the original file wasn't modified (our backup should still have the original content)
+    # Verify the original file wasn't modified
+    # (our backup should still have the original content)
     assert "text_loader" not in original_content.get(
-        "ignore", {}
+        "ignore",
+        {},
     ), "Original file content verification failed"
-    assert (
-        "ner" not in original_content
-    ), "Original file content verification failed"
+    assert "ner" not in original_content, "Original file content verification failed"
