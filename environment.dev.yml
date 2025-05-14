@@ -7,7 +7,6 @@ dependencies:
   - cryptography=38.0.1
   - datasets
   - huggingface_hub
-  - matplotlib
   - matplotlib-base
   - numpy
   - numpy-base
