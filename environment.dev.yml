@@ -29,7 +29,6 @@ dependencies:
   - pytest-benchmark=5.1.0
   - mypy
   - black
-  - flake8
   - argcomplete
   - pandas-stubs
   - types-jsonschema
