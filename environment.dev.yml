@@ -24,8 +24,6 @@ dependencies:
   - sqlite=3.39.3
   - tokenizers=0.11.4
   - toml=0.10.2
-  - torchaudio=0.13.0
-  - torchvision=0.14.0
   - tqdm
   - transformers
   - urllib3=1.26.12
