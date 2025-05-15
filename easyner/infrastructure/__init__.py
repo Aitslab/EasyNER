@@ -1,5 +1,4 @@
-"""
-EasyNER Infrastructure Package
+"""EasyNER Infrastructure Package.
 
 This package contains core infrastructure components used across the
 EasyNER project, including path management, environment settings, and
@@ -8,22 +7,22 @@ not tied to specific business logic.
 """
 
 from easyner.infrastructure.paths import (
-    # Base paths
-    PROJECT_ROOT,
-    SCRIPTS_DIR,
+    ANALYSIS_RESULTS_DIR,
     # Config files
     CONFIG_PATH,
-    TEMPLATE_PATH,
-    SCHEMA_PATH,
     # Data directories
     DATA_DIR,
-    RESULTS_DIR,
+    DATALOADER_RESULTS_DIR,
     MODELS_DIR,
     # Results subdirectories
     NER_RESULTS_DIR,
-    DATALOADER_RESULTS_DIR,
+    # Base paths
+    PROJECT_ROOT,
+    RESULTS_DIR,
+    SCHEMA_PATH,
+    SCRIPTS_DIR,
     SPLITTER_RESULTS_DIR,
-    ANALYSIS_RESULTS_DIR,
+    TEMPLATE_PATH,
     # Utility functions
     ensure_paths_exist,
 )
