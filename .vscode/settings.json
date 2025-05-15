@@ -4,7 +4,7 @@
     "**/bower_components": true,
     "**/*.code-search": true,
     "data/**.json": true,
-    "supplementary/experiment_scripts/*.ipynb": true,
+    // "supplementary/experiment_scripts/*.ipynb": true,
   },
   "files.watcherExclude": {
     "**/.git/objects/**": true,
