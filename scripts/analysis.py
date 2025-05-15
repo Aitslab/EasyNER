@@ -66,32 +66,29 @@ def run_analysis(input_files_list):
 
                 # analyse ids
                 if "ids" in sent and len(sent.get("ids", [])) != 0:
-                    for id in sent["ids"]:
-                        for i, id in enumerate(sent["ids"]):
-                            entity = sent["entities"][i]
-                            name = sent["names"][i]
+                    for i, id in enumerate(sent["ids"]):
+                        entity = sent["entities"][i]
+                        name = sent["names"][i]
 
-                            if id not in d_id:
-                                d_id[id]={"name": name,
-                                          "total_count":0,
-                                            "articles_set":set(),
-                                            "batch_count":{},
-                                            "batch_set":set(),
-                                            "entities_list": set()}
+                        if id not in d_id:
+                            d_id[id]={"name": name,
+                                        "total_count":0,
+                                        "articles_set":set(),
+                                        "batch_count":{},
+                                        "batch_set":set(),
+                                        "entities_list": set()}
 
-                            d_id[id]["entities_list"].add(entity)
-                            d_id[id]["total_count"]+=1
-                            d_id[id]["articles_set"].update([art])
-                            d_id[id]["batch_set"].update([idx])
+                        d_id[id]["entities_list"].add(entity)
+                        d_id[id]["total_count"]+=1
+                        d_id[id]["articles_set"].update([art])
+                        d_id[id]["batch_set"].update([idx])
 
-                            if idx not in d_id[id]["batch_count"]:
-                                d_id[id]["batch_count"][idx]=0
+                        if idx not in d_id[id]["batch_count"]:
+                            d_id[id]["batch_count"][idx]=0
 
-                            d_id[id]["batch_count"][idx]+=1
+                        d_id[id]["batch_count"][idx]+=1
 
 
-    #                 print(sent["text"])
-    #                 print(sent["entities"])
     
     df = pd.DataFrame.from_dict(d_main, orient="index")
     df_id = pd.DataFrame.from_dict(d_id, orient="index")
