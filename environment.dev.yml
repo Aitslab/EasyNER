@@ -13,6 +13,7 @@ dependencies:
   - pandas
   - pip
   - python==3.9
+  - pytorch>=1.13.0
   - requests>=2.28.1
   - seaborn>=0.12.2
   - setuptools>=65.5.0
