@@ -27,7 +27,6 @@ dependencies:
   - tqdm
   - transformers
   - urllib3=1.26.12
-  - yaml=0.2.5
   - jsonschema=4.23.0
   - pytest-benchmark=5.1.0
   - mypy
