@@ -13,7 +13,6 @@ dependencies:
   - numpy-base
   - onnxruntime
   - pandas
-  - pillow=
   - pip
   - python=3.9
   - pytorch-cuda
