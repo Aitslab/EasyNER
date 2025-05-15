@@ -39,7 +39,6 @@ dependencies:
   - pubmed-parser==0.3.1
   - pytest==7.2.1
   - pytest-cov==4.0.0
-  - scattertext==0.1.10
   - scipy==1.9.3
   - seqeval==1.2.2
   - spacy==3.4.4
