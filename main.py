@@ -1,3 +1,8 @@
+"""
+Author: Sonja Aits (largely based on previous script by Rafsan Ahmed)
+
+"""
+
 # coding=utf-8
 
 import json
@@ -5,10 +10,8 @@ import os
 from glob import glob
 from tqdm import tqdm
 import time
-import spacy
 import torch
-from spacy.matcher import PhraseMatcher
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from multiprocessing import cpu_count
 
 from scripts import cord_loader
@@ -21,9 +24,13 @@ from scripts import util
 from scripts import metrics
 from scripts import nel
 from scripts import entity_merger
-from scripts import ner_main
+from scripts import ner_spacy
+from scripts import ner_biobert
 from scripts import analysis
 from scripts import pubmed_bulk
+
+
+
 
 
 def run_cord_loader(cord_loader_config: dict, ignore: bool):
@@ -164,20 +171,7 @@ def run_ner(ner_config: dict, ignore: bool):
         return
 
     print("Running NER script.")
-
- 
-    # For experimentation: limit number of articles to process (and to output)
-    # limit = ner_config["article_limit"]
-    # if limit > 0:
-        # print(f"Limiting NER to {limit} articles.")
-        # a = {}
-        # i = 0
-        # for id in articles:
-            # if i >= limit:
-                # break
-            # a[id] = articles[id]
-            # i += 1
-        # articles = a
+    print(f"Input folder: {ner_config['input_path']}")
 
     if ner_config.get("clear_old_results", True):
         try:
@@ -188,34 +182,30 @@ def run_ner(ner_config: dict, ignore: bool):
     os.makedirs(ner_config["output_path"], exist_ok=True)
     
     input_file_list = sorted(glob(f'{ner_config["input_path"]}*.json'), key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]))
-    
-    # Sort files on range
+
+    # Filter files on range if article_limit is used
     if "article_limit" in ner_config:
         if isinstance(ner_config["article_limit"], list):
             start=ner_config["article_limit"][0]
             end=ner_config["article_limit"][1]
-            
-            input_file_list = ner_main.filter_files(input_file_list, start, end)
-            
+            filtered_list_files = []
+
+            for f in input_file_list:
+                f_idx = int(os.path.splitext(os.path.basename(f))[0].split("-")[-1])
+                if f_idx >= start and f_idx <= end:
+                    filtered_list_files.append(f)
+            input_file_list = filtered_list_files
             print("processing articles between {} and {} range".format(start, end))
     
+    # Run prediction on the files in the input_file_list
+    if ner_config["model_type"] == "spacy_phrasematcher":
+        print("Running NER with spapy phrasematcher")
+        ner_spacy.run_ner_main(ner_config, input_file_list, CPU_LIMIT)
 
-
-    # Run prediction on each sentence in each article.
-    if ner_config["multiprocessing"]:
-        with ProcessPoolExecutor(min(CPU_LIMIT,cpu_count())) as executor:
-                
-            futures=[executor.submit(ner_main.run_ner_main,ner_config,batch_file)
-                        for batch_file in input_file_list]
-            
-            for future in as_completed(futures):
-                i = future.result()
-    else:
-        device=torch.device(0 if torch.cuda.is_available() else "cpu")
-
-        for batch_file in tqdm(input_file_list):
-            ner_main.run_ner_main(ner_config,batch_file, device)
-            
+    if ner_config["model_type"] == "biobert_finetuned":
+        print("Running NER with biobert")
+        ner_biobert.run_ner_main(ner_config, input_file_list, CPU_LIMIT)
+    
 
     print("Finished running NER script.")
 
@@ -372,7 +362,18 @@ if __name__ == "__main__":
     if TIMEKEEP:
         end_ner= time.time()
         tkff.write(f"NER time: {end_ner-start_ner}\n")
-        tkff.write(f"Total time till NER: {end_ner-start_main}\n")
+        tkff.write(f"Total time incl NER: {end_ner-start_main}\n")
+    print()
+
+    # Run nel on models and gold-standard set
+    if TIMEKEEP:
+        start_nel= time.time()
+
+    run_nel(config, ignore=ignore["nel"])
+    if TIMEKEEP:
+        end_nel = time.time()
+        tkff.write(f"NEL time: {end_nel-start_nel}\n")
+
     print()
     
     # Run analysis on the entities that were found by NER.
@@ -388,10 +389,6 @@ if __name__ == "__main__":
 
     # Run metrics on models and gold-standard set
     run_metrics(config, ignore=ignore["metrics"])
-    print()
-
-    # Run nel on models and gold-standard set
-    run_nel(config, ignore=ignore["nel"])
     print()
 
     # Run merger on specified output folders
