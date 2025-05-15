@@ -222,10 +222,11 @@ fixable = ["ALL"]
 unfixable = ["F401"] # Don't automatically fix unused imports as this can provide info on unexected unused imports
 # that may be useful for debugging.
 
-extend-safe-fixes = ["UP006", "EM102", "ANN201"]
+extend-safe-fixes = ["UP006", "EM102", "ANN201", "D400"]
 # UP006 use built in types, this is unsafe if using pydantic which relies on types being imported from types
 # EM102 extract strings in error messages so that the message is interpreted when sent to traceback and logging
 # Python includes the raise in the default traceback (and formatters like Rich and IPython do too).
+# D400 First line should end with a period
 
 [tool.ruff.lint.mccabe]
 # Flag errors (`C901`) whenever the complexity level exceeds 8.
