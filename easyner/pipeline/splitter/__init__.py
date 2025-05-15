@@ -1,14 +1,15 @@
 import logging
-import time
 import sys
+import time
 from collections import defaultdict
+
 from .splitter_runner import run_splitter
 
 # Configure logging - Add filtering capabilities
 
 
 class BatchProcessingFilter(logging.Filter):
-    """Filter to remove repetitive batch processing messages"""
+    """Filter to remove repetitive batch processing messages."""
 
     def __init__(self):
         super().__init__()
@@ -44,14 +45,12 @@ class BatchProcessingFilter(logging.Filter):
 
         current_time = time.time()
         # Only let batch messages through occasionally
-        if (
-            current_time - self.last_batch_message_time > 10
-        ):  # Every 10 seconds
+        if current_time - self.last_batch_message_time > 10:  # Every 10 seconds
             if self.suppressed_count > 0:
                 # Add a summary of suppressed messages
                 logger = logging.getLogger("easyner.pipeline.splitter")
                 logger.debug(
-                    f"Suppressed {self.suppressed_count} batch processing messages ({', '.join(f'{k}: {v}' for k, v in self.message_types.items())})"
+                    f"Suppressed {self.suppressed_count} batch processing messages ({', '.join(f'{k}: {v}' for k, v in self.message_types.items())})",
                 )
                 self.suppressed_count = 0
                 self.message_types.clear()
@@ -65,7 +64,7 @@ class BatchProcessingFilter(logging.Filter):
 
 
 class SummaryHandler(logging.Handler):
-    """Handler that collects statistics for summary reporting"""
+    """Handler that collects statistics for summary reporting."""
 
     def __init__(self):
         super().__init__()
@@ -88,25 +87,24 @@ class SummaryHandler(logging.Handler):
 
             if "processing_time" in stats:
                 self.statistics["processing_times"].append(
-                    stats["processing_time"]
+                    stats["processing_time"],
                 )
 
             if "batch_size" in stats:
                 self.statistics["batch_sizes"].append(stats["batch_size"])
 
     def get_summary(self):
-        """Return formatted summary statistics"""
+        """Return formatted summary statistics."""
         elapsed = time.time() - self.statistics["start_time"]
 
         if not self.statistics["processing_times"]:
             return "No statistics collected"
 
         avg_time = sum(self.statistics["processing_times"]) / len(
-            self.statistics["processing_times"]
+            self.statistics["processing_times"],
         )
         avg_batch_size = (
-            sum(self.statistics["batch_sizes"])
-            / len(self.statistics["batch_sizes"])
+            sum(self.statistics["batch_sizes"]) / len(self.statistics["batch_sizes"])
             if self.statistics["batch_sizes"]
             else 0
         )
@@ -140,7 +138,7 @@ if not logger.handlers:
 
     # Create formatter
     formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
     console_handler.setFormatter(formatter)
 

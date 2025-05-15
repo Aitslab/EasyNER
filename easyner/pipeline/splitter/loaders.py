@@ -1,9 +1,9 @@
+import gc
+import logging
+import time
 from abc import ABC, abstractmethod
 from glob import glob
-import logging
-import gc
 from multiprocessing import current_process
-import time
 
 from easyner.io import get_io_handler
 from easyner.pipeline.utils import get_batch_index_from_filename
@@ -24,7 +24,7 @@ class StandardLoader(DataLoaderBase):
         self.io_format = io_format
         logger.debug(
             f"Initialized StandardLoader with input path: {input_path}, "
-            f"format: {io_format}"
+            f"format: {io_format}",
         )
 
     def load_data(self) -> list:
@@ -34,8 +34,7 @@ class StandardLoader(DataLoaderBase):
             io_handler = get_io_handler(self.io_format)
             data = io_handler.read(self.input_path)
             logger.info(
-                f"Successfully loaded {len(data)} articles from "
-                f"{self.input_path}"
+                f"Successfully loaded {len(data)} articles from " f"{self.input_path}",
             )
             return data
         except Exception as e:
@@ -54,11 +53,11 @@ class PubMedLoader(DataLoaderBase):
         self.io_format = io_format
         logger.debug(
             f"Initialized PubMedLoader with input folder: {input_folder}, "
-            f"limit: {limit}, key: {key}, format: {io_format}"
+            f"limit: {limit}, key: {key}, format: {io_format}",
         )
 
     def load_data(self):
-        """Load pre-batched PubMed files based on configured limits"""
+        """Load pre-batched PubMed files based on configured limits."""
         logger.info(f"Loading PubMed data from {self.input_folder}")
         io_handler = get_io_handler(self.io_format)
         pattern = f"{self.input_folder}/*{self.key}*.{io_handler.EXTENSION}"
@@ -66,7 +65,7 @@ class PubMedLoader(DataLoaderBase):
 
         if not all_files:
             logger.warning(
-                f"No PubMed files found matching pattern: {pattern}"
+                f"No PubMed files found matching pattern: {pattern}",
             )
             return []
 
@@ -80,17 +79,17 @@ class PubMedLoader(DataLoaderBase):
             selected_files = all_files[start:end]
             logger.info(
                 f"Processing PubMed files from index {start} to {end} "
-                f"({len(selected_files)} files)"
+                f"({len(selected_files)} files)",
             )
             return selected_files
         else:
             logger.warning(
-                f"Invalid limit format: {self.limit}, defaulting to ALL"
+                f"Invalid limit format: {self.limit}, defaulting to ALL",
             )
             return all_files
 
     def load_batch(self, file_path):
-        """Load a single batch file with memory optimization"""
+        """Load a single batch file with memory optimization."""
         process_id = current_process().name
         logger.debug(f"[{process_id}] Loading batch file: {file_path}")
         start_time = time.time()
@@ -104,7 +103,7 @@ class PubMedLoader(DataLoaderBase):
             logger.debug(
                 f"[{process_id}] Successfully loaded {len(data)} articles "
                 f"from {file_path} "
-                f"in {elapsed:.2f}s"
+                f"in {elapsed:.2f}s",
             )
 
             # Explicitly trigger garbage collection
@@ -120,8 +119,7 @@ class PubMedLoader(DataLoaderBase):
             raise
 
     def get_batch_index(self, input_file):
-        """
-        Extract batch index from filename using the pipeline utility
+        """Extract batch index from filename using the pipeline utility
         function.
         """
         try:
@@ -138,8 +136,7 @@ class PubMedLoader(DataLoaderBase):
             return 0
         except Exception as e:
             logger.error(
-                f"Unexpected error extracting batch index from {input_file}: "
-                f"{e}",
+                f"Unexpected error extracting batch index from {input_file}: " f"{e}",
                 exc_info=True,
             )
             return 0

@@ -1,7 +1,7 @@
-from abc import ABC, abstractmethod
-import os
-import logging
 import gc  # Add garbage collection module
+import logging
+import os
+from abc import ABC, abstractmethod
 
 from easyner.io import get_io_handler
 
@@ -12,13 +12,13 @@ logger = logging.getLogger("easyner.pipeline.splitter.writers")
 class OutputWriterBase(ABC):
     @abstractmethod
     def write(self, articles, batch_idx, tokenizer_name):
-        """
-        Write processed articles to output
+        """Write processed articles to output.
 
         Args:
             articles: Dictionary of processed articles
             batch_idx: Index of the current batch
             tokenizer_name: Name of the tokenizer used
+
         """
         pass
 
@@ -30,11 +30,11 @@ class JSONWriter(OutputWriterBase):
         self.io_format = io_format
         os.makedirs(output_folder, exist_ok=True)
         logger.debug(
-            f"Initialized JSONWriter with output folder: {output_folder}, prefix: {output_file_prefix}, format: {io_format}"
+            f"Initialized JSONWriter with output folder: {output_folder}, prefix: {output_file_prefix}, format: {io_format}",
         )
 
     def write(self, articles, batch_idx, tokenizer_name):
-        """Write articles to a file using the IO module"""
+        """Write articles to a file using the IO module."""
         # Get the appropriate IO handler
         io_handler = get_io_handler(self.io_format)
 
@@ -53,7 +53,7 @@ class JSONWriter(OutputWriterBase):
                 io_handler.write(articles, output_file)
 
             logger.debug(
-                f"Successfully wrote {article_count} articles to {output_file} using {self.io_format} format"
+                f"Successfully wrote {article_count} articles to {output_file} using {self.io_format} format",
             )
 
         except Exception as e:

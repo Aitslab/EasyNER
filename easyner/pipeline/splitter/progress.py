@@ -1,25 +1,24 @@
-import time
 import logging
+import time
 
 # Get logger for this module
 logger = logging.getLogger("easyner.pipeline.splitter.progress")
 
 
 class ProgressReporter:
-    """
-    Handles reporting progress to the main process.
+    """Handles reporting progress to the main process.
     Separates progress reporting concerns from processing logic.
     """
 
     def __init__(self, result_queue, worker_id, batch_idx, total_items):
-        """
-        Initialize a progress reporter.
+        """Initialize a progress reporter.
 
         Args:
             result_queue: Queue to send progress messages to
             worker_id: ID of the worker reporting progress
             batch_idx: Index of the batch being processed
             total_items: Total number of items to process
+
         """
         self.result_queue = result_queue
         self.worker_id = worker_id
@@ -29,15 +28,16 @@ class ProgressReporter:
         self.last_update_time = time.time()
         self.min_update_interval = 0.5  # seconds
         self.report_frequency = max(
-            10, min(500, total_items // 20)
+            10,
+            min(500, total_items // 20),
         )  # Report at appropriate intervals
 
-    def update(self, increment=1):
-        """
-        Update progress by the specified increment.
+    def update(self, increment=1) -> None:
+        """Update progress by the specified increment.
 
         Args:
             increment: Number of items processed since last update
+
         """
         self.processed_items += increment
         current_time = time.time()
@@ -51,7 +51,7 @@ class ProgressReporter:
             self.last_update_time = current_time
 
     def _send_progress_message(self):
-        """Send a progress update message to the main process"""
+        """Send a progress update message to the main process."""
         self.result_queue.put(
             (
                 "PROGRESS",
@@ -59,20 +59,20 @@ class ProgressReporter:
                 self.processed_items,
                 self.total_items,
                 self.worker_id,
-            )
+            ),
         )
         logger.debug(
             f"[Worker {self.worker_id}] Progress report: {self.processed_items}/{self.total_items} "
-            f"({self.processed_items / self.total_items * 100:.1f}%)"
+            f"({self.processed_items / self.total_items * 100:.1f}%)",
         )
 
-    def report_completion(self, num_articles, processing_time):
-        """
-        Report task completion.
+    def report_completion(self, num_articles, processing_time) -> None:
+        """Report task completion.
 
         Args:
             num_articles: Number of articles processed
             processing_time: Time taken to process the batch
+
         """
         # Ensure we report 100% completion
         self.processed_items = self.total_items
@@ -86,9 +86,9 @@ class ProgressReporter:
                 num_articles,
                 processing_time,
                 self.worker_id,
-            )
+            ),
         )
         logger.debug(
             f"[Worker {self.worker_id}] Completed batch {self.batch_idx}: "
-            f"{num_articles} articles in {processing_time:.2f}s"
+            f"{num_articles} articles in {processing_time:.2f}s",
         )
