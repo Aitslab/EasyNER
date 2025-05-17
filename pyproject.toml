@@ -235,3 +235,13 @@ max-complexity = 8
 
 [tool.ruff.lint.flake8-errmsg]
 max-string-length = 20
+
+# Ignore the following errors in all test files
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*test*.py" = [
+    "D100", "D101", "D102", "D103", "D104",  # Docstring errors
+    "ANN001", "ANN201",  # Ignore missing parameter/return type annotations
+    #"PT018",   # Assertion should be inside context manager (pytest.raises)
+    #"PT011",   # Too-broad pytest.raises matches any exception
+    "E501"     # Line too long in test files
+]
