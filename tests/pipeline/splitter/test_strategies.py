@@ -1,15 +1,13 @@
-import pytest
-import logging
 import time
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from easyner.pipeline.splitter.strategies import (
-    ProcessingStrategy,
-    BaseProcessingStrategy,
-    BatchOptimizedStrategy,
     BatchGeneratorStrategy,
-    SingleDocumentStrategy,
+    BatchOptimizedStrategy,
     ProcessingStrategySelector,
+    SingleDocumentStrategy,
     create_strategy,
 )
 
@@ -36,13 +34,14 @@ def sample_batch():
 
 
 # We can't directly test the abstract BaseProcessingStrategy, so let's use a concrete subclass
-def test_prepare_batch_functionality(sample_batch):
+def test_prepare_batch_functionality(sample_batch) -> None:
     """Test prepare_batch method functionality (using a concrete subclass)."""
     # Use BatchOptimizedStrategy which inherits from BaseProcessingStrategy
     strategy = BatchOptimizedStrategy()
 
-    texts, article_ids, empty_articles, original_order = (
-        strategy.prepare_batch(sample_batch, "text")
+    texts, article_ids, empty_articles, original_order = strategy.prepare_batch(
+        sample_batch,
+        "text",
     )
 
     # Check texts extraction
@@ -64,7 +63,7 @@ def test_prepare_batch_functionality(sample_batch):
     assert original_order == ["article1", "article2", "empty_article"]
 
 
-def test_reconstruct_output_functionality():
+def test_reconstruct_output_functionality() -> None:
     """Test reconstruct_output method functionality (using a concrete subclass)."""
     # Use BatchOptimizedStrategy which inherits from BaseProcessingStrategy
     strategy = BatchOptimizedStrategy()
@@ -86,14 +85,14 @@ def test_reconstruct_output_functionality():
         },
     }
 
-    empty_articles = {
-        "empty_article": {"title": "Empty Article", "sentences": []}
-    }
+    empty_articles = {"empty_article": {"title": "Empty Article", "sentences": []}}
 
     original_order = ["article1", "empty_article", "article2"]
 
     output = strategy.reconstruct_output(
-        processed_articles, empty_articles, original_order
+        processed_articles,
+        empty_articles,
+        original_order,
     )
 
     # Check that output has all articles
@@ -115,7 +114,7 @@ def test_reconstruct_output_functionality():
     assert keys[2] == "article2"
 
 
-def test_batch_optimized_strategy(mock_processor, sample_batch):
+def test_batch_optimized_strategy(mock_processor, sample_batch) -> None:
     """Test BatchOptimizedStrategy process method."""
     strategy = BatchOptimizedStrategy()
     batch_idx = 1
@@ -129,7 +128,11 @@ def test_batch_optimized_strategy(mock_processor, sample_batch):
     ]
 
     result = strategy.process(
-        mock_processor, batch_idx, sample_batch, text_field, full_articles
+        mock_processor,
+        batch_idx,
+        sample_batch,
+        text_field,
+        full_articles,
     )
 
     # Check that process calls tokenizer
@@ -150,7 +153,7 @@ def test_batch_optimized_strategy(mock_processor, sample_batch):
 
 
 @patch("logging.Logger.debug")
-def test_batch_generator_strategy(mock_debug, mock_processor, sample_batch):
+def test_batch_generator_strategy(mock_debug, mock_processor, sample_batch) -> None:
     """Test BatchGeneratorStrategy process method."""
     strategy = BatchGeneratorStrategy()
     batch_idx = 1
@@ -164,7 +167,11 @@ def test_batch_generator_strategy(mock_debug, mock_processor, sample_batch):
     ]
 
     result = strategy.process(
-        mock_processor, batch_idx, sample_batch, text_field, full_articles
+        mock_processor,
+        batch_idx,
+        sample_batch,
+        text_field,
+        full_articles,
     )
 
     # Check that process calls generator
@@ -184,7 +191,7 @@ def test_batch_generator_strategy(mock_debug, mock_processor, sample_batch):
     assert result["empty_article"]["sentences"] == []
 
 
-def test_single_document_strategy(mock_processor, sample_batch):
+def test_single_document_strategy(mock_processor, sample_batch) -> None:
     """Test SingleDocumentStrategy process method."""
     strategy = SingleDocumentStrategy()
     batch_idx = 1
@@ -192,12 +199,16 @@ def test_single_document_strategy(mock_processor, sample_batch):
     full_articles = False
 
     # Mock tokenizer behavior for single document processing
-    mock_processor.tokenizer.segment_sentences.side_effect = (
-        lambda text: text.split(". ")
+    mock_processor.tokenizer.segment_sentences.side_effect = lambda text: text.split(
+        ". ",
     )
 
     result = strategy.process(
-        mock_processor, batch_idx, sample_batch, text_field, full_articles
+        mock_processor,
+        batch_idx,
+        sample_batch,
+        text_field,
+        full_articles,
     )
 
     # Check result structure
@@ -217,7 +228,7 @@ def test_single_document_strategy(mock_processor, sample_batch):
     assert result["empty_article"]["sentences"] == []
 
 
-def test_processing_strategy_selector():
+def test_processing_strategy_selector() -> None:
     """Test ProcessingStrategySelector selection logic."""
     # Create mock tokenizer
     mock_tokenizer = MagicMock()
@@ -246,7 +257,7 @@ def test_processing_strategy_selector():
     assert strategy_name == "batch_optimized"
 
 
-def test_create_strategy():
+def test_create_strategy() -> None:
     """Test create_strategy factory function."""
     optimized = create_strategy("batch_optimized")
     assert isinstance(optimized, BatchOptimizedStrategy)

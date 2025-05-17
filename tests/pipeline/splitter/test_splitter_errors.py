@@ -1,16 +1,17 @@
-import pytest
 import json
 import os
-import tempfile
 import shutil
+import tempfile
 from glob import glob
+
+import pytest
 
 from easyner.pipeline.splitter.splitter_runner import run_splitter
 
 
 @pytest.fixture
 def temp_invalid_dir():
-    """Create a temporary directory with invalid input files"""
+    """Create a temporary directory with invalid input files."""
     temp_dir = tempfile.mkdtemp()
 
     # Create an invalid JSON file (not properly formatted)
@@ -34,8 +35,8 @@ def temp_invalid_dir():
     shutil.rmtree(temp_dir)
 
 
-def test_invalid_json_handling(temp_invalid_dir):
-    """Test how the splitter handles invalid JSON input"""
+def test_invalid_json_handling(temp_invalid_dir) -> None:
+    """Test how the splitter handles invalid JSON input."""
     # Set up output directory
     output_dir = os.path.join(temp_invalid_dir, "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -57,9 +58,7 @@ def test_invalid_json_handling(temp_invalid_dir):
         run_splitter(config)
         # If it doesn't raise an exception, check if output was created
         output_files = glob(os.path.join(output_dir, "test_invalid_*.json"))
-        assert (
-            len(output_files) == 0
-        ), "Output file was created with invalid JSON input"
+        assert len(output_files) == 0, "Output file was created with invalid JSON input"
     except Exception as e:
         # The error should be specific about JSON parsing issues
         assert (
@@ -67,8 +66,8 @@ def test_invalid_json_handling(temp_invalid_dir):
         ), f"Unexpected error: {str(e)}"
 
 
-def test_empty_file_handling(temp_invalid_dir):
-    """Test how the splitter handles empty file input"""
+def test_empty_file_handling(temp_invalid_dir) -> None:
+    """Test how the splitter handles empty file input."""
     # Set up output directory
     output_dir = os.path.join(temp_invalid_dir, "output_empty")
     os.makedirs(output_dir, exist_ok=True)
@@ -90,9 +89,7 @@ def test_empty_file_handling(temp_invalid_dir):
         run_splitter(config)
         # If it doesn't raise an exception, check if output was created
         output_files = glob(os.path.join(output_dir, "test_empty_*.json"))
-        assert (
-            len(output_files) == 0
-        ), "Output file was created with empty input"
+        assert len(output_files) == 0, "Output file was created with empty input"
     except Exception as e:
         # Empty file error should be specific
         assert (
@@ -100,8 +97,8 @@ def test_empty_file_handling(temp_invalid_dir):
         ), f"Unexpected error: {str(e)}"
 
 
-def test_missing_text_field(temp_invalid_dir):
-    """Test how the splitter handles missing text field"""
+def test_missing_text_field(temp_invalid_dir) -> None:
+    """Test how the splitter handles missing text field."""
     # Create a JSON file with missing text field
     missing_field_path = os.path.join(temp_invalid_dir, "missing_field.json")
     with open(missing_field_path, "w", encoding="utf-8") as f:
@@ -143,7 +140,7 @@ def test_missing_text_field(temp_invalid_dir):
     assert len(output_files) > 0, "No output files were created"
 
     # Load the output file
-    with open(output_files[0], "r", encoding="utf-8") as f:
+    with open(output_files[0], encoding="utf-8") as f:
         output_data = json.load(f)
 
     # Both articles should be present but have empty sentences
@@ -155,8 +152,8 @@ def test_missing_text_field(temp_invalid_dir):
     assert len(output_data["article2"]["sentences"]) == 0
 
 
-def test_invalid_tokenizer(temp_invalid_dir):
-    """Test how the splitter handles invalid tokenizer selection"""
+def test_invalid_tokenizer(temp_invalid_dir) -> None:
+    """Test how the splitter handles invalid tokenizer selection."""
     # Create a simple valid JSON file
     valid_path = os.path.join(temp_invalid_dir, "valid.json")
     with open(valid_path, "w", encoding="utf-8") as f:
@@ -165,7 +162,7 @@ def test_invalid_tokenizer(temp_invalid_dir):
                 "article1": {
                     "title": "Test Article",
                     "text": "This is test content.",
-                }
+                },
             },
             f,
         )
@@ -190,6 +187,6 @@ def test_invalid_tokenizer(temp_invalid_dir):
         run_splitter(config)
 
     # Error should mention the tokenizer
-    assert "tokenizer" in str(
-        excinfo.value
-    ).lower() or "non_existent_tokenizer" in str(excinfo.value)
+    assert "tokenizer" in str(excinfo.value).lower() or "non_existent_tokenizer" in str(
+        excinfo.value,
+    )

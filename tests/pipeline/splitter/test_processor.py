@@ -1,7 +1,7 @@
-import pytest
 import time
-import logging
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from easyner.pipeline.splitter.splitter_processor import SplitterProcessor
 from easyner.pipeline.splitter.tokenizers import TokenizerBase
@@ -75,7 +75,7 @@ def processed_articles():
     }
 
 
-def test_processor_initialization(mock_tokenizer, mock_writer, default_config):
+def test_processor_initialization(mock_tokenizer, mock_writer, default_config) -> None:
     """Test SplitterProcessor initialization."""
     processor = SplitterProcessor(
         tokenizer=mock_tokenizer,
@@ -92,7 +92,7 @@ def test_processor_initialization(mock_tokenizer, mock_writer, default_config):
     assert processor.io_format == "json"
 
 
-def test_record_timing_methods():
+def test_record_timing_methods() -> None:
     """Test the timing recording methods."""
     processor = SplitterProcessor(
         tokenizer=MagicMock(),
@@ -114,7 +114,7 @@ def test_record_timing_methods():
 
 # Fix patch paths to target where they're imported
 @patch(
-    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy"
+    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy",
 )
 @patch("easyner.pipeline.splitter.splitter_processor.create_strategy")
 def test_process_batch_standard_text(
@@ -125,15 +125,13 @@ def test_process_batch_standard_text(
     default_config,
     sample_batch,
     processed_articles,
-):
+) -> None:
     """Test processing a batch of standard text articles."""
     # Setup mocks
     mock_strategy = MagicMock()
     mock_strategy.process.return_value = processed_articles
     mock_create_strategy.return_value = mock_strategy
-    mock_select_strategy.return_value = (
-        "single_document"  # Use correct strategy name
-    )
+    mock_select_strategy.return_value = "single_document"  # Use correct strategy name
 
     progress_callback = MagicMock()
 
@@ -146,20 +144,24 @@ def test_process_batch_standard_text(
 
     # Process the batch
     batch_idx = 1
-    result_batch_idx, num_articles = processor.process_batch(
-        batch_idx, sample_batch
-    )
+    result_batch_idx, num_articles = processor.process_batch(batch_idx, sample_batch)
 
     # Verify strategy selection and processing
     mock_select_strategy.assert_called_once_with(sample_batch)
     mock_create_strategy.assert_called_once_with("single_document")
     mock_strategy.process.assert_called_once_with(
-        processor, batch_idx, sample_batch, "custom_text", None
+        processor,
+        batch_idx,
+        sample_batch,
+        "custom_text",
+        None,
     )
 
     # Verify writer was called with processed articles
     mock_writer.write.assert_called_once_with(
-        processed_articles, batch_idx, "MockTokenizer"
+        processed_articles,
+        batch_idx,
+        "MockTokenizer",
     )
 
     # Verify progress callback was called
@@ -172,7 +174,7 @@ def test_process_batch_standard_text(
 
 # Fix patch paths to target where they're imported
 @patch(
-    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy"
+    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy",
 )
 @patch("easyner.pipeline.splitter.splitter_processor.create_strategy")
 def test_process_batch_pubmed_data(
@@ -181,15 +183,13 @@ def test_process_batch_pubmed_data(
     mock_tokenizer,
     mock_writer,
     processed_articles,
-):
+) -> None:
     """Test processing a batch of PubMed data."""
     # Setup mocks
     mock_strategy = MagicMock()
     mock_strategy.process.return_value = processed_articles
     mock_create_strategy.return_value = mock_strategy
-    mock_select_strategy.return_value = (
-        "batch_generator"  # Use correct strategy name
-    )
+    mock_select_strategy.return_value = "batch_generator"  # Use correct strategy name
 
     pubmed_config = {
         "worker_id": "test-worker",
@@ -219,12 +219,18 @@ def test_process_batch_pubmed_data(
     batch_idx = 1
     full_articles = True
     result_batch_idx, num_articles = processor.process_batch(
-        batch_idx, sample_pubmed_batch, full_articles
+        batch_idx,
+        sample_pubmed_batch,
+        full_articles,
     )
 
     # Verify strategy processing with PubMed settings
     mock_strategy.process.assert_called_once_with(
-        processor, batch_idx, sample_pubmed_batch, "abstract", full_articles
+        processor,
+        batch_idx,
+        sample_pubmed_batch,
+        "abstract",
+        full_articles,
     )
 
     # Verify return values
@@ -234,7 +240,7 @@ def test_process_batch_pubmed_data(
 
 # Fix patch paths to target where they're imported
 @patch(
-    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy"
+    "easyner.pipeline.splitter.splitter_processor.ProcessingStrategySelector.select_strategy",
 )
 @patch("easyner.pipeline.splitter.splitter_processor.create_strategy")
 @patch("gc.collect")
@@ -247,15 +253,13 @@ def test_garbage_collection(
     default_config,
     sample_batch,
     processed_articles,
-):
+) -> None:
     """Test that garbage collection is triggered after batch processing."""
     # Setup mocks
     mock_strategy = MagicMock()
     mock_strategy.process.return_value = processed_articles
     mock_create_strategy.return_value = mock_strategy
-    mock_select_strategy.return_value = (
-        "single_document"  # Use correct strategy name
-    )
+    mock_select_strategy.return_value = "single_document"  # Use correct strategy name
 
     processor = SplitterProcessor(
         tokenizer=mock_tokenizer,

@@ -1,19 +1,21 @@
 import pytest
-import sys
-import os
 
-from easyner.pipeline.splitter.tokenizers import TokenizerBase, SpacyTokenizer, NLTKTokenizer
+from easyner.pipeline.splitter.tokenizers import (
+    NLTKTokenizer,
+    SpacyTokenizer,
+    TokenizerBase,
+)
 
 
 class TestTokenizers:
 
-    def test_tokenizer_base_abstract(self):
-        """Test that TokenizerBase is abstract and cannot be instantiated directly"""
+    def test_tokenizer_base_abstract(self) -> None:
+        """Test that TokenizerBase is abstract and cannot be instantiated directly."""
         with pytest.raises(TypeError):
-            TokenizerBase()
+            TokenizerBase()  # type: ignore This is what we want to test, the linter is just trying to do it's job
 
     @pytest.mark.parametrize(
-        "text,expected_count",
+        ("text", "expected_count"),
         [
             ("This is a test. This is another test.", 2),
             ("Single sentence without period", 1),
@@ -22,8 +24,8 @@ class TestTokenizers:
             ("Mr. Smith went to Washington, D.C. yesterday.", 1),  # Test abbreviations
         ],
     )
-    def test_spacy_tokenizer_sentence_count(self, text, expected_count):
-        """Test that SpacyTokenizer correctly identifies the number of sentences"""
+    def test_spacy_tokenizer_sentence_count(self, text, expected_count) -> None:
+        """Test that SpacyTokenizer correctly identifies the number of sentences."""
         try:
             tokenizer = SpacyTokenizer()
             sentences = tokenizer.segment_sentences(text)
@@ -32,7 +34,7 @@ class TestTokenizers:
             pytest.skip("spaCy not installed or en_core_web_sm model not available")
 
     @pytest.mark.parametrize(
-        "text,expected_count",
+        ("text", "expected_count"),
         [
             ("This is a test. This is another test.", 2),
             ("Single sentence without period", 1),
@@ -41,8 +43,8 @@ class TestTokenizers:
             ("Mr. Smith went to Washington, D.C. yesterday.", 1),  # Test abbreviations
         ],
     )
-    def test_nltk_tokenizer_sentence_count(self, text, expected_count):
-        """Test that NLTKTokenizer correctly identifies the number of sentences"""
+    def test_nltk_tokenizer_sentence_count(self, text, expected_count) -> None:
+        """Test that NLTKTokenizer correctly identifies the number of sentences."""
         try:
             tokenizer = NLTKTokenizer()
             sentences = tokenizer.segment_sentences(text)
@@ -50,14 +52,17 @@ class TestTokenizers:
         except ImportError:
             pytest.skip("NLTK not installed or punkt not available")
 
-    def test_spacy_tokenizer_batch_support(self):
-        """Test that SpacyTokenizer correctly supports batch processing"""
+    def test_spacy_tokenizer_batch_support(self) -> None:
+        """Test that SpacyTokenizer correctly supports batch processing."""
         try:
             tokenizer = SpacyTokenizer()
             assert tokenizer.SUPPORTS_BATCH_PROCESSING is True
 
             # Test batch processing
-            texts = ["This is sentence one. This is sentence two.", "Another document here."]
+            texts = [
+                "This is sentence one. This is sentence two.",
+                "Another document here.",
+            ]
             results = tokenizer.segment_sentences_batch(texts)
 
             assert len(results) == 2
@@ -74,8 +79,8 @@ class TestTokenizers:
         except ImportError:
             pytest.skip("spaCy not installed or en_core_web_sm model not available")
 
-    def test_tokenizer_content(self):
-        """Test that tokenizers preserve content correctly"""
+    def test_tokenizer_content(self) -> None:
+        """Test that tokenizers preserve content correctly."""
         text = "This is a complete sentence. Another one here!"
         try:
             spacy_tokenizer = SpacyTokenizer()

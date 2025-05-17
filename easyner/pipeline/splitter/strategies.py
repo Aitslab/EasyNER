@@ -1,16 +1,23 @@
+"""Processing strategies for sentence splitting in the EasyNER pipeline.
+
+This module defines strategy selection and implementations for processing
+batches of articles using different sentence segmentation approaches,
+depending on tokenizer capabilities and configuration.
+"""
+
 import logging
 from abc import ABC, abstractmethod
+
+from easyner.pipeline.splitter.tokenizers import TokenizerBase
 
 # Get logger for this module
 logger = logging.getLogger("easyner.pipeline.splitter.strategies")
 
 
 class ProcessingStrategySelector:
-    """Selects the most appropriate processing strategy based on tokenizer capabilities and data.
-    Encapsulates the decision logic for choosing between different processing approaches.
-    """
+    """Select processing strategy based on tokenizer capabilities and data."""
 
-    def __init__(self, tokenizer, config):
+    def __init__(self, tokenizer: TokenizerBase, config: dict) -> None:
         """Initialize the strategy selector.
 
         Args:
@@ -274,7 +281,8 @@ class BatchOptimizedStrategy(BaseProcessingStrategy):
 
         elapsed = processor.record_elapsed_time(start_time)
         logger.debug(
-            f"[Worker {worker_id}] Batch {batch_idx} tokenization (standard batch) finished in {elapsed:.2f}s for {total_articles} articles.",
+            f"[Worker {worker_id}] Batch {batch_idx} tokenization (standard batch) "
+            f"finished in {elapsed:.2f}s for {total_articles} articles.",
         )
         return ordered_processed_articles
 
@@ -287,7 +295,7 @@ class SingleDocumentStrategy(BaseProcessingStrategy):
         start_time = processor.record_start_time()
         worker_id = processor.worker_id
         tokenizer = processor.tokenizer
-        is_pubmed = processor.config.get("pubmed_bulk", False)
+        processor.config.get("pubmed_bulk", False)
 
         processed_articles = {}
         total_articles = len(batch)
@@ -304,7 +312,8 @@ class SingleDocumentStrategy(BaseProcessingStrategy):
 
                 if text_to_split:
                     sentences = tokenizer.segment_sentences(text_to_split)
-                    # Format output - always include title and use consistent sentence format
+                    # Format output - always include title and use consistent sentence
+                    # format
                     processed_articles[article_id] = {
                         "title": title,
                         "sentences": [{"text": s} for s in sentences],
@@ -317,7 +326,8 @@ class SingleDocumentStrategy(BaseProcessingStrategy):
                     }
             except Exception as e:
                 logger.error(
-                    f"[Worker {worker_id}] Error processing article {article_id} in batch {batch_idx}: {e}",
+                    f"[Worker {worker_id}] Error processing article {article_id} "
+                    f"in batch {batch_idx}: {e}",
                     exc_info=True,
                 )
                 # Ensure entry exists even on error
@@ -328,13 +338,17 @@ class SingleDocumentStrategy(BaseProcessingStrategy):
 
         elapsed = processor.record_elapsed_time(start_time)
         logger.debug(
-            f"[Worker {worker_id}] Batch {batch_idx} individual processing finished in {elapsed:.2f}s for {total_articles} articles.",
+            f"[Worker {worker_id}] Batch {batch_idx} individual processing "
+            f" finished in {elapsed:.2f}s for {total_articles} articles.",
         )
         return processed_articles
 
 
-def create_strategy(strategy_name):
-    """Factory function to create a strategy instance based on name.
+def create_strategy(strategy_name: str) -> ProcessingStrategy:
+    """Create a strategy instance based on name.
+
+    This is a factory function that returns an instance of the requested
+    processing strategy.
 
     Args:
         strategy_name: Name of the strategy to create

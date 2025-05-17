@@ -1,6 +1,7 @@
-import pytest
 import time
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
+import pytest
 
 from easyner.pipeline.splitter.progress import ProgressReporter
 
@@ -15,11 +16,14 @@ def mock_queue():
 def progress_reporter(mock_queue):
     """Create a ProgressReporter instance for testing."""
     return ProgressReporter(
-        result_queue=mock_queue, worker_id=1, batch_idx=5, total_items=1000
+        result_queue=mock_queue,
+        worker_id=1,
+        batch_idx=5,
+        total_items=1000,
     )
 
 
-def test_initialization(progress_reporter, mock_queue):
+def test_initialization(progress_reporter, mock_queue) -> None:
     """Test ProgressReporter initialization."""
     assert progress_reporter.result_queue == mock_queue
     assert progress_reporter.worker_id == 1
@@ -31,7 +35,7 @@ def test_initialization(progress_reporter, mock_queue):
     assert progress_reporter.report_frequency == 50  # 1000 // 20
 
 
-def test_initialization_small_batch():
+def test_initialization_small_batch() -> None:
     """Test ProgressReporter initialization with a small batch."""
     mock_queue = MagicMock()
     reporter = ProgressReporter(
@@ -45,7 +49,7 @@ def test_initialization_small_batch():
     assert reporter.report_frequency == 10
 
 
-def test_initialization_very_large_batch():
+def test_initialization_very_large_batch() -> None:
     """Test ProgressReporter initialization with a very large batch."""
     mock_queue = MagicMock()
     reporter = ProgressReporter(
@@ -59,7 +63,7 @@ def test_initialization_very_large_batch():
     assert reporter.report_frequency == 500
 
 
-def test_update_below_threshold(progress_reporter, mock_queue):
+def test_update_below_threshold(progress_reporter, mock_queue) -> None:
     """Test update method when below reporting threshold."""
     # Update with small increment
     progress_reporter.update(5)
@@ -71,7 +75,7 @@ def test_update_below_threshold(progress_reporter, mock_queue):
     assert progress_reporter.processed_items == 5
 
 
-def test_update_report_frequency_trigger(progress_reporter, mock_queue):
+def test_update_report_frequency_trigger(progress_reporter, mock_queue) -> None:
     """Test update method when hitting report frequency threshold."""
     # Update with exactly the report frequency
     progress_reporter.update(50)  # Matches report_frequency
@@ -89,7 +93,7 @@ def test_update_report_frequency_trigger(progress_reporter, mock_queue):
 
 
 # Use a more direct approach to test the time-based trigger
-def test_update_time_trigger(progress_reporter, mock_queue):
+def test_update_time_trigger(progress_reporter, mock_queue) -> None:
     """Test update method when time interval threshold is reached."""
     # Set initial time reference
     progress_reporter.last_update_time = (
@@ -108,7 +112,7 @@ def test_update_time_trigger(progress_reporter, mock_queue):
     assert args[2] == 5  # processed_items
 
 
-def test_multiple_updates(progress_reporter, mock_queue):
+def test_multiple_updates(progress_reporter, mock_queue) -> None:
     """Test multiple update calls."""
     # First update
     progress_reporter.update(25)
@@ -131,7 +135,7 @@ def test_multiple_updates(progress_reporter, mock_queue):
     assert mock_queue.put.call_count == 1
 
 
-def test_report_completion(progress_reporter, mock_queue):
+def test_report_completion(progress_reporter, mock_queue) -> None:
     """Test report_completion method."""
     # Report completion
     progress_reporter.report_completion(num_articles=1000, processing_time=5.2)

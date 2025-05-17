@@ -1,16 +1,17 @@
-import pytest
 import json
 import os
-import tempfile
 import shutil
+import tempfile
 from glob import glob
+
+import pytest
 
 from easyner.pipeline.splitter.splitter_runner import run_splitter
 
 
 @pytest.fixture
 def temp_pubmed_dir():
-    """Create a temporary directory with test PubMed input file"""
+    """Create a temporary directory with test PubMed input file."""
     temp_dir = tempfile.mkdtemp()
     input_folder = os.path.join(temp_dir, "input")
     os.makedirs(input_folder, exist_ok=True)
@@ -23,7 +24,7 @@ def temp_pubmed_dir():
     example_file = os.path.join(current_dir, "pubmed_input.json")
 
     # Copy the example data
-    with open(example_file, "r", encoding="utf-8") as src:
+    with open(example_file, encoding="utf-8") as src:
         test_data = json.load(src)
 
         # Add an article with empty abstract for testing empty abstract handling
@@ -45,11 +46,11 @@ def temp_pubmed_dir():
 
 @pytest.fixture
 def expected_output():
-    """Load the expected output format"""
+    """Load the expected output format."""
     current_dir = os.path.dirname(os.path.abspath(__file__))
     example_file = os.path.join(current_dir, "pubmed_output.json")
 
-    with open(example_file, "r", encoding="utf-8") as f:
+    with open(example_file, encoding="utf-8") as f:
         expected_data = json.load(f)
 
         # Add expected format for the article with empty abstract
@@ -61,8 +62,8 @@ def expected_output():
         return expected_data
 
 
-def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
-    """Test that the splitter correctly processes PubMed data"""
+def test_pubmed_splitter_format(temp_pubmed_dir, expected_output) -> None:
+    """Test that the splitter correctly processes PubMed data."""
     # Set up output directory
     output_dir = os.path.join(os.path.dirname(temp_pubmed_dir), "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -89,7 +90,7 @@ def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
     assert len(output_files) > 0, "No output files were created"
 
     # Load the first output file
-    with open(output_files[0], "r", encoding="utf-8") as f:
+    with open(output_files[0], encoding="utf-8") as f:
         output_data = json.load(f)
 
     # Check overall structure
@@ -102,19 +103,26 @@ def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
         assert "title" in article_data, f"Article {article_id} has no 'title' field"
 
         # Check sentences structure
-        assert "sentences" in article_data, f"Article {article_id} has no 'sentences' field"
+        assert (
+            "sentences" in article_data
+        ), f"Article {article_id} has no 'sentences' field"
         assert isinstance(
-            article_data["sentences"], list
+            article_data["sentences"],
+            list,
         ), f"Article {article_id} 'sentences' is not a list"
 
         # Check sentence format - should be objects with text property
         for sentence in article_data["sentences"]:
             assert isinstance(
-                sentence, dict
+                sentence,
+                dict,
             ), f"Sentence in article {article_id} is not a dictionary object"
-            assert "text" in sentence, f"Sentence in article {article_id} has no 'text' property"
+            assert (
+                "text" in sentence
+            ), f"Sentence in article {article_id} has no 'text' property"
             assert isinstance(
-                sentence["text"], str
+                sentence["text"],
+                str,
             ), f"Sentence text in article {article_id} is not a string"
 
     # Compare with expected output structure for key articles
@@ -126,7 +134,7 @@ def test_pubmed_splitter_format(temp_pubmed_dir, expected_output):
 
             # Compare sentence count
             assert len(output_data[article_id]["sentences"]) == len(
-                expected_article["sentences"]
+                expected_article["sentences"],
             ), f"Sentence count mismatch for article {article_id}"
 
             # Compare actual sentence content for non-empty sentences

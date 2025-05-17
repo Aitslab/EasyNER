@@ -1,6 +1,14 @@
+"""StatsManager for collecting and reporting splitter pipeline.
+
+This module provides the StatsManager class, which centralizes statistics collection,
+reporting, and formatting for the splitter pipeline, including batch processing times,
+batch sizes, and worker performance summaries.
+"""
+
 import logging
 import statistics
 import time
+from typing import Optional
 
 import tabulate
 
@@ -14,7 +22,7 @@ class StatsManager:
     Centralizes statistics collection and reporting.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize a statistics manager."""
         self.processing_times = []
         self.batch_sizes = []
@@ -22,7 +30,12 @@ class StatsManager:
         self.total_batches = 0
         self.start_time = time.time()
 
-    def update_stats(self, num_articles, processing_time, batch_size=None) -> None:
+    def update_stats(
+        self,
+        num_articles: int,
+        processing_time: float,
+        batch_size: Optional[int] = None,
+    ) -> None:
         """Update statistics with a new batch.
 
         Args:
@@ -37,7 +50,7 @@ class StatsManager:
         if batch_size:
             self.batch_sizes.append(batch_size)
 
-    def get_elapsed_time(self):
+    def get_elapsed_time(self) -> float:
         """Get elapsed time since start.
 
         Returns:
@@ -46,7 +59,7 @@ class StatsManager:
         """
         return time.time() - self.start_time
 
-    def format_elapsed_time(self, seconds=None) -> str:
+    def format_elapsed_time(self, seconds: Optional[float] = None) -> str:
         """Format elapsed time as a human-readable string.
 
         Args:

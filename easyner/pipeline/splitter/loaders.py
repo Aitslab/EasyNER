@@ -13,8 +13,17 @@ logger = logging.getLogger("easyner.pipeline.splitter.loaders")
 
 
 class DataLoaderBase(ABC):
+    """Abstract base class for data loaders in the EasyNER pipeline.
+
+    Methods
+    -------
+    load_data() -> dict | list
+        Abstract method to load data; must be implemented by subclasses.
+
+    """
+
     @abstractmethod
-    def load_data(self) -> list:
+    def load_data(self) -> dict | list:
         pass
 
 
@@ -27,7 +36,7 @@ class StandardLoader(DataLoaderBase):
             f"format: {io_format}",
         )
 
-    def load_data(self) -> list:
+    def load_data(self) -> dict:
         logger.info(f"Loading data from {self.input_path}")
         try:
             # Use IO handler to read data
@@ -46,7 +55,39 @@ class StandardLoader(DataLoaderBase):
 
 
 class PubMedLoader(DataLoaderBase):
-    def __init__(self, input_folder, limit="ALL", key="n", io_format="json"):
+    """Loader for pre-batched PubMed files.
+
+    Supporting file selection by index range and batch loading.
+
+    Attributes
+    ----------
+    input_folder : str
+        Path to the folder containing PubMed batch files.
+    limit : str or list[int]
+        "ALL" to load all files, or a list [start, end] to select a range.
+    key : str
+        Key pattern to match files in the folder.
+    io_format : str
+        Format of the files (e.g., "json").
+
+    Methods
+    -------
+    load_data() -> list
+        Loads file paths of PubMed batches based on the configured limit.
+    load_batch(file_path)
+        Loads a single batch file with memory optimization.
+    get_batch_index(input_file)
+        Extracts the batch index from a filename.
+
+    """
+
+    def __init__(
+        self,
+        input_folder: str,
+        limit: str | list[int] = "ALL",
+        key: str = "n",
+        io_format: str = "json",
+    ) -> None:
         self.input_folder = input_folder
         self.limit = limit
         self.key = key
@@ -56,7 +97,7 @@ class PubMedLoader(DataLoaderBase):
             f"limit: {limit}, key: {key}, format: {io_format}",
         )
 
-    def load_data(self):
+    def load_data(self) -> list:
         """Load pre-batched PubMed files based on configured limits."""
         logger.info(f"Loading PubMed data from {self.input_folder}")
         io_handler = get_io_handler(self.io_format)
@@ -118,10 +159,8 @@ class PubMedLoader(DataLoaderBase):
             )
             raise
 
-    def get_batch_index(self, input_file):
-        """Extract batch index from filename using the pipeline utility
-        function.
-        """
+    def get_batch_index(self, input_file: str) -> int:
+        """Extract batch index from filename using the pipeline utility function."""
         try:
             # Use the centralized utility function
             return get_batch_index_from_filename(input_file)

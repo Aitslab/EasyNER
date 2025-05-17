@@ -7,6 +7,7 @@ logger = logging.getLogger("easyner.pipeline.splitter.worker")
 
 class WorkerStateManager:
     """Manages the state of a worker process.
+
     Centralizes worker state management and communication with main process.
     """
 
@@ -111,7 +112,7 @@ class WorkerStateManager:
 
         """
         self.result_queue.put(
-            ("WORKER_READY", self.worker_id, supports_batch, supports_generator)
+            ("WORKER_READY", self.worker_id, supports_batch, supports_generator),
         )
         logger.debug(
             f"[Worker {self.worker_id}] Signaled ready (batch={supports_batch}, generator={supports_generator})",

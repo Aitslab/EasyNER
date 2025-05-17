@@ -1,6 +1,8 @@
-import pytest
+# ruff: noqa: ANN001,
 import time
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from easyner.pipeline.splitter.worker_state import WorkerStateManager
 
@@ -17,7 +19,7 @@ def worker_state_manager(mock_queue):
     return WorkerStateManager(worker_id=1, result_queue=mock_queue)
 
 
-def test_init(worker_state_manager, mock_queue):
+def test_init(worker_state_manager, mock_queue) -> None:
     """Test WorkerStateManager initialization."""
     assert worker_state_manager.worker_id == 1
     assert worker_state_manager.result_queue == mock_queue
@@ -29,7 +31,7 @@ def test_init(worker_state_manager, mock_queue):
     }
 
 
-def test_start_batch(worker_state_manager):
+def test_start_batch(worker_state_manager) -> None:
     """Test start_batch method."""
     batch_idx = 1
     batch = {"article1": {}, "article2": {}}
@@ -42,7 +44,7 @@ def test_start_batch(worker_state_manager):
     assert worker_state_manager.current_batch["start_time"] == start_time
 
 
-def test_complete_batch_with_active_batch(worker_state_manager, mock_queue):
+def test_complete_batch_with_active_batch(worker_state_manager, mock_queue) -> None:
     """Test complete_batch method with an active batch."""
     # Start a batch first
     batch_idx = 1
@@ -69,7 +71,7 @@ def test_complete_batch_with_active_batch(worker_state_manager, mock_queue):
     assert worker_state_manager.current_batch is None
 
 
-def test_complete_batch_without_active_batch(worker_state_manager, mock_queue):
+def test_complete_batch_without_active_batch(worker_state_manager, mock_queue) -> None:
     """Test complete_batch method without an active batch."""
     result_idx, elapsed = worker_state_manager.complete_batch(2)
 
@@ -81,7 +83,7 @@ def test_complete_batch_without_active_batch(worker_state_manager, mock_queue):
     mock_queue.put.assert_not_called()
 
 
-def test_report_error_with_batch_idx(worker_state_manager, mock_queue):
+def test_report_error_with_batch_idx(worker_state_manager, mock_queue) -> None:
     """Test report_error method with explicit batch_idx."""
     worker_state_manager.report_error("Test error", 5)
 
@@ -93,7 +95,7 @@ def test_report_error_with_batch_idx(worker_state_manager, mock_queue):
     assert worker_id == 1
 
 
-def test_report_error_with_current_batch(worker_state_manager, mock_queue):
+def test_report_error_with_current_batch(worker_state_manager, mock_queue) -> None:
     """Test report_error method using current batch index."""
     # Start a batch first
     batch_idx = 3
@@ -110,14 +112,14 @@ def test_report_error_with_current_batch(worker_state_manager, mock_queue):
     assert worker_id == 1
 
 
-def test_signal_ready(worker_state_manager, mock_queue):
+def test_signal_ready(worker_state_manager, mock_queue) -> None:
     """Test signal_ready method."""
     worker_state_manager.signal_ready(True, False)
 
     mock_queue.put.assert_called_once_with(("WORKER_READY", 1, True, False))
 
 
-def test_signal_done(worker_state_manager, mock_queue):
+def test_signal_done(worker_state_manager, mock_queue) -> None:
     """Test signal_done method."""
     peak_memory = 256.5
     worker_state_manager.signal_done(peak_memory)
@@ -125,7 +127,7 @@ def test_signal_done(worker_state_manager, mock_queue):
     mock_queue.put.assert_called_once_with(("WORKER_DONE", 1, peak_memory))
 
 
-def test_get_stats_empty(worker_state_manager):
+def test_get_stats_empty(worker_state_manager) -> None:
     """Test get_stats method with no batches processed."""
     stats = worker_state_manager.get_stats()
 
@@ -138,7 +140,7 @@ def test_get_stats_empty(worker_state_manager):
     assert stats["avg_time_per_article"] == 0
 
 
-def test_get_stats_with_activity(worker_state_manager, mock_queue):
+def test_get_stats_with_activity(worker_state_manager, mock_queue) -> None:
     """Test get_stats method after processing batches."""
     # Start and complete a batch
     worker_state_manager.start_batch(1, {"article1": {}, "article2": {}})
@@ -147,7 +149,8 @@ def test_get_stats_with_activity(worker_state_manager, mock_queue):
 
     # Start and complete another batch
     worker_state_manager.start_batch(
-        2, {"article3": {}, "article4": {}, "article5": {}}
+        2,
+        {"article3": {}, "article4": {}, "article5": {}},
     )
     with patch("time.time", return_value=time.time() + 1.5):
         worker_state_manager.complete_batch(3)
@@ -159,14 +162,17 @@ def test_get_stats_with_activity(worker_state_manager, mock_queue):
     assert stats["batches"] == 2
     assert stats["articles"] == 5
     assert stats["time"] == pytest.approx(
-        2.0, abs=0.01
+        2.0,
+        abs=0.01,
     )  # Allow small difference from 2.0
 
     # Check derived metrics
     assert stats["avg_batch_size"] == 2.5  # 5 / 2
     assert stats["avg_time_per_batch"] == pytest.approx(
-        1.0, abs=0.01
+        1.0,
+        abs=0.01,
     )  # Allow small difference from 1.0
     assert stats["avg_time_per_article"] == pytest.approx(
-        0.4, abs=0.01
+        0.4,
+        abs=0.01,
     )  # Allow small difference from 0.4

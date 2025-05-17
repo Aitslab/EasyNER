@@ -1,16 +1,17 @@
-import pytest
 import json
 import os
-import tempfile
 import shutil
+import tempfile
 from glob import glob
+
+import pytest
 
 from easyner.pipeline.splitter.splitter_runner import run_splitter
 
 
 @pytest.fixture
 def temp_standard_dir():
-    """Create a temporary directory with test standard input file"""
+    """Create a temporary directory with test standard input file."""
     temp_dir = tempfile.mkdtemp()
     input_path = os.path.join(temp_dir, "standard_input.json")
 
@@ -36,8 +37,8 @@ def temp_standard_dir():
     shutil.rmtree(temp_dir)
 
 
-def test_standard_splitter_format(temp_standard_dir):
-    """Test that the splitter correctly processes standard text data"""
+def test_standard_splitter_format(temp_standard_dir) -> None:
+    """Test that the splitter correctly processes standard text data."""
     # Set up output directory
     output_dir = os.path.join(os.path.dirname(temp_standard_dir), "output")
     os.makedirs(output_dir, exist_ok=True)
@@ -65,7 +66,7 @@ def test_standard_splitter_format(temp_standard_dir):
     # Load and merge data from all output files
     output_data = {}
     for output_file in output_files:
-        with open(output_file, "r", encoding="utf-8") as f:
+        with open(output_file, encoding="utf-8") as f:
             batch_data = json.load(f)
             output_data.update(batch_data)
 
@@ -107,8 +108,8 @@ def test_standard_splitter_format(temp_standard_dir):
     assert sentences[2]["text"] == "The last sentence is here."
 
 
-def test_different_tokenizers(temp_standard_dir):
-    """Test that the splitter works with different tokenizers"""
+def test_different_tokenizers(temp_standard_dir) -> None:
+    """Test that the splitter works with different tokenizers."""
     # First check if NLTK is available
     try:
         import nltk
@@ -136,21 +137,15 @@ def test_different_tokenizers(temp_standard_dir):
             if process.is_alive():
                 # If still running after timeout, terminate and skip
                 process.terminate()
-                pytest.skip(
-                    "NLTK punkt download is taking too long, skipping test"
-                )
+                pytest.skip("NLTK punkt download is taking too long, skipping test")
 
             # Verify it was downloaded
             nltk.data.find("tokenizers/punkt")
         except Exception:
-            pytest.skip(
-                "Failed to download NLTK punkt, skipping NLTK tokenizer test"
-            )
+            pytest.skip("Failed to download NLTK punkt, skipping NLTK tokenizer test")
 
     # Set up output directory
-    output_dir = os.path.join(
-        os.path.dirname(temp_standard_dir), "output_nltk"
-    )
+    output_dir = os.path.join(os.path.dirname(temp_standard_dir), "output_nltk")
     os.makedirs(output_dir, exist_ok=True)
 
     # Configure the splitter with NLTK
@@ -171,12 +166,10 @@ def test_different_tokenizers(temp_standard_dir):
 
         # Find the output file(s)
         output_files = glob(os.path.join(output_dir, "test_nltk_*.json"))
-        assert (
-            len(output_files) > 0
-        ), "No output files were created with NLTK tokenizer"
+        assert len(output_files) > 0, "No output files were created with NLTK tokenizer"
 
         # Load the output file
-        with open(output_files[0], "r", encoding="utf-8") as f:
+        with open(output_files[0], encoding="utf-8") as f:
             output_data = json.load(f)
 
         # Verify basic structure

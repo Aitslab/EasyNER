@@ -7,6 +7,7 @@ logger = logging.getLogger("easyner.pipeline.splitter.progress")
 
 class ProgressReporter:
     """Handles reporting progress to the main process.
+
     Separates progress reporting concerns from processing logic.
     """
 

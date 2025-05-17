@@ -1,11 +1,12 @@
-import pytest
+import json
 import os
 import tempfile
-import json
+
+import pytest
 
 from easyner.io import get_io_handler
+from easyner.pipeline.splitter.loaders import PubMedLoader, StandardLoader
 from easyner.pipeline.splitter.writers import JSONWriter
-from easyner.pipeline.splitter.loaders import StandardLoader, PubMedLoader
 
 
 class TestSplitterIOIntegration:
@@ -63,7 +64,8 @@ class TestSplitterIOIntegration:
 
             # Check that file was created with correct name
             output_file = os.path.join(
-                tmp_dir, f"test_split_{tokenizer_name}-split-{batch_idx}.json"
+                tmp_dir,
+                f"test_split_{tokenizer_name}-split-{batch_idx}.json",
             )
             assert os.path.exists(output_file)
 

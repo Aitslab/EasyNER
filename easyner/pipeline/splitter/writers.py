@@ -1,3 +1,9 @@
+"""Writers for outputting processed articles in various formats.
+
+This module provides base and concrete writer classes for saving processed articles
+(e.g., in JSON or other formats) during the splitting pipeline of EasyNER.
+"""
+
 import gc  # Add garbage collection module
 import logging
 import os

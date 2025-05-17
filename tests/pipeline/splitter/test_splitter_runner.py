@@ -1,17 +1,17 @@
-import pytest
 import time
-from unittest.mock import patch, MagicMock, ANY, call
-from multiprocessing import Queue, Value
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from easyner.pipeline.splitter.splitter_runner import (
-    make_batches,
-    worker_process,
     SplitterRunner,
+    make_batches,
     run_splitter,
+    worker_process,
 )
 
 
-def test_make_batches():
+def test_make_batches() -> None:
     """Test the make_batches function properly divides lists into chunks."""
     # Test with exact multiples of batch size
     assert list(make_batches([1, 2, 3, 4], 2)) == [[1, 2], [3, 4]]
@@ -37,7 +37,7 @@ def test_worker_process_initialization(
     mock_processor,
     mock_writer,
     mock_tokenizer,
-):
+) -> None:
     """Test worker process initialization with SpaCy tokenizer."""
     # Setup mocks
     task_queue = MagicMock()
@@ -100,7 +100,7 @@ def test_worker_process_with_nltk(
     mock_processor,
     mock_writer,
     mock_tokenizer,
-):
+) -> None:
     """Test worker process initialization with NLTK tokenizer."""
     # Setup mocks
     task_queue = MagicMock()
@@ -147,7 +147,7 @@ def test_worker_process_batch_processing(
     mock_processor,
     mock_writer,
     mock_tokenizer,
-):
+) -> None:
     """Test worker process batch processing."""
     # Setup mocks
     task_queue = MagicMock()
@@ -202,10 +202,13 @@ def test_worker_process_batch_processing(
     # Verify batch processing
     assert mock_tokenizer_instance.nlp.batch_size == 32
     mock_processor_instance.process_batch.assert_called_once_with(
-        batch_idx, batch_data, True
+        batch_idx,
+        batch_data,
+        True,
     )
     mock_state_manager_instance.start_batch.assert_called_once_with(
-        batch_idx, batch_data
+        batch_idx,
+        batch_data,
     )
     mock_state_manager_instance.complete_batch.assert_called_once_with(2)
 
@@ -221,7 +224,7 @@ def test_splitter_runner_pubmed_init(
     mock_queue,
     mock_message_handler,
     mock_pubmed_loader,
-):
+) -> None:
     """Test SplitterRunner initialization with PubMed configuration."""
     # Setup mocks
     mock_task_queue = MagicMock()
@@ -264,7 +267,7 @@ def test_splitter_runner_pubmed_init(
     mock_message_handler.return_value = mock_message_handler_instance
 
     # Mock message processing
-    def mock_handle_message(result):
+    def mock_handle_message(result) -> None:
         if result[0] == "WORKER_READY":
             runner.workers_ready += 1
 
@@ -277,7 +280,7 @@ def test_splitter_runner_pubmed_init(
     # Need to patch some methods that would be called during run
     with (
         patch("easyner.pipeline.splitter.splitter_runner.tqdm") as mock_tqdm,
-        patch("threading.Thread") as mock_thread,
+        patch("threading.Thread"),
     ):
 
         mock_tqdm_instance = MagicMock()
@@ -320,7 +323,7 @@ def test_splitter_runner_standard_init(
     mock_queue,
     mock_message_handler,
     mock_standard_loader,
-):
+) -> None:
     """Test SplitterRunner initialization with standard text configuration."""
     # Setup mocks
     mock_task_queue = MagicMock()
@@ -359,7 +362,7 @@ def test_splitter_runner_standard_init(
     mock_message_handler.return_value = mock_message_handler_instance
 
     # Mock message processing
-    def mock_handle_message(result):
+    def mock_handle_message(result) -> None:
         if result[0] == "WORKER_READY":
             runner.workers_ready += 1
 
@@ -372,7 +375,7 @@ def test_splitter_runner_standard_init(
     # Need to patch some methods that would be called during run
     with (
         patch("easyner.pipeline.splitter.splitter_runner.tqdm") as mock_tqdm,
-        patch("threading.Thread") as mock_thread,
+        patch("threading.Thread"),
     ):
 
         mock_tqdm_instance = MagicMock()
@@ -394,7 +397,8 @@ def test_splitter_runner_standard_init(
 
     # Verify StandardLoader was initialized correctly
     mock_standard_loader.assert_called_once_with(
-        input_path=config["input_path"], io_format="json"
+        input_path=config["input_path"],
+        io_format="json",
     )
 
     # Verify StandardLoader methods were called
@@ -403,7 +407,7 @@ def test_splitter_runner_standard_init(
 
 @patch("easyner.pipeline.splitter.splitter_runner.SplitterRunner")
 @patch("easyner.pipeline.splitter.splitter_runner.cpu_count")
-def test_run_splitter(mock_cpu_count, mock_splitter_runner):
+def test_run_splitter(mock_cpu_count, mock_splitter_runner) -> None:
     """Test the main run_splitter function."""
     # Setup mocks
     mock_splitter_instance = MagicMock()
