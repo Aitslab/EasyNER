@@ -199,62 +199,7 @@ def run_ner(ner_config: dict, ignore: bool) -> None:  # noqa: C901, D103
         print("Ignoring script: NER.")
         return
 
-    print("Running NER script.")
-
-    # For experimentation: limit number of articles to process (and to output)
-    # limit = ner_config["article_limit"]
-    # if limit > 0:
-    #     print(f"Limiting NER to {limit} articles.")
-    #     a = {}
-    #     i = 0
-    #     for id in articles:
-    #         if i >= limit:
-    #             break
-    #         a[id] = articles[id]
-    #         i += 1
-    #     articles = a
-
-    if ner_config.get("clear_old_results", True):
-        try:
-            os.remove(ner_config["output_path"])
-        except OSError:
-            pass
-
-    os.makedirs(ner_config["output_path"], exist_ok=True)
-
-    input_file_list = sorted(
-        glob(f'{ner_config["input_path"]}*.json'),
-        key=lambda x: int(os.path.splitext(os.path.basename(x))[0].split("-")[-1]),
-    )
-
-    # Sort files on range
-    if "article_limit" in ner_config:
-        if isinstance(ner_config["article_limit"], list):
-            start = ner_config["article_limit"][0]
-            end = ner_config["article_limit"][1]
-
-            input_file_list = ner_main.filter_files(input_file_list, start, end)
-
-            print(f"processing articles between {start} and {end} range")
-
-    # Run prediction on each sentence in each article.
-    if ner_config["multiprocessing"]:
-        with ProcessPoolExecutor(min(CPU_LIMIT, cpu_count())) as executor:
-
-            futures = [
-                executor.submit(ner_main.run_ner_main, ner_config, batch_file)
-                for batch_file in input_file_list
-            ]
-
-            for future in as_completed(futures):
-                i = future.result()
-    else:
-        device = torch.device(0 if torch.cuda.is_available() else "cpu")
-
-        for batch_file in tqdm(input_file_list):
-            ner_main.run_ner_main(ner_config, batch_file, device)
-
-    print("Finished running NER script.")
+    ner_main.run_ner_module(ner_config, CPU_LIMIT)
 
 
 def run_analysis(analysis_config: dict, ignore: bool) -> None:  # noqa: D103
