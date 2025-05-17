@@ -61,6 +61,8 @@ def create_minimal_valid_config() -> dict[str, Any]:
             "cord_loader": True,
             "downloader": False,
             "text_loader": True,
+            "pubmed_bulk_downloader": False,
+            "pubmed_bulk_updates_downloader": True,
             "pubmed_bulk_loader": True,
             "splitter": False,
             "ner": True,
@@ -91,6 +93,8 @@ def sample_config() -> dict[str, Any]:
             "cord_loader": True,
             "downloader": False,
             "text_loader": True,
+            "pubmed_bulk_downloader": False,
+            "pubmed_bulk_updates_downloader": True,
             "pubmed_bulk_loader": True,
             "splitter": False,
             "ner": True,
@@ -280,6 +284,8 @@ def test_validate_config_path_types(
                 "cord_loader": True,
                 "downloader": False,
                 "text_loader": True,
+                "pubmed_bulk_downloader": False,
+                "pubmed_bulk_updates_downloader": True,
                 "pubmed_bulk_loader": True,
                 "splitter": False,
                 "ner": True,
@@ -427,6 +433,7 @@ def test_generate_template_preserves_values(
         "ignore": {
             "cord_loader": False,
             "downloader": True,
+            # Note: other settings are intentionally omitted to test that they get added
         },
     }
 
