@@ -5,21 +5,20 @@ from concurrent.futures import (
     ProcessPoolExecutor,
     as_completed,
 )
-from glob import glob
 from multiprocessing import cpu_count
 
-import torch
-from tqdm import tqdm
-
+from easyner.pipeline.pubmed import (
+    get_abstracts_by_pmids,
+    pubmed_bulk_downloader,
+    pubmed_bulk_loader,
+)
 from scripts import (
     analysis,
     cord_loader,
-    downloader,
     entity_merger,
     metrics,
     nel,
     ner_main,
-    pubmed_bulk,
     search,
     splitter,
     splitter_pubmed,
@@ -48,7 +47,7 @@ def run_download(dl_config: dict, ignore: bool) -> None:  # noqa: D103
         return
 
     print("Running downloader script.")
-    downloader.run(
+    get_abstracts_by_pmids.run(
         input_file=dl_config["input_path"],
         output_file=dl_config["output_path"],
         batch_size=dl_config["batch_size"],
@@ -69,13 +68,57 @@ def run_text_loader(tl_config: dict, ignore: bool) -> None:  # noqa: D103
     print("Finished running freetext loader script.")
 
 
-def run_pubmed_bulk_loader(pbl_config: dict, ignore: bool) -> None:  # noqa: D103
+def run_pubmed_bulk_downloader(pbd_config: dict, ignore: bool) -> None:
+    """Run the PubMed bulk downloader for baseline files.
+
+    Args:
+        pbd_config: Configuration for the PubMed bulk downloader
+        ignore: Whether to skip this module
+
+    """
     if ignore:
         print("Ignoring script: pubmed bulk downloader")
         return
 
     print("Running pubmed bulk downloader script.")
-    pubmed_bulk.run_pbl(pbl_config)
+    pubmed_bulk_downloader.download_pubmed_in_bulk(pbd_config)
+    print("Finished running pubmed bulk downloader.")
+
+
+def run_pubmed_bulk_updates_downloader(pbu_config: dict, ignore: bool) -> None:
+    """Run the PubMed bulk updates downloader for nightly update files.
+
+    Args:
+        pbu_config: Configuration for the PubMed bulk updates downloader
+        ignore: Whether to skip this module
+
+    """
+    if ignore:
+        print("Ignoring script: pubmed bulk updates downloader")
+        return
+
+    print("Running pubmed bulk updates downloader script.")
+    # Use the dedicated pubmed_bulk_updates_downloader configuration
+    # The download_updates flag is no longer needed as we're using a separate function
+    pubmed_bulk_downloader.download_pubmed_updates_in_bulk(pbu_config)
+    print("Finished running pubmed bulk updates downloader.")
+
+
+def run_pubmed_loader(pbl_config: dict, ignore: bool) -> None:
+    """Run the PubMed bulk loader to process downloaded XML files.
+
+    Args:
+        pbl_config: Configuration for the PubMed bulk loader
+        ignore: Whether to skip this module
+
+    """
+    if ignore:
+        print("Ignoring script: pubmed loader")
+        return
+
+    print("Running pubmed loader script.")
+    pubmed_bulk_loader.load_pubmed_from_xml(pbl_config)
+    print("Finished running pubmed loader script.")
 
 
 def run_splitter(splitter_config: dict, ignore: bool) -> dict:  # noqa: D103
@@ -326,11 +369,56 @@ if __name__ == "__main__":
         tkff.write(f"Text loader time: {end_textloader-start_textloader}\n")
     print()
 
-    # Bulk download pubmed baseline though ftp
+    # Download PubMed baseline files
+    if not ignore.get("pubmed_bulk_downloader", True) and TIMEKEEP:
+        start_pbdownloader = time.time()
+
+    run_pubmed_bulk_downloader(
+        config["pubmed_bulk_downloader"],
+        ignore=ignore.get("pubmed_bulk_downloader", True),
+    )
+
+    if not ignore.get("pubmed_bulk_downloader", True) and TIMEKEEP:
+        end_pbdownloader = time.time()
+        tkff.write(
+            f"Pubmed bulk downloader time: {end_pbdownloader-start_pbdownloader}\n",
+        )
+    print()
+
+    # Download PubMed update files
+    start_pbudownloader = 0  # Initialize time variables
+
+    if not ignore.get("pubmed_bulk_updates_downloader", True):
+        if TIMEKEEP:
+            start_pbudownloader = time.time()
+
+        # Check if the config section exists
+        if "pubmed_bulk_updates_downloader" not in config:
+            print(
+                "Warning: pubmed_bulk_updates_downloader section not found in config.json",
+            )
+            print("Skipping PubMed bulk updates download.")
+        else:
+            run_pubmed_bulk_updates_downloader(
+                config["pubmed_bulk_updates_downloader"],
+                ignore=False,
+            )
+
+        if TIMEKEEP:
+            end_pbudownloader = time.time()
+            tkff.write(
+                f"Pubmed bulk updates downloader time: "
+                f"{end_pbudownloader-start_pbudownloader}\n",
+            )
+    else:
+        print("Ignoring pubmed bulk updates downloader as specified in config.")
+    print()
+
+    # Process downloaded PubMed XML files
     if not ignore["pubmed_bulk_loader"] and TIMEKEEP:
         start_pbloader = time.time()
 
-    run_pubmed_bulk_loader(
+    run_pubmed_loader(
         config["pubmed_bulk_loader"],
         ignore=ignore["pubmed_bulk_loader"],
     )

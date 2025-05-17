@@ -43,6 +43,14 @@
           "type": "boolean",
           "description": "Ignore the plain text loader module if true."
         },
+        "pubmed_bulk_downloader": {
+          "type": "boolean",
+          "description": "Ignore the PubMed bulk downloader module if true."
+        },
+        "pubmed_bulk_updates_downloader": {
+          "type": "boolean",
+          "description": "Ignore the PubMed bulk updates downloader module if true."
+        },
         "pubmed_bulk_loader": {
           "type": "boolean",
           "description": "Ignore the PubMed bulk loader module if true."
@@ -163,64 +171,122 @@
         "prefix"
       ]
     },
-    "pubmed_bulk_loader": {
+    "pubmed_bulk_downloader": {
       "type": "object",
-      "description": "PubMed bulk loader module configuration.",
+      "description": "PubMed bulk downloader module configuration for baseline XML files.",
       "properties": {
-        "output_path": {
+        "download_path": {
           "$ref": "#/definitions/path",
-          "description": "Output folder for processed PubMed bulk files."
+          "description": "Folder for raw downloaded files."
         },
         "baseline": {
-          "type": "string",
-          "description": "PubMed annual baseline version, e.g., '24' for pubmed24n0001.xml.gz."
+          "type": [
+            "integer"
+          ],
+          "description": "PubMed annual baseline version, e.g., '24' for pubmed24n0001.xml.gz.",
+          "default": 25
         },
-        "subset": {
-          "type": "boolean",
-          "description": "If true, download only a subset of the baseline.",
-          "default": false
+        "file_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Starting file number for downloading, e.g., 1 for pubmed24n0001.xml.gz.",
+          "default": null
         },
-        "subset_range": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          },
-          "minItems": 2,
-          "maxItems": 2,
-          "description": "Range of file numbers to download, e.g., [1,160]."
+        "file_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Ending file number for downloading, e.g., 160 for pubmed24n0160.xml.gz.",
+          "default": null
+        }
+      },
+      "required": [
+        "download_path",
+        "baseline"
+      ]
+    },
+    "pubmed_bulk_updates_downloader": {
+      "type": "object",
+      "description": "PubMed bulk downloader module configuration for nightly update XML files.",
+      "properties": {
+        "download_path": {
+          "$ref": "#/definitions/path",
+          "description": "Folder for raw downloaded update files."
         },
-        "get_nightly_update_files": {
-          "type": "boolean",
-          "description": "If true, download nightly update files alongside the baseline.",
-          "default": false
+        "update_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Starting update file number to download.",
+          "default": null
         },
-        "update_file_range": {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          },
-          "minItems": 2,
-          "maxItems": 2,
-          "description": "Range of nightly update files to download, e.g., [1167,1298]."
+        "update_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Ending update file number to download.",
+          "default": null
         },
         "count_articles": {
           "type": "boolean",
           "description": "If true, count articles in each file and store in count.txt.",
           "default": false
-        },
-        "raw_download_path": {
-          "$ref": "#/definitions/path",
-          "description": "Folder for raw downloaded files."
         }
       },
       "required": [
+        "download_path",
+        "update_start",
+        "update_end"
+      ]
+    },
+    "pubmed_bulk_loader": {
+      "type": "object",
+      "description": "PubMed bulk loader module configuration.",
+      "properties": {
+        "input_path": {
+          "$ref": "#/definitions/path",
+          "description": "Input folder containing downloaded PubMed XML files."
+        },
+        "output_path": {
+          "$ref": "#/definitions/path",
+          "description": "Output folder for processed PubMed bulk files."
+        },
+        "require_abstract": {
+          "type": "boolean",
+          "description": "If true, only include articles with non-empty abstracts.",
+          "default": false
+        },
+        "batch_size": {
+          "type": "integer",
+          "description": "Number of articles per output batch file.",
+          "default": 1000
+        },
+        "file_start": {
+          "type": "integer",
+          "description": "Starting file number to process, e.g., 1 for pubmed24n0001.xml.gz. Default is to start with first file.",
+          "default": 1
+        },
+        "file_end": {
+          "type": "integer",
+          "description": "Ending file number to process, e.g., 160 for pubmed24n0160.xml.gz. Default is null for all files.",
+          "default": null
+        },
+        "baseline": {
+          "type": "integer",
+          "description": "PubMed annual baseline version, e.g., '24' for pubmed24n0001.xml.gz.",
+          "default": 25
+        }
+      },
+      "required": [
+        "input_path",
         "output_path",
-        "baseline",
-        "subset",
-        "subset_range",
-        "get_nightly_update_files",
-        "update_file_range",
-        "count_articles"
+        "require_abstract",
+        "baseline"
       ]
     },
     "splitter": {

@@ -9,11 +9,11 @@ ___
 # 1. Installation
 
 ## 1.1 Install Python
-EasyNER is written in the Python programming language. Before you use EasyNER, you need to install Python. The easiest way to do this is to use Anaconda. 
-Anaconda can be downloaded from https://www.anaconda.com/ and step-by-step installation instructions can be found on https://docs.anaconda.com/anaconda/install/index.html.  
+EasyNER is written in the Python programming language. Before you use EasyNER, you need to install Python. The easiest way to do this is to use Anaconda.
+Anaconda can be downloaded from https://www.anaconda.com/ and step-by-step installation instructions can be found on https://docs.anaconda.com/anaconda/install/index.html.
 
 EasyNER requires very little knowledge of Python but you probably find it easier to use if you watch our [Python tutorial](https://youtu.be/yDNBdB59J1s) on YouTube.
-The notebook for the tutorial can be found [here](https://github.com/COMPUTE-LU/PLGroup_PythonforBeginners/blob/main/kickoff_tutorial_20210127.ipynb). You can open the notebook by copying it to google drive and then loading it in colab (see our [tutorial for colab](https://github.com/Aitslab/training/blob/master/tutorials/colab.md)). 
+The notebook for the tutorial can be found [here](https://github.com/COMPUTE-LU/PLGroup_PythonforBeginners/blob/main/kickoff_tutorial_20210127.ipynb). You can open the notebook by copying it to google drive and then loading it in colab (see our [tutorial for colab](https://github.com/Aitslab/training/blob/master/tutorials/colab.md)).
 
 EasyNER was developed using Python version 3.9 but also works with other Python versions. If you do encounter issues, install Python 3.9.
 
@@ -21,7 +21,7 @@ EasyNER was developed using Python version 3.9 but also works with other Python 
 
 ## 1.2 Download the EasyNER GitHub repository
 
-If you have Git installed on the computer, open a terminal window and download the repository by writing: 
+If you have Git installed on the computer, open a terminal window and download the repository by writing:
 
 ```
 cd PATH TO YOUR FOLDER OF CHOICE (e.g. C:/Users/XYZ/)
@@ -67,9 +67,9 @@ ___
 
 # 2. Modify the Config file
 
-EasyNER consists of several modules which are run in a sequential manner using the main.py script (see section 3.). It is also possible to run the modules individually. For example, when two NER models are to be used, the first run typically includes a data loader, the Sentence splitter, the NER module and analysis module for the first model and the subsequent run includes only the NER module and analysis module for the second model. 
+EasyNER consists of several modules which are run in a sequential manner using the main.py script (see section 3.). It is also possible to run the modules individually. For example, when two NER models are to be used, the first run typically includes a data loader, the Sentence splitter, the NER module and analysis module for the first model and the subsequent run includes only the NER module and analysis module for the second model.
 
-For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor. 
+For each run, the config.json file in the EasyNER folder needs to be modified with the desired settings and file paths. This can be done in any text editor.
 
 #### CPU limit:
 You can specify the number of CPUs to be used in the case of multiprocessing runs on several CPU nodes by setting the "CPU_LIMIT" on top of the config file to the desired number. If the number is higher than the available CPUS, one less CPU than those available is used. If you encounter "Memory Error", it helps to reduce the CPU limit or switch to running on GPU.
@@ -79,7 +79,7 @@ The runtime for EasyNER and the modules can be obtained by setting "TIMEKEEP" on
 
 #### Module specification:
 
-In the next section, the modules that you want to run, should be switched to **"false"** in the ignore section. Then, the individual sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run. 
+In the next section, the modules that you want to run, should be switched to **"false"** in the ignore section. Then, the individual sections for those modules should be modified as required. It is advisable to save a copy of the modified config file elsewhere so you have a permanent record of the run.
 
 ```bash
 {
@@ -127,7 +127,7 @@ Example of the generated JSON file:
 ![](imgs/output_downloader.png)
 
 ### 2.1.1 Downloader
-The Downloader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the PubMed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs. 
+The Downloader module takes a single .txt file with pubmed IDs (one ID per row) as input and uses an API to retrieve abstracts from the PubMed database. The output consists of a single JSON file with all titles and abstracts for the selected IDs.
 
 As example for the input, look at the file ["Lund-Autophagy-1.txt"](/data/Lund-Autophagy-1.txt). The easiest way to create such a file is to perform a search on Pubmed and then save the search results using the "PMID" format option:
 
@@ -137,11 +137,11 @@ To run the Downloader module, change "downloader" in the ignore section of the c
 
 #### Config file arguments:
 
-- "input_path": path to file with pubmed IDs 
+- "input_path": path to file with pubmed IDs
 - "output_path": path to storage location for output
 - "batch_size": number of article records downloaded in each call to API. Note that a too large batch size may result in invalid download requests.
 
-#### example: 
+#### example:
 
 ![](imgs/downloader_.png)
 
@@ -163,7 +163,7 @@ Similar to other data loader modules, to run this data loader turn "pubmed_bulk_
 - "get_nightly_update_files": Set to "true" if nightly update files are to be downloaded alongside the annual baseline, otherwise set to "false". Note that a range must be provided under "update_file_range" if this is set to "true".
 - "update_file_range": Provide the range of update files to be downloaded if "get_nighly_update" is set to "true", e.g. [1167,1298] to download files 1167 to 1298 (inclusive). To see the available files, check: https://ftp.ncbi.nlm.nih.gov/pubmed/updatefiles/
 - "count_articles": Set to "true" if the number of articles within each file is to be counted and stored in a file called count.txt in the output folder. Otherwise, set to "false".
-- "raw_download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("raw_download_path": "") the gz files and error file are not saved. Note that this should be an empty folder.
+- "download_path": Path to the folder where the gz files and err.txt file are to be saved. If it is left empty ("download_path": "") the gz files and error file are not saved. Note that this should be an empty folder.
 
 If you only want to download the update files, set subset and get_nightly_update_files to "true" and subset_range to [0,0]. Then define the range of update files under update_file_range.
 
@@ -171,7 +171,7 @@ If not all the files you defined were downloaded, there might be an issue with t
 
 If the script gets interrupted you can restart the download by specifying the remaining batch as a subset. For this, you use the number of the last file that was downloaded in the first batch as start number for the subset of the second batch and the last file number as the end number of the subset. As long as you keep all of the already downloaded files of the first batch in the same folder as the second batch, both batches will be converted to JSON together in the second part of the script.
 
-#### example: 
+#### example:
 
 ![](imgs/pubmed_bulk_loader_.png)
 
@@ -188,7 +188,7 @@ The output of the PubMed Bulk loader is a folder with JSON files, each file cont
 - "subset": true or false - whether a subset of the CORD-19 data is to be extracted.
 - "subset_file": input file path to a file with cord UIDs if subset option is set to true
 
-#### example: 
+#### example:
 
 
 ![](imgs/cord_loader_.png)
@@ -205,7 +205,7 @@ The text_loader variant of the dataloader module processess plain text in .txt f
 - "output_path": output file (JSON format)
 - "prefix": name to be used as document identifier in the output JSON file (instead of the PMID or CORD UID)
 
-#### example: 
+#### example:
 
 ![](imgs/text_loader_.png)
 
@@ -224,26 +224,26 @@ ___
 
 This module loads the document collection generated by one of the data loaders (or files in the same [format](imgs/output_downloader.png)) and splits the text into sentences with the spaCy or NLTK sentence splitter. The input document collection can be in the form of a single JSON file (when using all data loaders except the PubMed bulk loader) or in a folder with multiple JSON files (when using the PubMed bulk loader). When using a folder of JSON files not generated by one of the EasyNER data loaders the files need to be renamed to match the PubMed file naming structure, i.e. "pubmed25n" followed by a 4-digit number (pubmed25n0001.json, pubmed25n0002.json, etc).
 
-To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to choose the model: "en_core_web_sm" or "en_core_web_trf". 
+To run the sentence splitter module set the ignore parameter for splitter in the config file to false. When using the spaCy option, the user needs to choose the model: "en_core_web_sm" or "en_core_web_trf".
 
 #### Config file arguments:
-- "input_path": input file path to the document collection (either a single JSON file or a folder of JSON files produced by the data loaders or a file/folder in the same format). 
+- "input_path": input file path to the document collection (either a single JSON file or a folder of JSON files produced by the data loaders or a file/folder in the same format).
 - "output_folder": output folder path where the produced JSON files will be saved
 - "output_file_prefix": first part of the output file name, e.g. "sentences"
 - "pubmed_bulk": set to "true" if the PubMed Bulk Downloader is used before the Splitter module or if a folder with JSON files in the same format is to be processed; if one of the other data loaders is used before the Splitter module or a single JSON file is to be processed set to "false"
 - "file_limit": when using a folder specify the number of the files that are to be processed (PubMed bulk file numbers)
 - "tokenizer": "spacy" or "nltk"
-- "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write "" 
+- "model_name": "en_core_web_sm" or "en_core_web_trf" for spaCy, for nltk write ""
 - "batch_size": number of texts to be saved in each JSON output file, typically between 100 and 1000; only relevant when using a single JSON file as input (when using a folder as input each file in the input folder will produce a corresponding JSON output file).
 
 
-#### examples: 
+#### examples:
 
 ![](imgs/splitter_1.png)
 
 ![](imgs/splitter_2.png)
 
-The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch_size". 
+The output is one or several JSON files with the document collection split into sentences. The number of documents stored in the same JSON output file is specified under "batch_size".
 
 #### common errors:
 
@@ -274,7 +274,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 - "output_folder": output folder path where each batch will be saved, e.g. you can create a new subfolder in the EasyNER "results" subfolder
 - "output_file_prefix": first part of the output file name, e.g. "ner_disease"
 - "model_type": type of model; the user can choose between "biobert_finetuned" (deep learning models) and "spacy_phrasematcher" (dictionary-based NER)
-- "model_folder": For HuggingFace models use the repo name, e.g. "aitslab" for our BioBERT_HUNER models. For locally stored models, add the path to folder where the model is located. 
+- "model_folder": For HuggingFace models use the repo name, e.g. "aitslab" for our BioBERT_HUNER models. For locally stored models, add the path to folder where the model is located.
 - "model_name": when using a deep learning model for NER, enter the name of the model exactly as it is on HuggingFace (e.g. "biobert_bc5cdr_disease_v1") or in the file name for a locally stored model; when using a dictionary for NER, enter the name of a spaCy model, normally the same that was used in the Sentence splitter ("en_core_web_sm" or "en_core_web_trf")
 - "vocab_path": path to dictionary (if this option is used), e.g. "dictionaries/covid-19_synonyms_v2.txt"
 - "store_tokens": default is "no"; choose "yes" if all tokens produced from the sentence should be stored in the JSON output files (which can help with error analysis); only relevant for dictionary-based NER
@@ -288,7 +288,7 @@ To run this module, the ignore argument for ner should be set to false and the f
 
 If # is removed from the start of line 84 of the [ner_main.py script](https://github.com/Aitslab/EasyNER/blob/main/scripts/ner_main.py) before running the pipeline the term specified as "entity_type" will be added to each annotation in the JSON files. This increases file size and memory requirments and is thus not used by default.
 
-#### example: 
+#### example:
 
 ![](imgs/ner_1.png)
 
@@ -299,7 +299,7 @@ The output is one or several document collection JSON files, in which the texts 
 When using a deep learning model, you can use one of the BioBERT-based pytorch models we fine-tuned on the [HUNER corpora](https://github.com/hu-ner/huner), which are available from the [Aitslab Huggingface repository](https://huggingface.co/aitslab). Alternatively, you can use other models from HuggingFace repositories or your own model stored in the EasyNER "model" folder (as long as it is in the same format).
 
 Recommended models:
-1. Cells/cell lines: biobert_huner_cell_v1 
+1. Cells/cell lines: biobert_huner_cell_v1
 2. Chemicals (including drugs): biobert_huner_chemical_v1
 3. Disease (including symptoms): biobert_huner_disease_v1
 4. Gene/protein: biobert_huner_gene_v1
@@ -317,14 +317,14 @@ When loading models from HuggingFace set the "model_path" to the repo name (i.e.
 ```
 
 ### 2.3.2 Dictionary-based NER
-The dictionary option makes use of the [spaCy Phrasematcher](https://spacy.io/api/phrasematcher). You can either use one of the dictionaries that are included with EasyNER in the ["dictionaries"](dictionaries/) subfolder or create your own dictionary in the form of a .txt file with one term per line. 
+The dictionary option makes use of the [spaCy Phrasematcher](https://spacy.io/api/phrasematcher). You can either use one of the dictionaries that are included with EasyNER in the ["dictionaries"](dictionaries/) subfolder or create your own dictionary in the form of a .txt file with one term per line.
 
 The EasyNER dictionary folder contains dictionaries for the following:
 - COVID-19 and its synonyms
 - SARS-CoV2 and its synonyms
 - SARS-CoV2 variant names
- 
-Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (ideally use the same model as for the splitter,  "en_core_web_sm" or "en_core_web_trf") and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file. 
+
+Dictionary based NER can be run by specifying model_type as "spacy_phrasematcher", "model_name" as the spacy model (ideally use the same model as for the splitter,  "en_core_web_sm" or "en_core_web_trf") and specifying the "vocab_path" (path_to_dictionary) in the NER section of the config file.
 
 #### example:
 
@@ -353,7 +353,7 @@ This section quantifies the annotated entities from a single class (does not run
 - "entity_type": type of entity, this will be added as a prefix to the output file and bar graph,
 - "plot_top_n": plot top n entities. defaults to 50. Note that plotting more than 100 entities can result in a distorted graph
 
-#### example: 
+#### example:
 
 ![](imgs/Analysis_.png)
 
@@ -390,7 +390,7 @@ ___
 
 
 ## 2.5 Named Entity Linking (NEL) module
-This module adds unique identifiers to the entities in the annotated JSON document collection files by matching entities to a lookup table. Only exact matches receive the identifier. The lookup table should be a .tsv file with the columns "entity", "id" and "name", separated by "/t" (tab) where entity is the text discovered in the document, id is the identifier for a knowledge base, e.g. an ontology, and name is the standard name used in the knowledge base. Entities not present in the lookup table, instead receive a dummy identifier, i.e. "easyner:number". Consecutive numbers are used for each new encountered entity and each occurence of the entity receives the same dummy identifier which are stored in the new_entities.tsv output file which can be used as lookup table in the future. 
+This module adds unique identifiers to the entities in the annotated JSON document collection files by matching entities to a lookup table. Only exact matches receive the identifier. The lookup table should be a .tsv file with the columns "entity", "id" and "name", separated by "/t" (tab) where entity is the text discovered in the document, id is the identifier for a knowledge base, e.g. an ontology, and name is the standard name used in the knowledge base. Entities not present in the lookup table, instead receive a dummy identifier, i.e. "easyner:number". Consecutive numbers are used for each new encountered entity and each occurence of the entity receives the same dummy identifier which are stored in the new_entities.tsv output file which can be used as lookup table in the future.
 The output files have the same name as the input files with the prefix "nel_".
 
 
@@ -407,7 +407,7 @@ ___
 The File Merger module merges corresponding JSON files from multiple NER module or NEL runs, e.g. several runs for the same entity class with different models or several runs with different entity classes. First, as all the other steps above, set ignore analysis to false. Then use the following input and output config arguments:
 
 #### Config file arguments:
-- "input_paths": list of input folder paths where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]   
+- "input_paths": list of input folder paths where the files are saved. for example: ["path/to/cell/model/files/", "path/to/chemical/model/files/", "path/to/disease/model/files/"]
 - "entities": list of entities correcponding to the models. For example: ["cell", "chemical", "disease"]
 - "output_path": output path where the medged files will be saved
 
@@ -479,7 +479,7 @@ cd supplementary\experiment_scripts
 ```
 2. Run the script by typing
 ```console
-python postprocess_separator_merging.py 
+python postprocess_separator_merging.py
 ```
 
 ___
