@@ -154,9 +154,9 @@ class DownloaderConfig:
         params = {
             "baseline": config.get("baseline"),
             "save_path": (
-                config.get("raw_download_path", "")
-                if config.get("raw_download_path")
-                and len(config.get("raw_download_path", "")) > 0
+                config.get("download_path", "")
+                if config.get("download_path")
+                and len(config.get("download_path", "")) > 0
                 else cls.DEFAULT_SAVE_PATH
             ),
             "download_updates": config.get("download_updates", False),
@@ -914,7 +914,7 @@ def run_pubmed_download(config: dict) -> None:
     params = {
         "baseline": config.get("baseline"),
         "save_path": config.get(
-            "raw_download_path",
+            "download_path",
             DownloaderConfig.DEFAULT_SAVE_PATH,
         ),
         "n_start": config.get("file_start", 0),
@@ -952,7 +952,7 @@ def run_pubmed_updates_download(config: dict) -> None:
     params = {
         "baseline": config.get("baseline"),
         "save_path": config.get(
-            "raw_download_path",
+            "download_path",
             DownloaderConfig.DEFAULT_SAVE_PATH,
         ),
         "download_updates": True,  # Explicitly set this to True for update downloads
@@ -1022,7 +1022,7 @@ if __name__ == "__main__":
 
                 # Check that required configuration options exist
                 required_keys = [
-                    "raw_download_path",
+                    "download_path",
                     "baseline",
                     "update_start",
                     "update_end",
@@ -1056,7 +1056,7 @@ if __name__ == "__main__":
 
                 # Check that required configuration options exist
                 required_keys = [
-                    "raw_download_path",
+                    "download_path",
                     "baseline",
                     "file_start",
                     "file_end",

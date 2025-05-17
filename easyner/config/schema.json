@@ -175,7 +175,7 @@
       "type": "object",
       "description": "PubMed bulk downloader module configuration for baseline XML files.",
       "properties": {
-        "raw_download_path": {
+        "download_path": {
           "$ref": "#/definitions/path",
           "description": "Folder for raw downloaded files."
         },
@@ -204,7 +204,7 @@
         }
       },
       "required": [
-        "raw_download_path",
+        "download_path",
         "baseline"
       ]
     },
@@ -212,7 +212,7 @@
       "type": "object",
       "description": "PubMed bulk downloader module configuration for nightly update XML files.",
       "properties": {
-        "raw_download_path": {
+        "download_path": {
           "$ref": "#/definitions/path",
           "description": "Folder for raw downloaded update files."
         },
@@ -239,7 +239,7 @@
         }
       },
       "required": [
-        "raw_download_path",
+        "download_path",
         "update_start",
         "update_end"
       ]
@@ -275,12 +275,18 @@
           "type": "integer",
           "description": "Ending file number to process, e.g., 160 for pubmed24n0160.xml.gz. Default is null for all files.",
           "default": null
+        },
+        "baseline": {
+          "type": "integer",
+          "description": "PubMed annual baseline version, e.g., '24' for pubmed24n0001.xml.gz.",
+          "default": 25
         }
       },
       "required": [
         "input_path",
         "output_path",
-        "require_abstract"
+        "require_abstract",
+        "baseline"
       ]
     },
     "splitter": {

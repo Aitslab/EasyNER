@@ -81,7 +81,7 @@ ___
 
 The EasyNER pipeline includes a data loader module that can download, process and convert (to JSON files) the entire PubMed abstract collection. This is provided as the annual baseline, updated only once per year, and nightly update files. You can read more about this [here](https://ftp.ncbi.nlm.nih.gov/pubmed/README.tx) and [here](https://pubmed.ncbi.nlm.nih.gov/download/). The abstracts are bundled into a large number of gz files. The baselie version number is indicated in the file names after the word "pubmed" and the second number is the file number, e.g. pubmed24n0001.xml.gz.
 
-Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err.txt file is generated in the end (in the folder specified under "raw_download_path") to keep track of files that are not downloaded. Missing files can be downloaded in a second EasyNER run or manually from the ftp sites of the baseline and update files.
+Note that the download of the entire article collection requires enough storage space on your computer and may take several hours. An err.txt file is generated in the end (in the folder specified under "download_path") to keep track of files that are not downloaded. Missing files can be downloaded in a second EasyNER run or manually from the ftp sites of the baseline and update files.
 
 The pubmed_bulk_loader section of the config file is as follows:
 
@@ -94,7 +94,7 @@ The pubmed_bulk_loader section of the config file is as follows:
     "get_nightly_update_files": false,
     "update_file_range":[0,0],
     "count_articles": true,
-    "raw_download_path": ""
+    "download_path": ""
   },
  ```
 
@@ -122,7 +122,7 @@ If you want to download only a subset of the files in the the annual baseline, s
     "get_nightly_update_files": false,
     "update_file_range":[0,0],
     "count_articles": true,
-    "raw_download_path": ""
+    "download_path": ""
   },
  ```
 
