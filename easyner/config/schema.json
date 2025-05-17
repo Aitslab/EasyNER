@@ -272,7 +272,10 @@
           "default": 1
         },
         "file_end": {
-          "type": "integer",
+          "type": [
+            "integer",
+            "null"
+          ],
           "description": "Ending file number to process, e.g., 160 for pubmed24n0160.xml.gz. Default is null for all files.",
           "default": null
         },
