@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""
-Duplicate Sentence Analyzer
+"""Duplicate Sentence Analyzer.
 
 This script analyzes duplicate articles identified in a duplicate_report.json file
 to check if their sentences are also complete matches. It helps determine if articles
@@ -10,13 +9,24 @@ are true duplicates (exact copies) or just share the same title but have differe
 import argparse
 import datetime
 import os
+import warnings
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from difflib import SequenceMatcher
 from multiprocessing import cpu_count
+from typing import Optional
 
 import numpy as np
 import orjson
 from tqdm import tqdm
+
+# Display deprecation warning
+warnings.warn(
+    "This script was developed for analyzing a specific JSON format previously used "
+    "by the project for PubMed data. It may be removed or significantly changed in "
+    "future versions as the data format evolves.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # Define similarity threshold for sentences to be considered matching
 DEFAULT_SIMILARITY_THRESHOLD = 0.95  # 95% similarity
@@ -24,17 +34,16 @@ DEFAULT_MAX_CPU_LIMIT = 32  # Maximum number of CPU cores to use
 
 
 class DuplicateSentenceAnalyzer:
-    """
-    Analyzes sentence-level similarity between articles identified as
-    duplicates
+    """Analyze sentence-level similarity between articles identified as duplicates.
+
     Args:
-        duplicate_report_filepath (str): Path to the duplicate report JSON
-        file
+        duplicate_report_filepath (str): Path to the duplicate report JSON file
         similarity_threshold (float): Similarity threshold for sentences to be
         considered matching (0.0-1.0)
         max_processes (int): Number of parallel processes to use (default:
         CPU count)
-        verbose (bool): Enable verbose output for debugging
+        verbose (bool): Enable verbose output for debugging.
+
     """
 
     def __init__(
@@ -45,16 +54,21 @@ class DuplicateSentenceAnalyzer:
         verbose=False,
     ):
         """Initialize with path to duplicate report and similarity threshold."""
+        warnings.warn(
+            "DuplicateSentenceAnalyzer was designed for a specific JSON format that "
+            "may change in the future. Consider updating your code if you encounter issues.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
         self.duplicate_report_filepath = duplicate_report_filepath
         self.similarity_threshold = similarity_threshold
         self.max_processes = num_processes or min(
-            cpu_count(), DEFAULT_MAX_CPU_LIMIT
+            cpu_count(),
+            DEFAULT_MAX_CPU_LIMIT,
         )  # Default to CPU count or max limit, whichever is smaller
         self.verbose = verbose
         self.duplicates = []
-        self.original_duplicate_count = (
-            0  # Added to track original count when sampling
-        )
+        self.original_duplicate_count = 0  # Added to track original count when sampling
         self.results = {}
 
     def load_duplicate_report(self):
@@ -62,12 +76,13 @@ class DuplicateSentenceAnalyzer:
         if self.verbose:
             print(
                 f"[DEBUG] Loading duplicate report from "
-                f"{self.duplicate_report_filepath}"
+                f"{self.duplicate_report_filepath}",
             )
 
         try:
             with open(
-                self.duplicate_report_filepath, "r", encoding="utf-8"
+                self.duplicate_report_filepath,
+                encoding="utf-8",
             ) as f:
                 data = orjson.loads(f.read())
                 self.duplicates = data.get("duplicates", [])
@@ -75,8 +90,7 @@ class DuplicateSentenceAnalyzer:
             duplicate_count = len(self.duplicates)
             if self.verbose:
                 print(
-                    f"[DEBUG] Found {duplicate_count} duplicate sets in the "
-                    "report"
+                    f"[DEBUG] Found {duplicate_count} duplicate sets in the " "report",
                 )
 
             return duplicate_count > 0
@@ -85,8 +99,7 @@ class DuplicateSentenceAnalyzer:
             return False
 
     def calculate_sentence_similarity(self, sentence1, sentence2):
-        """Calculate similarity between two sentences, using fast exact match
-        check first."""
+        """Calculate similarity between two sentences, using fast exact match check first."""
         # Fast path: Check for exact equality first
         if sentence1 == sentence2:
             return 1.0
@@ -96,8 +109,7 @@ class DuplicateSentenceAnalyzer:
         return SequenceMatcher(None, sentence1, sentence2).ratio()
 
     def compare_article_sentences(self, article1_data, article2_data):
-        """Compare sentences between two article objects and calculate
-        similarity metrics."""
+        """Compare sentences between two article objects and calculate similarity metrics."""
         # Get sentences from both articles
         article1_sentences = article1_data.get("sentences", [])
         article2_sentences = article2_data.get("sentences", [])
@@ -143,7 +155,8 @@ class DuplicateSentenceAnalyzer:
 
             # Calculate similarity
             similarity = self.calculate_sentence_similarity(
-                article1_sentence_text, article2_sentence_text
+                article1_sentence_text,
+                article2_sentence_text,
             )  # This is computationally expensive
             similarities.append(similarity)
 
@@ -155,14 +168,12 @@ class DuplicateSentenceAnalyzer:
 
         # Calculate metrics
         avg_similarity = np.mean(similarities) if similarities else 0.0
-        is_exact_duplicate = (
-            avg_similarity >= self.similarity_threshold
-            and len(article1_sentences) == len(article2_sentences)
-        )
+        is_exact_duplicate = avg_similarity >= self.similarity_threshold and len(
+            article1_sentences,
+        ) == len(article2_sentences)
 
         return {
-            "sentence_count_match": len(article1_sentences)
-            == len(article2_sentences),
+            "sentence_count_match": len(article1_sentences) == len(article2_sentences),
             "sentence_count1": len(article1_sentences),
             "sentence_count2": len(article2_sentences),
             "identical_sentences": identical_count,
@@ -276,7 +287,7 @@ class DuplicateSentenceAnalyzer:
     #             ),
     #         }
 
-    def run_analysis(self):
+    def run_analysis(self) -> Optional[bool]:
         """Run the duplicate sentence analysis on all duplicate articles."""
         if not self.duplicates:
             print("No duplicates to analyze. Load the duplicate report first.")
@@ -286,7 +297,7 @@ class DuplicateSentenceAnalyzer:
         print(f"Started analysis at {start_time}")
         print(
             f"Processing {len(self.duplicates)} duplicate sets with "
-            f"{self.max_processes} processes"
+            f"{self.max_processes} processes",
         )
 
         try:
@@ -301,13 +312,13 @@ class DuplicateSentenceAnalyzer:
 
             print(
                 f"Found {len(file_to_duplicates)} unique files referenced by "
-                "duplicates"
+                "duplicates",
             )
 
             print("Step 2/3: Creating optimized processing batches...")
             # Create batches of duplicates that share files
             duplicate_batches = self._create_duplicate_batches(
-                file_to_duplicates
+                file_to_duplicates,
             )
 
             print(f"Created {len(duplicate_batches)} processing batches")
@@ -317,7 +328,7 @@ class DuplicateSentenceAnalyzer:
             print(
                 f"Batch size statistics: "
                 f"min={min(batch_sizes)}, max={max(batch_sizes)}, "
-                f"  avg={sum(batch_sizes)/len(batch_sizes):.1f}"
+                f"  avg={sum(batch_sizes)/len(batch_sizes):.1f}",
             )
 
             print("Step 3/3: Running parallel analysis...")
@@ -328,13 +339,13 @@ class DuplicateSentenceAnalyzer:
             TIMEOUT_PER_BATCH = 300  # 5 minutes timeout per batch
 
             with ProcessPoolExecutor(
-                max_workers=self.max_processes
+                max_workers=self.max_processes,
             ) as executor:
                 # Submit batches instead of individual duplicates
                 futures = []
                 for i, batch in enumerate(duplicate_batches):
                     futures.append(
-                        executor.submit(self._process_duplicate_batch, batch)
+                        executor.submit(self._process_duplicate_batch, batch),
                     )
 
                 # Process results as they complete
@@ -343,11 +354,11 @@ class DuplicateSentenceAnalyzer:
                         as_completed(futures),
                         total=len(futures),
                         desc="Processing batches",
-                    )
+                    ),
                 ):
                     try:
                         batch_results = future.result(
-                            timeout=TIMEOUT_PER_BATCH
+                            timeout=TIMEOUT_PER_BATCH,
                         )
                         results.extend(batch_results)
 
@@ -355,13 +366,13 @@ class DuplicateSentenceAnalyzer:
                         if (i + 1) % 10 == 0 or i == len(futures) - 1:
                             print(
                                 f"Processed {i+1}/{len(futures)} batches "
-                                f"({(i+1)/len(futures)*100:.1f}%)"
+                                f"({(i+1)/len(futures)*100:.1f}%)",
                             )
 
                     except TimeoutError:
                         print(
                             f"WARNING: Batch timed out after "
-                            f"{TIMEOUT_PER_BATCH} seconds. Skipping."
+                            f"{TIMEOUT_PER_BATCH} seconds. Skipping.",
                         )
                     except Exception as e:
                         print(f"Error processing batch: {str(e)}")
@@ -375,8 +386,7 @@ class DuplicateSentenceAnalyzer:
             exact_duplicates = [
                 r
                 for r in results
-                if r.get("status") == "analyzed"
-                and r.get("is_exact_duplicate", False)
+                if r.get("status") == "analyzed" and r.get("is_exact_duplicate", False)
             ]
             partial_duplicates = [
                 r
@@ -384,14 +394,12 @@ class DuplicateSentenceAnalyzer:
                 if r.get("status") == "analyzed"
                 and not r.get("is_exact_duplicate", False)
             ]
-            errors = [
-                r for r in results if r.get("status") in ["error", "skipped"]
-            ]
+            errors = [r for r in results if r.get("status") in ["error", "skipped"]]
 
             self.results = {
                 "summary": {
                     "total_duplicate_sets": len(
-                        self.duplicates
+                        self.duplicates,
                     ),  # This is now correct regardless of sampling
                     "exact_duplicates": len(exact_duplicates),
                     "partial_duplicates": len(partial_duplicates),
@@ -401,7 +409,7 @@ class DuplicateSentenceAnalyzer:
                     ).total_seconds(),
                     "similarity_threshold": self.similarity_threshold,
                     "timestamp": datetime.datetime.now().strftime(
-                        "%Y-%m-%d_%H-%M-%S"
+                        "%Y-%m-%d_%H-%M-%S",
                     ),
                 },
                 "exact_duplicates": exact_duplicates,
@@ -416,20 +424,17 @@ class DuplicateSentenceAnalyzer:
             return False
 
     def _create_duplicate_batches(self, file_to_duplicates):
-        """
-        Create optimized batches of duplicates that share files.
+        """Create optimized batches of duplicates that share files.
         This minimizes redundant file loading across processes.
         """
         # Create a graph where duplicates are connected if they share files
-        duplicate_to_id = {
-            dup["pmid"]: i for i, dup in enumerate(self.duplicates)
-        }
+        duplicate_to_id = {dup["pmid"]: i for i, dup in enumerate(self.duplicates)}
         connections = {}
 
         if self.verbose:
             print(
                 f"Building connection graph for {len(duplicate_to_id)} "
-                "duplicates..."
+                "duplicates...",
             )
 
         # Find connections between duplicates that share files
@@ -442,8 +447,7 @@ class DuplicateSentenceAnalyzer:
             if len(dups) > 1000:
                 if self.verbose:
                     print(
-                        f"Skipping file with {len(dups)} duplicates: "
-                        f"{file_path}"
+                        f"Skipping file with {len(dups)} duplicates: " f"{file_path}",
                     )
                 continue
 
@@ -465,7 +469,7 @@ class DuplicateSentenceAnalyzer:
 
         if self.verbose:
             print(
-                f"Finding connected components for {len(connections)} nodes..."
+                f"Finding connected components for {len(connections)} nodes...",
             )
 
         # Use a more efficient implementation for finding connected components
@@ -516,14 +520,14 @@ class DuplicateSentenceAnalyzer:
             if batch_sizes:
                 print(
                     f"Batch size statistics: min={min(batch_sizes)}, "
-                    f"max={max(batch_sizes)}, avg={sum(batch_sizes)/len(batch_sizes):.1f}"
+                    f"max={max(batch_sizes)}, avg={sum(batch_sizes)/len(batch_sizes):.1f}",
                 )
 
         # Balance batches if needed (avoid too many small batches)
         if len(batches) > self.max_processes * 2:
             if self.verbose:
                 print(
-                    "Merging small batches to optimize workload distribution..."
+                    "Merging small batches to optimize workload distribution...",
                 )
 
             batches = self._merge_small_batches(batches)
@@ -600,14 +604,13 @@ class DuplicateSentenceAnalyzer:
 
         if self.verbose:
             print(
-                f"Merged {len(merged)//2} batch pairs into {len(result)} batches"
+                f"Merged {len(merged)//2} batch pairs into {len(result)} batches",
             )
 
         return result
 
     def _process_duplicate_batch(self, batch):
-        """
-        Process a batch of duplicates that potentially share files.
+        """Process a batch of duplicates that potentially share files.
         Uses file caching to avoid redundant file loading.
         """
         results = []
@@ -615,7 +618,9 @@ class DuplicateSentenceAnalyzer:
 
         # Add progress bar for processing duplicates in the batch
         for duplicate in tqdm(
-            batch, desc="Processing duplicates in batch", leave=False
+            batch,
+            desc="Processing duplicates in batch",
+            leave=False,
         ):
             try:
                 # Extract duplicate info
@@ -632,7 +637,7 @@ class DuplicateSentenceAnalyzer:
                             "status": "skipped",
                             "reason": "less than 2 files",
                             "files": files,
-                        }
+                        },
                     )
                     continue
 
@@ -648,7 +653,7 @@ class DuplicateSentenceAnalyzer:
                     try:
                         # Use cached file content if available
                         if file_path not in file_cache:
-                            with open(file_path, "r", encoding="utf-8") as f:
+                            with open(file_path, encoding="utf-8") as f:
                                 file_cache[file_path] = orjson.loads(f.read())
 
                         data = file_cache[file_path]
@@ -673,7 +678,7 @@ class DuplicateSentenceAnalyzer:
                             "status": "skipped",
                             "reason": "could not load at least 2 files",
                             "files": files,
-                        }
+                        },
                     )
                     continue
 
@@ -685,7 +690,8 @@ class DuplicateSentenceAnalyzer:
                         file2_path, article2_data = file_contents[j]
 
                         comparison_result = self.compare_article_sentences(
-                            article1_data, article2_data
+                            article1_data,
+                            article2_data,
                         )
 
                         comparisons.append(
@@ -693,13 +699,12 @@ class DuplicateSentenceAnalyzer:
                                 "file1": os.path.basename(file1_path),
                                 "file2": os.path.basename(file2_path),
                                 "comparison": comparison_result,
-                            }
+                            },
                         )
 
                 # Determine overall duplicate status
                 is_exact_duplicate_across_all = all(
-                    comp["comparison"]["is_exact_duplicate"]
-                    for comp in comparisons
+                    comp["comparison"]["is_exact_duplicate"] for comp in comparisons
                 )
 
                 results.append(
@@ -710,14 +715,14 @@ class DuplicateSentenceAnalyzer:
                         "is_exact_duplicate": is_exact_duplicate_across_all,
                         "comparisons": comparisons,
                         "files": [os.path.basename(f) for f in files],
-                    }
+                    },
                 )
 
             except Exception as e:
                 if self.verbose:
                     print(
                         f"Error analyzing duplicate "
-                        f"{pmid if 'pmid' in locals() else 'unknown'}: {str(e)}"
+                        f"{pmid if 'pmid' in locals() else 'unknown'}: {str(e)}",
                     )
                 results.append(
                     {
@@ -725,15 +730,13 @@ class DuplicateSentenceAnalyzer:
                         "title": title if "title" in locals() else "unknown",
                         "status": "error",
                         "error": str(e),
-                        "files": (
-                            duplicate["files"] if "files" in duplicate else []
-                        ),
-                    }
+                        "files": (duplicate["files"] if "files" in duplicate else []),
+                    },
                 )
 
         return results
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Print a summary of the analysis results."""
         if not self.results:
             print("No results available. Run analysis first.")
@@ -745,22 +748,22 @@ class DuplicateSentenceAnalyzer:
         print(" DUPLICATE SENTENCE ANALYSIS SUMMARY ")
         print("=" * 60)
         print(
-            f"Total duplicate sets analyzed: {summary['total_duplicate_sets']}"
+            f"Total duplicate sets analyzed: {summary['total_duplicate_sets']}",
         )
         print(
             f"Exact duplicates (content matches): {summary['exact_duplicates']} "
-            + f"({summary['exact_duplicates']/summary['total_duplicate_sets']*100:.1f}%)"
+            + f"({summary['exact_duplicates']/summary['total_duplicate_sets']*100:.1f}%)",
         )
         print(
             f"Partial duplicates (content differs): {summary['partial_duplicates']} "
-            + f"({summary['partial_duplicates']/summary['total_duplicate_sets']*100:.1f}%)"
+            + f"({summary['partial_duplicates']/summary['total_duplicate_sets']*100:.1f}%)",
         )
         print(
             f"Errors/skipped: {summary['errors']} "
-            + f"({summary['errors']/summary['total_duplicate_sets']*100:.1f}%)"
+            + f"({summary['errors']/summary['total_duplicate_sets']*100:.1f}%)",
         )
         print(
-            f"Processing time: {summary['processing_time_seconds']:.2f} seconds"
+            f"Processing time: {summary['processing_time_seconds']:.2f} seconds",
         )
         print(f"Similarity threshold: {summary['similarity_threshold']}")
         print("=" * 60)
@@ -768,13 +771,13 @@ class DuplicateSentenceAnalyzer:
         # Print some examples of partial duplicates if available
         if self.results["partial_duplicates"]:
             print(
-                "\nEXAMPLES OF PARTIAL DUPLICATES (same title, different content):"
+                "\nEXAMPLES OF PARTIAL DUPLICATES (same title, different content):",
             )
             for i, dup in enumerate(self.results["partial_duplicates"][:3]):
                 print(f"\n{i+1}. PMID: {dup['pmid']}")
                 print(
                     f"   Title: {dup['title'][:80]}"
-                    + ("..." if len(dup["title"]) > 80 else "")
+                    + ("..." if len(dup["title"]) > 80 else ""),
                 )
                 print(f"   Files: {', '.join(dup['files'])}")
                 # Show the first comparison
@@ -785,10 +788,10 @@ class DuplicateSentenceAnalyzer:
                         f"{comp['identical_sentences'] + comp['similar_sentences']}"
                         f"/"
                         f"{min(comp['sentence_count1'], comp['sentence_count2'])} "
-                        f"({comp['average_similarity']*100:.1f}% similarity)"
+                        f"({comp['average_similarity']*100:.1f}% similarity)",
                     )
 
-    def save_report(self, output_path=None):
+    def save_report(self, output_path=None) -> Optional[bool]:
         """Save analysis results to a JSON file."""
         if not self.results:
             print("No results available. Run analysis first.")
@@ -799,19 +802,23 @@ class DuplicateSentenceAnalyzer:
             timestamp = self.results["summary"]["timestamp"]
             # Create results directory if it doesn't exist
             results_dir = os.path.join(
-                os.getcwd(), "results", "json_diagnostics"
+                os.getcwd(),
+                "results",
+                "json_diagnostics",
             )
             os.makedirs(results_dir, exist_ok=True)
             output_path = os.path.join(
-                results_dir, f"duplicate_sentence_analysis_{timestamp}.json"
+                results_dir,
+                f"duplicate_sentence_analysis_{timestamp}.json",
             )
 
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(
                     orjson.dumps(
-                        self.results, option=orjson.OPT_INDENT_2
-                    ).decode("utf-8")
+                        self.results,
+                        option=orjson.OPT_INDENT_2,
+                    ).decode("utf-8"),
                 )
             print(f"Analysis report saved to: {output_path}")
             return True
@@ -820,16 +827,17 @@ class DuplicateSentenceAnalyzer:
             return False
 
 
-def main():
+def main() -> int:
     """Main function to run the script."""
     parser = argparse.ArgumentParser(
         description=(
             "Analyze sentence-level similarities between articles identified "
             "as duplicates."
-        )
+        ),
     )
     parser.add_argument(
-        "duplicate_report", help="Path to the duplicate report JSON file"
+        "duplicate_report",
+        help="Path to the duplicate report JSON file",
     )
     parser.add_argument(
         "--threshold",
@@ -857,7 +865,9 @@ def main():
         ),
     )
     parser.add_argument(
-        "--verbose", action="store_true", help="Enable verbose output"
+        "--verbose",
+        action="store_true",
+        help="Enable verbose output",
     )
     parser.add_argument(
         "--profile",
@@ -902,13 +912,14 @@ def main():
 
             random.seed(42)  # For reproducibility
             analyzer.duplicates = random.sample(
-                analyzer.duplicates, args.sample
+                analyzer.duplicates,
+                args.sample,
             )
 
         print(
             f"Sampling mode: analyzing {len(analyzer.duplicates)} out of "
             f"{original_count} duplicates "
-            f"({len(analyzer.duplicates)/original_count*100:.2f}%)"
+            f"({len(analyzer.duplicates)/original_count*100:.2f}%)",
         )
 
     # Run analysis with or without profiling
@@ -926,11 +937,14 @@ def main():
             + f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.prof",
         )
         print(
-            f"Running with profiler. Results will be saved to {profile_output}"
+            f"Running with profiler. Results will be saved to {profile_output}",
         )
 
         cProfile.runctx(
-            "analyzer.run_analysis()", globals(), locals(), profile_output
+            "analyzer.run_analysis()",
+            globals(),
+            locals(),
+            profile_output,
         )
 
         # Print top 20 functions by cumulative time

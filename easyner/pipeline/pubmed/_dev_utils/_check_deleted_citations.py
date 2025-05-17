@@ -1,21 +1,32 @@
-"""
-Script to check for DeleteCitation elements in PubMed XML files.
+"""Script to check for DeleteCitation elements in PubMed XML files.
+
 This script is optimized to efficiently scan through large XML datasets
 and identify files containing deleted citations.
 """
 
-import os
-import gzip
-import glob
-from lxml import etree
-import json
-from collections import defaultdict
-import subprocess
-from tqdm import tqdm
+import warnings
+
+warnings.warn(
+    "This module is deprecated and will be removed in a future version. "
+    "Please use the pubmed_xml_parser or the pubmed_parser package instead. "
+    "This script is kept for development utility purposes only.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 import argparse
-import time
 import datetime
+import glob
+import gzip
+import json
+import os
+import subprocess
+import time
+from collections import defaultdict
 from multiprocessing import Pool, cpu_count
+
+from lxml import etree
+from tqdm import tqdm
 
 # Path configuration - can be overridden by command line arguments
 DEFAULT_DATA_DIR = "/lunarc/nobackup/projects/snic2020-6-41/carl/data/pubmed_raw/"
@@ -25,14 +36,14 @@ DEFAULT_PROCESS_COUNT = min(cpu_count(), 16)  # Limit to reasonable number
 
 
 def check_delete_citations(file_path):
-    """
-    Check for DeleteCitation elements in a PubMed XML file.
+    """Check for DeleteCitation elements in a PubMed XML file.
 
     Args:
         file_path: Path to the XML file to check
 
     Returns:
         tuple: (has_deletions, deleted_pmids)
+
     """
     deleted_pmids = []
     file_name = os.path.basename(file_path)
@@ -90,9 +101,8 @@ def analyze_delete_citations_multiprocessing(
     output_dir=DEFAULT_OUTPUT_DIR,
     limit=None,
     num_processes=DEFAULT_PROCESS_COUNT,
-):
-    """
-    Analyze PubMed XML files for DeleteCitation elements using multiprocessing.
+) -> None:
+    """Analyze PubMed XML files for DeleteCitation elements using multiprocessing.
 
     Args:
         data_dir: Directory containing PubMed XML files
@@ -100,6 +110,7 @@ def analyze_delete_citations_multiprocessing(
         output_dir: Directory to save output
         limit: Maximum number of files to process
         num_processes: Number of parallel processes to use
+
     """
     # Create output directory if it doesn't exist
     os.makedirs(output_dir, exist_ok=True)
@@ -160,7 +171,7 @@ def analyze_delete_citations_multiprocessing(
                         check_delete_citations,
                         args=(file_path,),
                         callback=update_progress,
-                    )
+                    ),
                 )
 
             # Wait for all tasks to complete and collect results
@@ -182,7 +193,7 @@ def analyze_delete_citations_multiprocessing(
 
     except KeyboardInterrupt:
         print(
-            "\nProcess interrupted by user. Generating report with processed files..."
+            "\nProcess interrupted by user. Generating report with processed files...",
         )
     finally:
         total_time = time.time() - start_time
@@ -215,9 +226,11 @@ def analyze_delete_citations_multiprocessing(
     print(f"Processing speed: {processed_files/total_time:.2f} files/second")
 
     if files_with_deletions:
-        print(f"\nTop 10 files with most deletions:")
+        print("\nTop 10 files with most deletions:")
         for item in sorted(
-            files_with_deletions, key=lambda x: x["count"], reverse=True
+            files_with_deletions,
+            key=lambda x: x["count"],
+            reverse=True,
         )[:10]:
             print(f"  {item['file']}: {item['count']} deleted PMIDs")
 
@@ -227,9 +240,8 @@ def analyze_delete_citations(
     file_pattern=DEFAULT_FILE_PATTERN,
     output_dir=DEFAULT_OUTPUT_DIR,
     limit=None,
-):
-    """
-    Sequential (non-parallel) version of the analysis function.
+) -> None:
+    """Sequential (non-parallel) version of the analysis function.
     Useful for debugging or when multiprocessing causes issues.
     """
     # Create output directory if it doesn't exist
@@ -285,7 +297,7 @@ def analyze_delete_citations(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Check for DeleteCitation elements in PubMed XML files"
+        description="Check for DeleteCitation elements in PubMed XML files",
     )
     parser.add_argument(
         "--data-dir",
@@ -298,7 +310,9 @@ if __name__ == "__main__":
         help="Pattern to match XML files",
     )
     parser.add_argument(
-        "--output-dir", default=DEFAULT_OUTPUT_DIR, help="Directory to save output"
+        "--output-dir",
+        default=DEFAULT_OUTPUT_DIR,
+        help="Directory to save output",
     )
     parser.add_argument("--limit", type=int, help="Maximum number of files to process")
     parser.add_argument(
@@ -329,5 +343,8 @@ if __name__ == "__main__":
     else:
         print("Using sequential processing")
         analyze_delete_citations(
-            args.data_dir, args.file_pattern, args.output_dir, args.limit
+            args.data_dir,
+            args.file_pattern,
+            args.output_dir,
+            args.limit,
         )

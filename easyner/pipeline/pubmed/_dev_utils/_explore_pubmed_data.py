@@ -29,6 +29,16 @@ Examples
 
 """
 
+import warnings
+
+warnings.warn(
+    "This module is deprecated and will be removed in a future version. "
+    "Please use the pubmed_xml_parser or the pubmed_parser package instead. "
+    "This script is kept for development utility purposes only.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 import argparse
 import datetime
 import glob
@@ -592,7 +602,7 @@ def analyze_pubmed_data_multiprocessing(
         abstract_match_type_summary: dict[str, int] = Counter()
         xml_element_differences: dict[str, int] = defaultdict(int)
 
-        try:
+        try {
             if all_pmids:
                 print("Finding duplicate PMIDs...")
                 df = pd.DataFrame(all_pmids)
@@ -1479,7 +1489,7 @@ def compare_article_metadata(
                 log_difference(f"list_length_mismatch ({len(val1)} vs {len(val2)})")
             # Naive list comparison, order matters. For more complex lists, might need element-wise.
             elif val1 != val2:
-                log_difference("list_content_differs")
+                log_difference("list_content_difers")
         else:  # Scalar types
             if val1 != val2:
                 log_difference("value_mismatch")

@@ -1,14 +1,31 @@
+"""Module for counting articles and unique doc_id-title combinations across JSON files.
+
+Provides the ArticleCounter class for efficient statistics gathering using threading or multiprocessing,
+and utilities for generating summary and duplicate reports.
+"""
+
 import argparse
 import datetime
 import gc
 import os
 import time
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from glob import glob
 from multiprocessing import cpu_count
+from typing import Optional
 
 import orjson
 from tqdm import tqdm
+
+# Display deprecation warning
+warnings.warn(
+    "This script was developed for analyzing a specific JSON format previously used "
+    "by the project for PubMed data. It may be removed or significantly changed in "
+    "future versions as the data format evolves.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 # Get system capabilities
 SYSTEM_CPU_COUNT = cpu_count()
@@ -464,7 +481,7 @@ class ArticleCounter:
 
         return self.results
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Print a summary of the results."""
         if not self.results:
             print("No results available. Run a counting method first.")
@@ -491,7 +508,7 @@ class ArticleCounter:
         if not self.results.get("completed", True):
             print("Note: Processing was interrupted before completion")
 
-    def generate_report(self, output_path=None):
+    def generate_report(self, output_path=None) -> Optional[bool]:
         """Generate a detailed report of the results in JSON format."""
         if not self.results:
             print("No results available. Run a counting method first.")
@@ -584,7 +601,7 @@ class ArticleCounter:
             print(f"Error saving report: {str(e)}")
             return False
 
-    def generate_duplicate_report(self, output_path=None):
+    def generate_duplicate_report(self, output_path=None) -> Optional[bool]:
         """Generate a detailed report of duplicates in JSON format."""
         if not self.results or "file_stats" not in self.results:
             print(
