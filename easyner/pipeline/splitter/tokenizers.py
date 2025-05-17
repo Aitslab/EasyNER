@@ -156,19 +156,16 @@ class NLTKTokenizer(TokenizerBase):
     def __init__(self):
         """Initializes the NLTKTokenizer."""
         try:
+            import nltk
             from nltk.tokenize import sent_tokenize
 
-            # Optional: Check/download 'punkt' data
-            # import nltk
-            # try:
-            #     nltk.data.find('tokenizers/punkt')
-            # except LookupError:
-            #     print("NLTK 'punkt' resource not found. Downloading...")
-            #     nltk.download('punkt', quiet=True)
-        except ImportError:
-            raise ImportError(
-                "NLTKTokenizer requires NLTK. Install with: pip install nltk",
-            )
+            # TODO: Check that this works without internet access
+            # This checks if they are up to date, and ifso skips the download
+            nltk.download("punkt")
+            nltk.download("punkt_tab")
+        except ImportError as e:
+            msg = "NLTKTokenizer requires NLTK. Install with: pip install nltk"
+            raise ImportError(msg) from e
 
         self.sent_tokenize = sent_tokenize
 
