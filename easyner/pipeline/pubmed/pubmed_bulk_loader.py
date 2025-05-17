@@ -296,7 +296,7 @@ def count_articles(input_path: str, baseline: int = 23) -> None:
     pmid_writer.close()
 
 
-def run_pubmed_loading(config: dict) -> None:
+def load_pubmed_from_xml(config: dict) -> None:
     """Run the PubMed loading process based on the provided configuration.
 
     Args:
@@ -399,7 +399,7 @@ if __name__ == "__main__":
                 print("Abstract filtering has been disabled via command line argument")
 
             # Run the loader
-            run_pubmed_loading(loader_config)
+            load_pubmed_from_xml(loader_config)
             print("PubMed bulk loading complete.")
         else:
             msg = (

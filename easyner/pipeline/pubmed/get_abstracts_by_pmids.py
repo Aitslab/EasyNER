@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import sys
-from typing import Any, List
+from typing import Any
 
 import pubmed_parser as pp
 import requests
@@ -81,7 +81,7 @@ def _append_json(path: str, new_data: dict):
 _tmp_dir = "tmp_dir_dl"
 
 
-def run(input_file: str, output_file: str, batch_size: int):
+def run(input_file: str, output_file: str, batch_size: int) -> None:
     os.makedirs(_tmp_dir, exist_ok=True)
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 

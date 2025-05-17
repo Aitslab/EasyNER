@@ -32,7 +32,7 @@ _downloading_files: set[Path] = set()
 
 
 @asynccontextmanager
-async def track_downloading_file(file_path: Path):
+async def track_downloading_file(file_path: Path):  # noqa: ANN201
     """Context manager to track files being downloaded.
 
     Allows for cleanup of partial downloads on program termination.
@@ -67,7 +67,7 @@ def cleanup_partial_downloads() -> None:
 def setup_signal_handlers() -> None:
     """Set up signal handlers for graceful termination."""
 
-    def signal_handler(sig, frame):
+    def signal_handler(sig, frame):  # noqa: ANN001
         print("\nInterrupt received, cleaning up and terminating...")
         cleanup_partial_downloads()
         print("Cleanup complete. Exiting.")
@@ -81,7 +81,7 @@ def setup_signal_handlers() -> None:
 
 
 @dataclass
-class DownloaderConfig:
+class PubMedBulkDownloaderConfig:
     """Configuration for downloading PubMed XML files.
 
     Attributes:
@@ -125,7 +125,7 @@ class DownloaderConfig:
     DEFAULT_SAVE_PATH: ClassVar[str] = "data/tmp/pubmed/"
 
     @classmethod
-    def from_config_dict(cls, config: dict[str, Any]) -> "DownloaderConfig":
+    def from_config_dict(cls, config: dict[str, Any]) -> "PubMedBulkDownloaderConfig":
         """Create a DownloaderConfig instance from a configuration dictionary.
 
         This class method is deprecated and only maintained for backwards compatibility.
@@ -483,14 +483,14 @@ class DownloaderConfig:
         return str(resolved_path)
 
 
-class PubMedDownloader:
+class PubMedBulkDownloader:
     """Downloader for PubMed XML files.
 
     This class handles downloading baseline and nightly update files from PubMed.
     It manages the download process, including error handling and logging.
     """
 
-    def __init__(self, config: DownloaderConfig) -> None:
+    def __init__(self, config: PubMedBulkDownloaderConfig) -> None:
         """Initialize the PubMed downloader with configuration.
 
         Args:
@@ -502,7 +502,9 @@ class PubMedDownloader:
         self.formatted_baseline = f"{self.baseline:02d}"
         self.save_path = Path(config.save_path)
         self.n_start: int = config.n_start
-        self.n_end: int = config.n_end
+        self.n_end: int = (
+            config.n_end
+        )  # There is a strange type error here, since this should always be a int after validation.
         self.download_updates = config.download_updates
         self.skip_existing = config.skip_existing
         self.max_connections = config.max_connections
@@ -903,7 +905,7 @@ class PubMedDownloader:
                 time.sleep(0.05)
 
 
-def run_pubmed_download(config: dict) -> None:
+def download_pubmed_in_bulk(config: dict) -> None:
     """Run the PubMed baseline download process based on the provided configuration.
 
     Args:
@@ -915,7 +917,7 @@ def run_pubmed_download(config: dict) -> None:
         "baseline": config.get("baseline"),
         "save_path": config.get(
             "download_path",
-            DownloaderConfig.DEFAULT_SAVE_PATH,
+            PubMedBulkDownloaderConfig.DEFAULT_SAVE_PATH,
         ),
         "n_start": config.get("file_start", 0),
         "n_end": config.get("file_end"),
@@ -925,14 +927,14 @@ def run_pubmed_download(config: dict) -> None:
     }
 
     # Create and validate the config
-    downloader_config = DownloaderConfig(**params)
+    downloader_config = PubMedBulkDownloaderConfig(**params)
 
     # Check if we should skip download
     if not downloader_config.skip_download:
         print("Downloading PubMed baseline files...")
         try:
             # Initialize and run downloader
-            downloader = PubMedDownloader(downloader_config)
+            downloader = PubMedBulkDownloader(downloader_config)
             downloader.execute_download()
             print("PubMed baseline download complete.")
         except Exception as e:
@@ -941,7 +943,7 @@ def run_pubmed_download(config: dict) -> None:
         print("PubMed baseline download step skipped based on configuration.")
 
 
-def run_pubmed_updates_download(config: dict) -> None:
+def download_pubmed_updates_in_bulk(config: dict) -> None:
     """Run the PubMed updates download process based on the provided configuration.
 
     Args:
@@ -953,7 +955,7 @@ def run_pubmed_updates_download(config: dict) -> None:
         "baseline": config.get("baseline"),
         "save_path": config.get(
             "download_path",
-            DownloaderConfig.DEFAULT_SAVE_PATH,
+            PubMedBulkDownloaderConfig.DEFAULT_SAVE_PATH,
         ),
         "download_updates": True,  # Explicitly set this to True for update downloads
         "u_start": config.get("update_start"),
@@ -963,14 +965,14 @@ def run_pubmed_updates_download(config: dict) -> None:
     }
 
     # Create and validate the config
-    downloader_config = DownloaderConfig(**params)
+    downloader_config = PubMedBulkDownloaderConfig(**params)
 
     # Check if we should skip download
     if not downloader_config.skip_download:
         print("Downloading PubMed update files...")
         try:
             # Initialize and run downloader
-            downloader = PubMedDownloader(downloader_config)
+            downloader = PubMedBulkDownloader(downloader_config)
             downloader.execute_download()
             print("PubMed update download complete.")
         except Exception as e:
@@ -1041,7 +1043,7 @@ if __name__ == "__main__":
                 # Update the skip_existing parameter based on force_download flag
                 if force_download:
                     updates_config["skip_existing"] = False
-                run_pubmed_updates_download(updates_config)
+                download_pubmed_updates_in_bulk(updates_config)
             else:
                 msg = (
                     "pubmed_bulk_updates_downloader section not found in config.json.\n"
@@ -1075,7 +1077,7 @@ if __name__ == "__main__":
                 # Update the skip_existing parameter based on force_download flag
                 if force_download:
                     downloader_config["skip_existing"] = False
-                run_pubmed_download(downloader_config)
+                download_pubmed_in_bulk(downloader_config)
             else:
                 msg = (
                     "pubmed_bulk_downloader section not found in config.json.\n"

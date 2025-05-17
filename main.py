@@ -5,16 +5,12 @@ from concurrent.futures import (
     ProcessPoolExecutor,
     as_completed,
 )
-from glob import glob
 from multiprocessing import cpu_count
 
-import torch
-from tqdm import tqdm
-
 from easyner.pipeline.pubmed import (
+    get_abstracts_by_pmids,
     pubmed_bulk_downloader,
     pubmed_bulk_loader,
-    pubmed_downloader,
 )
 from scripts import (
     analysis,
@@ -51,7 +47,7 @@ def run_download(dl_config: dict, ignore: bool) -> None:  # noqa: D103
         return
 
     print("Running downloader script.")
-    pubmed_downloader.run(
+    get_abstracts_by_pmids.run(
         input_file=dl_config["input_path"],
         output_file=dl_config["output_path"],
         batch_size=dl_config["batch_size"],
@@ -85,7 +81,7 @@ def run_pubmed_bulk_downloader(pbd_config: dict, ignore: bool) -> None:
         return
 
     print("Running pubmed bulk downloader script.")
-    pubmed_bulk_downloader.run_pubmed_download(pbd_config)
+    pubmed_bulk_downloader.download_pubmed_in_bulk(pbd_config)
     print("Finished running pubmed bulk downloader.")
 
 
@@ -104,7 +100,7 @@ def run_pubmed_bulk_updates_downloader(pbu_config: dict, ignore: bool) -> None:
     print("Running pubmed bulk updates downloader script.")
     # Use the dedicated pubmed_bulk_updates_downloader configuration
     # The download_updates flag is no longer needed as we're using a separate function
-    pubmed_bulk_downloader.run_pubmed_updates_download(pbu_config)
+    pubmed_bulk_downloader.download_pubmed_updates_in_bulk(pbu_config)
     print("Finished running pubmed bulk updates downloader.")
 
 
@@ -121,7 +117,7 @@ def run_pubmed_loader(pbl_config: dict, ignore: bool) -> None:
         return
 
     print("Running pubmed loader script.")
-    pubmed_bulk_loader.run_pubmed_loading(pbl_config)
+    pubmed_bulk_loader.load_pubmed_from_xml(pbl_config)
     print("Finished running pubmed loader script.")
 
 
