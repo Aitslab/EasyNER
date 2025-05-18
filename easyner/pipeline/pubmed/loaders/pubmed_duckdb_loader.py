@@ -81,7 +81,7 @@ class PubMedDuckDBLoader(BasePubMedLoader):
                 issn_linking VARCHAR,
                 "delete" BOOLEAN,
                 _created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                _source_file VARCHAR,
+                _source_batch INTEGER,
 
             )
         """,
@@ -101,6 +101,8 @@ class PubMedDuckDBLoader(BasePubMedLoader):
 
         try:
             # Start a transaction for better performance
+            source_file = os.path.basename(input_file)
+            batch = get_batch_index_from_filename(source_file)
             df = pd.DataFrame(data)
             self.conn.execute("BEGIN TRANSACTION")
 
@@ -109,9 +111,10 @@ class PubMedDuckDBLoader(BasePubMedLoader):
 
             # Insert from the registered table to the target table
             self.conn.execute(
-                """--sql
+                f"""--sql
                 INSERT INTO pubmed BY NAME
-                SELECT * FROM temp_articles
+                SELECT *, '{batch}' as _source_batch
+                FROM temp_articles
                 """,
             )
 
