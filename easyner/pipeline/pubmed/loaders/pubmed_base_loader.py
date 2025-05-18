@@ -44,7 +44,24 @@ class BasePubMedLoader(ABC):
                 msg = f"file_start ({self.file_start}) cannot be greater than file_end ({self.file_end})"
                 raise ValueError(msg)
 
-        os.makedirs(self.output_path, exist_ok=True)
+        # output_path could be either a database file, such as duckdb
+        # or a directory for holding output json files
+
+        # If output_path is a file, ensure the directory exists
+        if not os.path.isdir(self.output_path):
+            output_dir = os.path.dirname(self.output_path)
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+                print(f"Created directory: {output_dir}")
+            else:
+                print(f"Output directory already exists: {output_dir}")
+        else:
+            # If output_path is a directory, ensure it exists
+            if not os.path.exists(self.output_path):
+                os.makedirs(self.output_path)
+                print(f"Created directory: {self.output_path}")
+            else:
+                print(f"Output directory already exists: {self.output_path}")
 
     def _get_input_files(self, input_path: str) -> list[str]:
         """Get input files using path objects for reliable path handling.
@@ -109,19 +126,6 @@ class BasePubMedLoader(ABC):
         return input_files
 
     @abstractmethod
-    def _process_article_data(self, data: list[dict[str, Any]]) -> Any:
-        """Process article data extracted from XML.
-
-        Args:
-            data: List of article data dictionaries from pubmed_parser
-
-        Returns:
-            Processed article data in implementation-specific format
-
-        """
-        pass
-
-    @abstractmethod
     def _write_output(self, data: Any, input_file: str) -> None:
         """Write processed article data to output.
 
@@ -130,7 +134,10 @@ class BasePubMedLoader(ABC):
             input_file: Original input file path
 
         """
-        pass
+        msg = "Subclasses must implement the _write_output method."
+        raise NotImplementedError(
+            msg,
+        )
 
     def _load_xml(self, input_file: str) -> list[dict[str, Any]]:
         """Load XML file and parse using pubmed_parser.
@@ -162,5 +169,4 @@ class BasePubMedLoader(ABC):
         for input_file in tqdm(input_files_list, desc="Processing files"):
             self.current_input_file = input_file
             data = self._load_xml(input_file)
-            processed_data = self._process_article_data(data)
-            self._write_output(processed_data, input_file)
+            self._write_output(data, input_file)

@@ -115,6 +115,7 @@ class PubMedJSONLoader(BasePubMedLoader):
             input_file: Original input file path
 
         """
+        data = self._process_article_data(data)
         outfile = os.path.join(
             self.output_path,
             os.path.basename(input_file.split(".xml")[0]) + ".json",
