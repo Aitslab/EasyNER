@@ -905,7 +905,7 @@ class PubMedBulkDownloader:
                 time.sleep(0.05)
 
 
-def download_pubmed_in_bulk(config: dict) -> None:
+def bulk_download_pubmed_baseline(config: dict) -> None:
     """Run the PubMed baseline download process based on the provided configuration.
 
     Args:
@@ -943,7 +943,7 @@ def download_pubmed_in_bulk(config: dict) -> None:
         print("PubMed baseline download step skipped based on configuration.")
 
 
-def download_pubmed_updates_in_bulk(config: dict) -> None:
+def bulk_download_pubmed_updates(config: dict) -> None:
     """Run the PubMed updates download process based on the provided configuration.
 
     Args:
@@ -1043,7 +1043,7 @@ if __name__ == "__main__":
                 # Update the skip_existing parameter based on force_download flag
                 if force_download:
                     updates_config["skip_existing"] = False
-                download_pubmed_updates_in_bulk(updates_config)
+                bulk_download_pubmed_updates(updates_config)
             else:
                 msg = (
                     "pubmed_bulk_updates_downloader section not found in config.json.\n"
@@ -1077,7 +1077,7 @@ if __name__ == "__main__":
                 # Update the skip_existing parameter based on force_download flag
                 if force_download:
                     downloader_config["skip_existing"] = False
-                download_pubmed_in_bulk(downloader_config)
+                bulk_download_pubmed_baseline(downloader_config)
             else:
                 msg = (
                     "pubmed_bulk_downloader section not found in config.json.\n"
