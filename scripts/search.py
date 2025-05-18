@@ -5,7 +5,8 @@ import json
 import os
 from tqdm import tqdm
 from glob import glob
-from . import util
+from easyner import util
+
 
 class EntitySearch:
 

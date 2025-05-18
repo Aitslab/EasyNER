@@ -7,6 +7,7 @@ from concurrent.futures import (
 )
 from multiprocessing import cpu_count
 
+from easyner.pipeline.ner import ner_main
 from easyner.pipeline.pubmed import (
     get_abstracts_by_pmids,
     pubmed_bulk_downloader,
@@ -18,7 +19,6 @@ from scripts import (
     entity_merger,
     metrics,
     nel,
-    ner_main,
     search,
     text_loader,
 )
@@ -125,7 +125,10 @@ def run_ner(ner_config: dict, ignore: bool) -> None:  # noqa: C901, D103
         print("Ignoring script: NER.")
         return
 
-    ner_main.run_ner_module(ner_config, CPU_LIMIT)
+    from easyner.pipeline.ner.ner_main import NERPipeline
+
+    pipeline = NERPipeline(ner_config, CPU_LIMIT)
+    pipeline.run()
 
 
 def run_analysis(analysis_config: dict, ignore: bool) -> None:  # noqa: D103

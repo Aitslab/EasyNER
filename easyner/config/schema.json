@@ -379,6 +379,20 @@
         },
         "model_type": {
           "type": "string",
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "biobert_finetuned",
+                "spacy_phrasematcher"
+              ],
+              "description": "Predefined model options"
+            },
+            {
+              "type": "string",
+              "description": "Custom model type"
+            }
+          ],
           "description": "Type of model to use: 'biobert_finetuned' for deep learning or 'spacy_phrasematcher' for dictionary-based NER.",
           "default": "biobert_finetuned"
         },
@@ -413,9 +427,9 @@
           "description": "Path to dictionary file for dictionary-based NER, e.g., 'dictionaries/covid-19_synonyms_v2.txt'."
         },
         "store_tokens": {
-          "type": "string",
-          "description": "'yes' to store all tokens in the output for error analysis (only for dictionary-based NER); default is 'no'.",
-          "default": "no"
+          "type": "boolean",
+          "description": "If true store all tokens in the output for error analysis (only for dictionary-based NER); default is 'false'.",
+          "default": false
         },
         "labels": {
           "type": "string",
@@ -440,6 +454,29 @@
             }
           ],
           "default": null
+        },
+        "reuse_optimal_batch_size": {
+          "type": "boolean",
+          "description": "If true, calculates the optimal batch size only once for the first batch and reuses it for all subsequent batches. This improves performance by avoiding redundant batch size calculations.",
+          "default": true
+        },
+        "batch_span_start": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Inclusive starting index for the batch of sentences to process. Default is 0.",
+          "default": 1,
+          "minimum": 1
+        },
+        "batch_span_end": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Exclusive end index for the batch of sentences to process. Default is null, which processes all batches.",
+          "default": null,
+          "minimum": 1
         },
         "article_limit": {
           "type": "array",
@@ -475,6 +512,11 @@
           "type": "boolean",
           "description": "If true, enables multiprocessing for faster processing when using SpacyPharseMatcher dictionary based NER.",
           "default": true
+        },
+        "reprocess": {
+          "type": "boolean",
+          "description": "If true, reprocesses the input files even if they already exist in the output folder.",
+          "default": false
         }
       },
       "required": [

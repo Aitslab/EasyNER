@@ -117,7 +117,7 @@ def sample_config() -> dict[str, Any]:
             "model_folder": "test_folder",
             "model_name": "test_name",
             "vocab_path": "D:/projects/vocab.txt",
-            "store_tokens": "no",
+            "store_tokens": False,
             "labels": "",
             "clear_old_results": True,
             "article_limit": [-1, 100],
