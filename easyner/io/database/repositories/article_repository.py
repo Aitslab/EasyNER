@@ -3,7 +3,7 @@ from typing import Any, Optional, Union
 import pandas as pd
 
 from easyner.io.database.schemas import ARTICLES_TABLE_SQL
-from easyner.io.database.utils.column_names import (
+from easyner.io.database.schemas.python_mappings import (
     ARTICLE_ID,
     ARTICLES_TABLE,
     TITLE,

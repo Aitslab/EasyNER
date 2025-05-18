@@ -1,5 +1,4 @@
-"""
-SQL Column name and table name constants extracted from schema definitions.
+"""SQL Column name and table name constants extracted from schema definitions.
 
 This module provides constants for all database table names and column names,
 extracted from the actual SQL schema files for consistency.
@@ -18,18 +17,18 @@ SENTENCES_TABLE = "sentences"
 ENTITIES_TABLE = "entities"
 
 
-def extract_column_names_from_sql(file_path: Path) -> List[str]:
-    """
-    Extract column names from a SQL CREATE TABLE statement.
+def extract_column_names_from_sql(file_path: Path) -> list[str]:
+    """Extract column names from a SQL CREATE TABLE statement.
 
     Args:
         file_path: Path to SQL schema file
 
     Returns:
         List of column names found in the schema
+
     """
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             sql_content = f.read()
 
         # Extract text between CREATE TABLE and closing parenthesis

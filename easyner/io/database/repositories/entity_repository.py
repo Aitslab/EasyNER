@@ -3,7 +3,7 @@ from typing import Any, Union
 import pandas as pd
 
 from easyner.io.database.schemas import ENTITIES_TABLE_SQL
-from easyner.io.database.utils.column_names import (
+from easyner.io.database.schemas.python_mappings import (
     ARTICLE_ID,
     END_CHAR,
     ENTITIES_TABLE,
@@ -180,7 +180,7 @@ class EntityRepository(Repository):
         if log_duplicates:
             self.logger.warning(
                 "Duplicate logging not supported for entities. "
-                "Setting log_duplicates=False and proceeding with insertion."
+                "Setting log_duplicates=False and proceeding with insertion.",
             )
             log_duplicates = False
 

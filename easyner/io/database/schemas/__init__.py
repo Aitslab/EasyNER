@@ -5,6 +5,9 @@ This package contains SQL schema definitions for tables used in the EasyNer appl
 """
 
 from pathlib import Path
+
+import easyner.io.database.schemas.python_mappings as python_mappings
+
 from ..utils.sql_utils import read_sql_file
 
 SCHEMA_DIR = Path(__file__).parent
