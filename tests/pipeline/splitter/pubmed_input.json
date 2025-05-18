@@ -1,0 +1,30 @@
+{
+  "30981": {
+    "title": "Potentiation of apomorphine action in rats by l-prolyl-l-leucyl-glycine amide.",
+    "abstract": "Although the antiparkinsonian activity of 1-prolyl-l-leucyl-glycine amide (PLG=MIF-I) has been previously observed in several clinical trials, little is known of the mechanism of action of this tripeptide on the brain. Our study demonstrated potentiation of the action of apomorphine by PLG on the rotational behavior of mature rats which received unilateral 6-OHDA (16 microgram) lesions of the striatum as neonates. No change in tyrosine hydroxylase or dopa decarboxylase activities in rat striatal homogenates was found after addition of PLG (10(-8-10(-3) M). The results suggest that PLG modifies the dopamine receptor, making it more responsive to stimulation by the agonistic agent apomorphine and perhaps by the natural neurotransmitter dopamine.",
+    "mesh_terms": "D000818:Animals; D001058:Apomorphine; D001522:Behavior, Animal; D003342:Corpus Striatum; D003913:Dextroamphetamine; D004296:Dopa Decarboxylase; D004357:Drug Synergism; D005260:Female; D066298:In Vitro Techniques; D009075:MSH Release-Inhibiting Hormone; D008297:Male; D051381:Rats; D014446:Tyrosine 3-Monooxygenase",
+    "pubdate": "1978-09",
+    "chemical_list": "D009075:MSH Release-Inhibiting Hormone; D014446:Tyrosine 3-Monooxygenase; D004296:Dopa Decarboxylase; D001058:Apomorphine; D003913:Dextroamphetamine"
+  },
+  "30982": {
+    "title": "Myocardial adrenoceptors and cardiac arrhythmias.",
+    "abstract": "",
+    "mesh_terms": "D000319:Adrenergic beta-Antagonists; D000818:Animals; D001145:Arrhythmias, Cardiac; D006321:Heart; D006801:Humans; D066298:In Vitro Techniques; D009200:Myocardial Contraction; D009467:Neuromuscular Depolarizing Agents; D011941:Receptors, Adrenergic; D011943:Receptors, Adrenergic, beta; D013569:Synapses",
+    "pubdate": "1978-07",
+    "chemical_list": "D000319:Adrenergic beta-Antagonists; D009467:Neuromuscular Depolarizing Agents; D011941:Receptors, Adrenergic; D011943:Receptors, Adrenergic, beta"
+  },
+  "30983": {
+    "title": "[Conference report. III. International Symposium on Facial Nerve Surgery in Zurich, August 9--12, 1976].",
+    "abstract": "",
+    "mesh_terms": "D003226:Congresses as Topic; D005154:Facial Nerve; D006801:Humans; D013557:Switzerland",
+    "pubdate": "1978-06",
+    "chemical_list": ""
+  },
+  "30984": {
+    "title": "Specific immune recognition by lymphocytes: an evolutionary perspective.",
+    "abstract": "In this review, we analyze data pertinent to the origins of specific immune recognition by lymphocytes. The phenomena of immunity in invertebrates and the cells that might be involved in these processes are considered. We conclude that the existence of vertebrate-type immunocompetent lymphocytes in invertebrates is not yet proven. All vertebrates apparently possess immunologically competent lymphocytes, and the following conclusions may be drawn: (1) Specific antigen recognition by lymphocytes of all vertebrates appears to be mediated by membrane-bound immunoglobulins. These immunoglobulins are, in all probability, distinct from secreted, serum immunoglobulins (antibodies), although serum and surface immunoglobulins share combining sites for antigen which are formed of variable regions. (2) There is evidence for similar functional divisions among the immune systems of all vertebrates, as reflected in the results of anatomical, functional, and physicochemical investigations of lymphocytes from animals as diverse as fish and mammals.",
+    "mesh_terms": "D000220:Adaptation, Biological; D000818:Animals; D000845:Annelida; D001181:Arthropods; D001402:B-Lymphocytes; D005075:Biological Evolution; D003063:Cnidaria; D004447:Echinodermata; D007109:Immunity; D007156:Immunologic Memory; D007448:Invertebrates; D008214:Lymphocytes; D011947:Receptors, Antigen, B-Cell; D013601:T-Lymphocytes; D014561:Urochordata; D014714:Vertebrates",
+    "pubdate": "1978-09",
+    "chemical_list": "D011947:Receptors, Antigen, B-Cell"
+  }
+}

@@ -20,8 +20,6 @@ from scripts import (
     nel,
     ner_main,
     search,
-    splitter,
-    splitter_pubmed,
     text_loader,
 )
 
@@ -119,121 +117,6 @@ def run_pubmed_loader(pbl_config: dict, ignore: bool) -> None:
     print("Running pubmed loader script.")
     pubmed_bulk_loader.load_pubmed_from_xml(pbl_config)
     print("Finished running pubmed loader script.")
-
-
-def run_splitter(splitter_config: dict, ignore: bool) -> dict:  # noqa: D103
-    if ignore:
-        print("Ignoring script: splitter.")
-        return {}
-
-    os.makedirs(splitter_config["output_folder"], exist_ok=True)
-
-    if splitter_config["pubmed_bulk"] == True:
-        if splitter_config["file_limit"] == "ALL":
-            input_files_list = splitter_pubmed.load_pre_batched_files(
-                splitter_config["input_path"],
-            )
-        else:
-            input_files_list = splitter_pubmed.load_pre_batched_files(
-                splitter_config["input_path"],
-                limit=splitter_config["file_limit"],
-            )
-            # split each batch
-        if splitter_config["tokenizer"] == "spacy":
-            print("Running splitter script with spacy")
-
-            with ProcessPoolExecutor(min(CPU_LIMIT, cpu_count())) as executor:
-
-                futures = [
-                    executor.submit(
-                        splitter_pubmed.split_prebatch,
-                        splitter_config,
-                        input_file,
-                        tokenizer="spacy",
-                    )
-                    for input_file in input_files_list
-                ]
-
-                for future in as_completed(futures):
-                    # print(future.result)
-                    i = future.result()
-
-        elif splitter_config["tokenizer"] == "nltk":
-            print("Running splitter script with nltk")
-
-            # import nltk
-            # nltk.download("punkt")
-
-            with ProcessPoolExecutor(min(CPU_LIMIT, cpu_count())) as executor:
-
-                futures = [
-                    executor.submit(
-                        splitter_pubmed.split_prebatch,
-                        splitter_config,
-                        input_file,
-                        tokenizer="nltk",
-                    )
-                    for input_file in input_files_list
-                ]
-
-                for future in as_completed(futures):
-                    i = future.result()
-
-    else:
-        with open(splitter_config["input_path"], encoding="utf-8") as f:
-            full_articles = json.loads(f.read())
-
-        article_batches = splitter.make_batches(
-            list(full_articles),
-            splitter_config["batch_size"],
-        )
-
-        # split each batch
-        if splitter_config["tokenizer"] == "spacy":
-            print("Running splitter script with spacy")
-
-            with ProcessPoolExecutor(min(CPU_LIMIT, cpu_count())) as executor:
-
-                futures = [
-                    executor.submit(
-                        splitter.split_batch,
-                        splitter_config,
-                        idx,
-                        art,
-                        full_articles,
-                        tokenizer="spacy",
-                    )
-                    for idx, art in enumerate(article_batches)
-                ]
-
-                for future in as_completed(futures):
-                    # print(future.result)
-                    i = future.result()
-
-        elif splitter_config["tokenizer"] == "nltk":
-            print("Running splitter script with nltk")
-
-            # import nltk
-            # nltk.download("punkt")
-
-            with ProcessPoolExecutor(min(CPU_LIMIT, cpu_count())) as executor:
-
-                futures = [
-                    executor.submit(
-                        splitter.split_batch,
-                        splitter_config,
-                        idx,
-                        art,
-                        full_articles,
-                        tokenizer="nltk",
-                    )
-                    for idx, art in enumerate(article_batches)
-                ]
-
-                for future in as_completed(futures):
-                    i = future.result()
-
-    print("Finished running splitter script.")
 
 
 def run_ner(ner_config: dict, ignore: bool) -> None:  # noqa: C901, D103
@@ -432,8 +315,15 @@ if __name__ == "__main__":
     if TIMEKEEP:
         start_splitter = time.time()
 
-    run_splitter(config["splitter"], ignore=ignore["splitter"])
+    if not ignore["splitter"]:
+        from easyner.pipeline.splitter import run_splitter
 
+    run_splitter(
+        config["splitter"],
+        ignore=ignore["splitter"],
+        cpu_limit=CPU_LIMIT,
+    )
+    # run_splitter_pubmed(config["splitter_pubmed"], ignore=ignore["splitter_pubmed"])
     if TIMEKEEP:
         end_splitter = time.time()
         tkff.write(f"Splitter time: {end_splitter-start_splitter}\n")
