@@ -2,6 +2,8 @@
 
 This module defines PubMedDuckDBLoader, which processes PubMed XML files
 and loads them into a DuckDB database.
+TODO: allow idempotent loading of the same file multiple times
+Maybe by checking already present batch numbers
 """
 
 import os
