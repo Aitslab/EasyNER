@@ -98,7 +98,7 @@ def load_pubmed_from_xml(config: dict) -> None:
     loader = PubMedJSONLoader(
         input_path=input_path,
         output_path=output_path,
-        k=config["baseline"],
+        baseline=config["baseline"],
         require_abstract=config.get("require_abstract", True),
         file_start=file_start,
         file_end=file_end,

@@ -14,7 +14,7 @@ class PubMedJSONLoader(BasePubMedLoader):
         self,
         input_path: str,
         output_path: str,
-        k: str,
+        baseline: str,
         require_abstract: bool = False,
         file_start: Optional[int] = None,
         file_end: Optional[int] = None,
@@ -30,7 +30,7 @@ class PubMedJSONLoader(BasePubMedLoader):
             file_end: Optional end index for file range processing
 
         """
-        super().__init__(input_path, output_path, k, file_start, file_end)
+        super().__init__(input_path, output_path, baseline, file_start, file_end)
         self.require_abstract = require_abstract
         self.counter = {}
         self.filter_stats = {

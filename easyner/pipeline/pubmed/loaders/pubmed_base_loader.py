@@ -16,7 +16,7 @@ class BasePubMedLoader(ABC):
         self,
         input_path: str,
         output_path: str,
-        k: str,
+        baseline: str,
         file_start: Optional[int] = None,
         file_end: Optional[int] = None,
     ) -> None:
@@ -34,7 +34,7 @@ class BasePubMedLoader(ABC):
         self.input_path = _resolve_path(input_path)
         self.output_path = _resolve_path(output_path)
         # Ensure k is a string
-        self.k = str(k)
+        self.baseline = str(baseline)
         self.file_start = file_start
         self.file_end = file_end
 
@@ -64,7 +64,9 @@ class BasePubMedLoader(ABC):
         input_files = sorted(
             [str(p) for p in input_path_obj.glob("*.gz")],
             key=lambda x: int(
-                os.path.splitext(os.path.basename(x))[0].split(self.k + "n")[-1][:-4],
+                os.path.splitext(os.path.basename(x))[0].split(self.baseline + "n")[-1][
+                    :-4
+                ],
             ),
         )
 
@@ -75,7 +77,7 @@ class BasePubMedLoader(ABC):
                 try:
                     file_num = int(
                         os.path.splitext(os.path.basename(file_path))[0].split(
-                            self.k + "n",
+                            self.baseline + "n",
                         )[-1][:-4],
                     )
 
