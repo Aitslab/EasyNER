@@ -14,8 +14,6 @@ from pathlib import Path
 import orjson
 from tqdm import tqdm
 
-from easyner.pipeline.pubmed.loaders.pubmed_base_loader import BasePubMedLoader
-from easyner.pipeline.pubmed.loaders.pubmed_json_loader import PubMedJSONLoader
 from easyner.pipeline.pubmed.utils import _resolve_path
 
 

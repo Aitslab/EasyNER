@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import orjson
 
-from .pubmed_base_loader import BasePubMedLoader
+from easyner.pipeline.pubmed.loaders import BasePubMedLoader
 
 
 class PubMedJSONLoader(BasePubMedLoader):

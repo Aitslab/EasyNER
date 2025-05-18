@@ -1,3 +1,9 @@
+"""Base loader classes for PubMed XML processing.
+
+This module provides an abstract base class for loading and processing PubMed XML files,
+including file discovery, range filtering, and output handling.
+"""
+
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -41,7 +47,10 @@ class BasePubMedLoader(ABC):
         # Validate file range if both are provided
         if self.file_start is not None and self.file_end is not None:
             if self.file_start > self.file_end:
-                msg = f"file_start ({self.file_start}) cannot be greater than file_end ({self.file_end})"
+                msg = (
+                    f"file_start ({self.file_start}) cannot be greater than "
+                    f"file_end ({self.file_end})"
+                )
                 raise ValueError(msg)
 
         # output_path could be either a database file, such as duckdb
@@ -113,7 +122,10 @@ class BasePubMedLoader(ABC):
 
             input_files = filtered_files
             print(
-                f"After applying range filters (start={self.file_start}, end={self.file_end}): {len(input_files)} files",
+                (
+                    f"After applying range filters (start={self.file_start}, "
+                    f"end={self.file_end}): {len(input_files)} files"
+                ),
             )
 
         # Add debug output for the number of files found
@@ -126,7 +138,7 @@ class BasePubMedLoader(ABC):
         return input_files
 
     @abstractmethod
-    def _write_output(self, data: Any, input_file: str) -> None:
+    def _write_output(self, data: Any, input_file: str) -> None:  # noqa: ANN401
         """Write processed article data to output.
 
         Args:

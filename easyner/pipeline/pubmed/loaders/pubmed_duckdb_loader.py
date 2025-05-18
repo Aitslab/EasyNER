@@ -1,11 +1,17 @@
-from typing import Any, List
+"""Loader for converting PubMed XML data to DuckDB format.
 
-import duckdb
+This module defines PubMedDuckDBLoader, which processes PubMed XML files
+and loads them into a DuckDB database.
+"""
+
+import os
+from typing import Any
+
 import pandas as pd
 
 from easyner.io.database import DatabaseConnection
-
-from .pubmed_base_loader import BasePubMedLoader
+from easyner.pipeline.pubmed.loaders import BasePubMedLoader
+from easyner.pipeline.utils import get_batch_index_from_filename
 
 
 class PubMedDuckDBLoader(BasePubMedLoader):
