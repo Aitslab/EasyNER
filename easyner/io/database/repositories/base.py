@@ -87,7 +87,8 @@ class Repository(ABC):
     def _execute_insert_many(
         self,
         items: Union[list[dict[str, Any]], pd.DataFrame],
-        log_duplicates_to_duplicates_table: bool = False,
+        log_duplicates: bool = False,
+        ignore_duplicates: bool = False,
     ) -> None:
         """Core logic to insert multiple items. Not transactional by itself.
 
@@ -151,10 +152,16 @@ class Repository(ABC):
             # most of the time we want to insert all columns
             self._register_view(view_name, df, required_cols)
             # Execute the repository-specific SQL query
-            if log_duplicates_to_duplicates_table:
+            if log_duplicates:
                 self._insert_log_duplicates_to_duplicates_table(view_name)
             else:
-                self.connection.execute(self._build_insert_query(view_name))
+                query = self._build_insert_query(view_name)
+                if ignore_duplicates:
+                    # Replace INSERT with INSERT OR IGNORE in sql query
+                    query = query.replace("INSERT", "INSERT OR IGNORE")
+
+                self.connection.execute(query)
+
         except duckdb.ConstraintException as e:
             # Handle constraint violation
             # When running withh log_duplicates_to_duplicates_table=True
@@ -192,49 +199,64 @@ class Repository(ABC):
     def insert_many_transactional(
         self,
         items: Union[list[dict[str, Any]], pd.DataFrame],
-        log_duplicates_to_duplicates_table: bool = False,
+        log_duplicates: bool = False,
+        ignore_duplicates: bool = False,
     ) -> None:
-        """Insert multiple items with transaction support.
+        """Transactional wrapper for insert many.
 
         Use this for standalone batch insertions.
-
-        Args:
-            items: List of dictionaries or DataFrame containing data
-            log_duplicates_to_duplicates_table: Flag to log duplicates
-            to duplicates table (default: False)
-
-        Raises:
-            Exception: If there is an error during insertion
-
         """
         self.insert_many_non_transactional(
             items,
-            log_duplicates_to_duplicates_table,
+            log_duplicates,
+            ignore_duplicates,
         )
 
     def insert_many_non_transactional(
         self,
         items: Union[list[dict[str, Any]], pd.DataFrame],
-        log_duplicates_to_duplicates_table: bool = False,
+        log_duplicates: bool = False,
+        ignore_duplicates: bool = False,
     ) -> None:
         """Insert multiple items without transaction management.
 
-        Use within externally managed transactions.
+        Use within externally managed transactions that catch
+        exceptions and rollback if needed.
+
+        Default behavior is INSERT INTO, which will raise an error
+        on duplicate entries.
+        If log_duplicates is set to True, it will log duplicates
+        to the duplicates table instead of raising an error.
+        If ignore_duplicates is set to True, it will silently
+        ignore duplicate entries. This is not compatible with log_duplicates.
 
         Args:
             items: List of dictionaries or DataFrame containing data
-            log_duplicates_to_duplicates_table: Flag to log duplicates
-            to duplicates table
+            log_duplicates: Flag to log duplicates to duplicates table
+                (default: False)
+            ignore_duplicates: Flag to ignore duplicate entries
                 (default: False)
 
         Raises:
             Exception: If there is an error during insertion
 
         """
+        # We can't both log and ignore duplicates
+        if log_duplicates and ignore_duplicates:
+            msg = (
+                "Log duplicates is not compatible with ignore duplicates. "
+                "Please choose whether to log or ignore duplicates. "
+                "If not logging to table, use ignore duplicates to either "
+                "raise errors on duplicate insertions or silently ignore them."
+            )
+            raise ValueError(
+                msg,
+            )
         try:
             self._execute_insert_many(
                 items,
-                log_duplicates_to_duplicates_table,
+                log_duplicates,
+                ignore_duplicates,
             )
         except Exception as e:
             self.logger.error(
