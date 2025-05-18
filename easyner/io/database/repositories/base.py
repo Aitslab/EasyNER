@@ -62,12 +62,6 @@ class Repository(ABC):
         pass
 
     @property
-    @abstractmethod
-    def parent_table(self) -> str:
-        """Return the name of the parent table."""
-        pass
-
-    @property
     def duplicate_table_name(self) -> str:
         """Return the name of the repository's duplicates table."""
         return f"{self.table_name}_duplicates"
@@ -203,9 +197,7 @@ class Repository(ABC):
             raise ValueError(msg)
 
         # Perform insertion, unique view name to avoid conflicts
-        view_name = (
-            f"temp_{self.table_name}_df_{id(df)}_{str(uuid.uuid4())[:8]}"
-        )
+        view_name = f"temp_{self.table_name}_df_{id(df)}_{str(uuid.uuid4())[:8]}"
 
         try:
             # Register view with only the columns we need
@@ -407,9 +399,7 @@ class Repository(ABC):
             conflict_count_result = self.conn.execute(
                 f"SELECT COUNT(*) FROM {conflicts_view_name}",
             ).fetchone()
-            conflict_count = (
-                conflict_count_result[0] if conflict_count_result else 0
-            )
+            conflict_count = conflict_count_result[0] if conflict_count_result else 0
 
             self.logger.info(
                 f"Found {conflict_count} records in view that conflict with "
@@ -463,9 +453,7 @@ class Repository(ABC):
                 f"SELECT COUNT(*) FROM {internal_dups_view}",
             ).fetchone()
             internal_dup_count = (
-                internal_dup_count_result[0]
-                if internal_dup_count_result
-                else 0
+                internal_dup_count_result[0] if internal_dup_count_result else 0
             )
             self.logger.info(
                 f"Found {internal_dup_count} internal duplicate records in batch",
@@ -499,9 +487,7 @@ class Repository(ABC):
             inserted_count_result = self.conn.execute(
                 f"SELECT COUNT(*) FROM {unique_records_view}",
             ).fetchone()
-            inserted_count = (
-                inserted_count_result[0] if inserted_count_result else 0
-            )
+            inserted_count = inserted_count_result[0] if inserted_count_result else 0
 
             self.logger.info(
                 f"Successfully inserted {inserted_count} unique records "
