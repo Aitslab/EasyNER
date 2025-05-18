@@ -14,6 +14,7 @@ from pathlib import Path
 import orjson
 from tqdm import tqdm
 
+from easyner.pipeline.pubmed.loaders.pubmed_base_loader import BasePubMedLoader
 from easyner.pipeline.pubmed.loaders.pubmed_json_loader import PubMedJSONLoader
 from easyner.pipeline.pubmed.utils import _resolve_path
 
@@ -71,6 +72,7 @@ def load_pubmed_from_xml(config: dict) -> None:
         config: A dictionary containing configuration parameters
 
     """
+    format = config["format"]
     # Get paths from config and resolve them
     input_path = _resolve_path(
         "data/tmp/pubmed/" if len(config["input_path"]) == 0 else config["input_path"],
@@ -94,27 +96,49 @@ def load_pubmed_from_xml(config: dict) -> None:
     if file_end is not None:
         print(f"Ending with file: {file_end}")
 
-    # Pass the require_abstract option to the loader
-    loader = PubMedJSONLoader(
-        input_path=input_path,
-        output_path=output_path,
-        baseline=config["baseline"],
-        require_abstract=config.get("require_abstract", True),
-        file_start=file_start,
-        file_end=file_end,
-    )
-
-    loader.run_loader()
-
-    # Generate statistics report
-    loader._write_statistics_report()
-
-    if config.get("count_articles", False):
-        print("Counting articles")
-        count_articles(
-            input_path=output_path,
-            baseline=config["baseline"],
+    if format == "DuckDb":
+        from easyner.pipeline.pubmed.loaders.pubmed_duckdb_loader import (
+            PubMedDuckDBLoader,
         )
+
+        loader = PubMedDuckDBLoader(
+            input_path=input_path,
+            output_path=output_path,
+            baseline=config["baseline"],
+            file_start=file_start,
+            file_end=file_end,
+        )
+        loader.run_loader()
+    if format == "json":
+        from easyner.pipeline.pubmed.loaders.pubmed_json_loader import (
+            PubMedJSONLoader,
+        )
+
+        # Check if the output path is a directory
+        if not os.path.isdir(output_path):
+            msg = f"Output path {output_path} is not a directory."
+            raise ValueError(msg)
+
+        loader = PubMedJSONLoader(
+            input_path=input_path,
+            output_path=output_path,
+            baseline=config["baseline"],
+            require_abstract=config.get("require_abstract", True),
+            file_start=file_start,
+            file_end=file_end,
+        )
+
+        loader.run_loader()
+
+        # Generate statistics report
+        loader._write_statistics_report()
+
+        if config.get("count_articles", False):
+            print("Counting articles")
+            count_articles(
+                input_path=output_path,
+                baseline=config["baseline"],
+            )
 
     print("PubMed processing complete")
 
@@ -131,6 +155,10 @@ if __name__ == "__main__":
             print("Usage:")
             print("  python -m easyner.pipeline.pubmed.pubmed_bulk_loader [OPTIONS]")
             print("\nOptions:")
+            print(
+                "  --format             Specify the output format "
+                "between default DuckDB or json",
+            )
             print("  --no-count           Skip counting articles")
             print("  --no-abstract-filter Skip filtering by abstract presence")
             print("  -h, --help           Show this help message and exit")
@@ -147,7 +175,13 @@ if __name__ == "__main__":
             loader_config = config["pubmed_bulk_loader"]
 
             # Check that required configuration options exist
-            required_keys = ["input_path", "output_path", "baseline"]
+            required_keys = ["input_path", "output_path", "baseline", "format"]
+            # Check if the format is either DuckDB or json
+            if loader_config["format"].lower() not in ["duckdb", "json"]:
+                msg = (
+                    "Invalid format specified. " "Please choose between DuckDB or json."
+                )
+                raise ValueError(msg)
             missing_keys = [key for key in required_keys if key not in loader_config]
 
             if missing_keys:
@@ -158,6 +192,11 @@ if __name__ == "__main__":
                 raise ValueError(msg)
 
             # Apply command-line overrides if any
+            if "--format" in sys.argv:
+                format_index = sys.argv.index("--format") + 1
+                if format_index < len(sys.argv):
+                    loader_config["format"] = sys.argv[format_index]
+                    print(f"Output format set to {loader_config['format']}")
             if "--no-count" in sys.argv:
                 loader_config["count_articles"] = False
                 print("Article counting has been disabled via command line argument")

@@ -8,9 +8,9 @@ from concurrent.futures import (
 from multiprocessing import cpu_count
 
 from easyner.pipeline.pubmed import (
+    bulk_download_pubmed_baseline,
+    bulk_unload_pubmed,
     get_abstracts_by_pmids,
-    pubmed_bulk_downloader,
-    pubmed_bulk_loader,
 )
 from scripts import (
     analysis,
@@ -79,7 +79,7 @@ def run_pubmed_bulk_downloader(pbd_config: dict, ignore: bool) -> None:
         return
 
     print("Running pubmed bulk downloader script.")
-    pubmed_bulk_downloader.download_pubmed_in_bulk(pbd_config)
+    bulk_download_pubmed_baseline.download_pubmed_in_bulk(pbd_config)
     print("Finished running pubmed bulk downloader.")
 
 
@@ -98,7 +98,7 @@ def run_pubmed_bulk_updates_downloader(pbu_config: dict, ignore: bool) -> None:
     print("Running pubmed bulk updates downloader script.")
     # Use the dedicated pubmed_bulk_updates_downloader configuration
     # The download_updates flag is no longer needed as we're using a separate function
-    pubmed_bulk_downloader.download_pubmed_updates_in_bulk(pbu_config)
+    bulk_download_pubmed_baseline.download_pubmed_updates_in_bulk(pbu_config)
     print("Finished running pubmed bulk updates downloader.")
 
 
@@ -115,7 +115,7 @@ def run_pubmed_loader(pbl_config: dict, ignore: bool) -> None:
         return
 
     print("Running pubmed loader script.")
-    pubmed_bulk_loader.load_pubmed_from_xml(pbl_config)
+    bulk_unload_pubmed.load_pubmed_from_xml(pbl_config)
     print("Finished running pubmed loader script.")
 
 
