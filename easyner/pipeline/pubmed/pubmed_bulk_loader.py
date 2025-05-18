@@ -9,6 +9,7 @@ counts the number of articles in the converted JSON files.
 import json
 import os
 import sys
+from abc import ABC, abstractmethod
 from glob import glob
 from pathlib import Path
 from typing import Any, Optional
@@ -18,26 +19,32 @@ import pubmed_parser as pp
 from tqdm import tqdm
 
 
-class PubMedLoader:
-    """PubMed XML to JSON loader."""
+class BasePubMedLoader(ABC):
+    """Abstract base class for PubMed XML loaders."""
 
     def __init__(
         self,
         input_path: str,
         output_path: str,
         k: str,
-        require_abstract: bool = False,
         file_start: Optional[int] = None,
         file_end: Optional[int] = None,
     ) -> None:
-        """Initialize the PubMedLoader."""
+        """Initialize the base PubMed loader.
+
+        Args:
+            input_path: Directory containing input XML files
+            output_path: Directory where processed files will be written
+            k: Baseline identifier used in filename parsing
+            file_start: Optional start index for file range processing
+            file_end: Optional end index for file range processing
+
+        """
         # Resolve paths against project root if they're relative
         self.input_path = _resolve_path(input_path)
         self.output_path = _resolve_path(output_path)
-        self.counter = {}
         # Ensure k is a string
         self.k = str(k)
-        self.require_abstract = require_abstract
         self.file_start = file_start
         self.file_end = file_end
 
@@ -45,17 +52,8 @@ class PubMedLoader:
         if self.file_start is not None and self.file_end is not None:
             if self.file_start > self.file_end:
                 msg = f"file_start ({self.file_start}) cannot be greater than file_end ({self.file_end})"
-                raise ValueError(
-                    msg,
-                )
+                raise ValueError(msg)
 
-        self.filter_stats = {
-            "total_articles": 0,
-            "no_abstract": 0,
-            "abstract_not_string": 0,
-            "empty_abstract": 0,
-            "included_articles": 0,
-        }
         os.makedirs(self.output_path, exist_ok=True)
 
     def _get_input_files(self, input_path: str) -> list[str]:
@@ -118,16 +116,109 @@ class PubMedLoader:
             print("Make sure the path exists and contains gzipped XML files.")
         return input_files
 
-    def _get_counter(self):
-        return self.counter
+    @abstractmethod
+    def _process_article_data(self, data: list[dict[str, Any]]) -> Any:
+        """Process article data extracted from XML.
 
-    def _load_xml_and_convert(self, input_file: str) -> dict[str, Any]:
-        """Load XML file and convert to JSON format."""
-        data: list[dict[str, Any]] = pp.parse_medline_xml(
-            input_file,
-            year_info_only=False,
-        )
+        Args:
+            data: List of article data dictionaries from pubmed_parser
 
+        Returns:
+            Processed article data in implementation-specific format
+
+        """
+        pass
+
+    @abstractmethod
+    def _write_output(self, data: Any, input_file: str) -> None:
+        """Write processed article data to output.
+
+        Args:
+            data: The processed article data
+            input_file: Original input file path
+
+        """
+        pass
+
+    def _load_xml(self, input_file: str) -> list[dict[str, Any]]:
+        """Load XML file and parse using pubmed_parser.
+
+        Args:
+            input_file: Path to the input XML file
+
+        Returns:
+            List of article data dictionaries
+
+        """
+        return pp.parse_medline_xml(input_file, year_info_only=False)
+
+    def run_loader(self) -> None:
+        """Run the loader of PubMed files."""
+        print(f"Starting to load PubMed files from {self.input_path}")
+        input_files_list = self._get_input_files(self.input_path)
+
+        # Add more debug information about the files being processed
+        if len(input_files_list) > 0:
+            print(f"Processing {len(input_files_list)} XML files")
+            print(f"First file: {os.path.basename(input_files_list[0])}")
+            print(f"Last file: {os.path.basename(input_files_list[-1])}")
+        else:
+            print("No files to process. Please check the input path and file pattern.")
+            return
+
+        # Use tqdm with the list directly for proper progress tracking
+        for input_file in tqdm(input_files_list, desc="Processing files"):
+            self.current_input_file = input_file
+            data = self._load_xml(input_file)
+            processed_data = self._process_article_data(data)
+            self._write_output(processed_data, input_file)
+
+
+class PubMedJSONLoader(BasePubMedLoader):
+    """PubMed XML to JSON loader with abstract filtering."""
+
+    def __init__(
+        self,
+        input_path: str,
+        output_path: str,
+        k: str,
+        require_abstract: bool = False,
+        file_start: Optional[int] = None,
+        file_end: Optional[int] = None,
+    ) -> None:
+        """Initialize the PubMedJSONLoader.
+
+        Args:
+            input_path: Directory containing input XML files
+            output_path: Directory where processed JSON files will be written
+            k: Baseline identifier used in filename parsing
+            require_abstract: If True, articles without abstracts are filtered out
+            file_start: Optional start index for file range processing
+            file_end: Optional end index for file range processing
+
+        """
+        super().__init__(input_path, output_path, k, file_start, file_end)
+        self.require_abstract = require_abstract
+        self.counter = {}
+        self.filter_stats = {
+            "total_articles": 0,
+            "no_abstract": 0,
+            "abstract_not_string": 0,
+            "empty_abstract": 0,
+            "included_articles": 0,
+        }
+        self.current_input_file = None
+
+    def _process_article_data(self, data: list[dict[str, Any]]) -> dict[str, Any]:
+        """Process article data and apply filtering based on abstract requirements.
+
+        Args:
+            data: List of article data dictionaries from pubmed_parser
+
+        Returns:
+            Dictionary of processed articles with PMID as key
+
+        """
         article: dict[str, Any] = {}
         local_stats: dict[str, int] = {
             "total": len(data),
@@ -180,10 +271,17 @@ class PubMedLoader:
                     "chemical_list": art.get("chemical_list", ""),
                 }
 
-        self.counter[input_file] = local_stats
+        self.counter[self.current_input_file] = local_stats
         return article
 
-    def _write_to_json(self, data: dict[str, Any], input_file: str) -> None:
+    def _write_output(self, data: dict[str, Any], input_file: str) -> None:
+        """Write processed article data to a JSON file.
+
+        Args:
+            data: Dictionary of articles to write
+            input_file: Original input file path
+
+        """
         outfile = os.path.join(
             self.output_path,
             os.path.basename(input_file.split(".xml")[0]) + ".json",
@@ -191,33 +289,24 @@ class PubMedLoader:
         with open(outfile, "wb") as f:
             f.write(orjson.dumps(data, option=orjson.OPT_INDENT_2))
 
-    def run_loader(self) -> None:
-        """Run the loader of PubMed files."""
-        print(f"Starting to load PubMed files from {self.input_path}")
-        input_files_list = self._get_input_files(self.input_path)
-
-        # Add more debug information about the files being processed
-        if len(input_files_list) > 0:
-            print(f"Processing {len(input_files_list)} XML files")
-            print(f"First file: {os.path.basename(input_files_list[0])}")
-            print(f"Last file: {os.path.basename(input_files_list[-1])}")
-        else:
-            print("No files to process. Please check the input path and file pattern.")
-            return
-
-        for _, input_file in tqdm(enumerate(input_files_list)):
-            data = self._load_xml_and_convert(input_file)
-            self._write_to_json(data, input_file)
-
     def get_filter_statistics(self) -> dict[str, int]:
         """Return statistics about filtered articles."""
         return self.filter_stats
+
+    def get_counter(self) -> dict[str, dict[str, int]]:
+        """Return per-file statistics."""
+        return self.counter
 
     def _write_statistics_report(
         self,
         output_file: str = "filter_statistics.json",
     ) -> None:
-        """Write filtering statistics to a JSON file."""
+        """Write filtering statistics to a JSON file.
+
+        Args:
+            output_file: Name of the output statistics file
+
+        """
         report_path = os.path.join(self.output_path, output_file)
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(
@@ -327,7 +416,7 @@ def load_pubmed_from_xml(config: dict) -> None:
         print(f"Ending with file: {file_end}")
 
     # Pass the require_abstract option to the loader
-    loader = PubMedLoader(
+    loader = PubMedJSONLoader(
         input_path=input_path,
         output_path=output_path,
         k=config["baseline"],
@@ -341,7 +430,7 @@ def load_pubmed_from_xml(config: dict) -> None:
     # Generate statistics report
     loader._write_statistics_report()
 
-    if config["count_articles"]:
+    if config.get("count_articles", False):
         print("Counting articles")
         count_articles(
             input_path=output_path,
