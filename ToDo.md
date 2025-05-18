@@ -1,5 +1,3 @@
-[] Consistent connection vs conn
-
 ## Package structure
 easyner/
 ├── __init__.py             # Main package exports
