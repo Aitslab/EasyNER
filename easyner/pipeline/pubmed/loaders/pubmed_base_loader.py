@@ -2,6 +2,10 @@
 
 This module provides an abstract base class for loading and processing PubMed XML files,
 including file discovery, range filtering, and output handling.
+
+TODO: optimize parsing. The absolute majority of time is spent in pubmed_parser
+return pp.parse_medline_xml(input_file, year_info_only=False)
+reports 70% of the time as python code
 """
 
 import os
