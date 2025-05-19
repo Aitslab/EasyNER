@@ -15,7 +15,7 @@ from tqdm import tqdm  # Added tqdm
 # --- Configuration ---
 load_dotenv()
 DB_PATH = os.getenv("DB_PATH")
-if not DB_PATH:
+if DB_PATH is None or DB_PATH.strip() == "":
     msg = "DB_PATH environment variable is not set."
     raise ValueError(msg)
 else:
@@ -76,12 +76,24 @@ def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
 
 
 def main() -> None:
+    """Process text segments from a DuckDB database.
+
+    Split them into sentences and store the sentences back into the database, with progress reporting.
+    """
     con = None
     try:
+        # This assertion confirms DB_PATH is not None. It serves two main purposes:
+        # 1. Runtime check: Ensures DB_PATH is valid before use, though an earlier
+        #    module-level check should already guarantee this.
+        # 2. Static analysis hint: Informs type checkers (e.g., Mypy) that DB_PATH
+        #    can be treated as `str` (not `Optional[str]`) beyond this point,
+        #    preventing potential false positive type errors.
+        assert (
+            DB_PATH is not None
+        ), "DB_PATH cannot be None at this point due to module-level check."
         con = duckdb.connect(database=DB_PATH, read_only=False)
 
         # --- Ensure sentences table exists with new schema ---
-        # Added segment_number and sentence_in_segment_order
         con.execute(
             f"""--sql
             CREATE TABLE IF NOT EXISTS {SENTENCES_TABLE} (
@@ -90,7 +102,7 @@ def main() -> None:
                 sentence_in_segment_order INTEGER,
                 sentence VARCHAR,
                 start_char INTEGER,
-                end_char INTEGER,
+                end_char INTEGER
             );
         """,
         )
