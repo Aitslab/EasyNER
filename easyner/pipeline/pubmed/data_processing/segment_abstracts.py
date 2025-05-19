@@ -5,6 +5,7 @@ the results in a view.
 """
 
 import os
+import random
 import sys
 
 import duckdb
@@ -51,15 +52,70 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
     # Show sample segments
     print("\nSample segments:")
     samples = conn.execute(
-        """
-        SELECT pmid, segment_number, segment
+        """--sql
+        SELECT pmid, segment_number, segment, is_header
         FROM abstract_segments
+        WHERE is_header = FALSE
         LIMIT 5
     """,
     ).fetchall()
 
-    for pmid, segment_number, segment in samples:
-        print(f"PMID {pmid}, Segment {segment_number}: {segment[:50]}...")
+    samples += conn.execute(
+        """--sql
+        SELECT pmid, segment_number, segment, is_header
+        FROM abstract_segments
+        WHERE is_header = TRUE
+        LIMIT 5
+    """,
+    ).fetchall()
+
+    random.shuffle(samples)
+    print("PMID   | Segment nbr | Header | Segment")
+    print("--------------------------------------------------")
+    for pmid, segment_number, segment, is_header in samples:
+        if len(segment) > 50:
+            print(f"{pmid} | {segment_number} | {is_header} | {segment[:50]}..")
+        else:
+            print(f"{pmid} | {segment_number} | {is_header} | {segment}")
+
+    # Test that headers are correctly identified
+    header_samples = conn.execute(
+        """--sql
+        SELECT pmid, segment_number, segment
+        FROM abstract_segments
+        WHERE is_header = TRUE
+        LIMIT 5
+    """,
+    ).fetchall()
+    print("\nSample header segments:")
+
+    for pmid, segment_number, segment in header_samples:
+        seg_text = segment
+        if len(seg_text) > 50:
+            print(f"PMID {pmid}, Segment {segment_number}: {seg_text[:50]}..")
+        else:
+            print(f"PMID {pmid}, Segment {segment_number}: {seg_text}")
+
+    # segments with uppercase LIKE BACKGROUND
+    unmarked_headers = conn.execute(
+        """--sql
+        SELECT DISTINCT segment
+        FROM abstract_segments
+        WHERE is_header = FALSE
+        AND UPPER(segment) = segment
+        -- this would inlcude non structured segments with "BACKGROUND Ventilarors..."
+        -- AND segment LIKE '%BACKGROUND%'
+        LIMIT 50
+    """,
+    ).fetchall()
+    print("\nPotentially unmarked headers (ALL UPPERCASE and not marked):")
+
+    for segment in unmarked_headers:
+        seg_text = segment[0]
+        if len(seg_text) > 50:
+            print(f"Segment: {seg_text[:50]}..")
+        else:
+            print(f"Segment: {seg_text}")
 
     conn.close()
 
