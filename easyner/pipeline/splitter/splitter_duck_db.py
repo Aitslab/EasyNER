@@ -84,18 +84,6 @@ def main() -> None:
         """,
         )
 
-        # --- Get already processed segment IDs (pmid, segment_number) ---
-        # Check for existing entries based on both pmid and segment_number
-        print(f"Fetching already processed segment IDs from {SENTENCES_TABLE}...")
-        processed_segments_df = con.execute(
-            f"SELECT DISTINCT pmid, segment_number FROM {SENTENCES_TABLE}",
-        ).df()
-        # Create a set of tuples for efficient lookup
-        processed_segments = set(
-            zip(processed_segments_df["pmid"], processed_segments_df["segment_number"]),
-        )
-        print(f"Found {len(processed_segments)} already processed segments.")
-
         # --- Load spaCy model once ---
         print(f"Loading spaCy model: {SPACY_MODEL}...")
         # Load only components needed for sentence segmentation
@@ -109,57 +97,62 @@ def main() -> None:
         total_segments_processed = 0
         total_sentences_inserted = 0
 
+        # Instead of fetching all processed segments upfront,
+        # directly filter in the database during each batch:
         while True:
-            # --- Fetch a batch of text segments from the view ---
-            # Select pmid, segment_number, and segment text
             query = f"""--sql
-                SELECT pmid, segment_number, segment
-                FROM {SOURCE_VIEW}
-                ORDER BY pmid, segment_number
-                -- Maintains consistent batching, however not strictly necessary
-                -- The nlp pipe can handle potential differences in batchs sizes
-                -- For each batch we still check for already processed segments
-                -- PMIDs are already highly sorted although not garanteed to be in order
+                SELECT s.pmid, s.segment_number, s.segment
+                FROM {SOURCE_VIEW} s
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM {SENTENCES_TABLE} t
+                    WHERE t.pmid = s.pmid AND t.segment_number = s.segment_number
+                )
+                ORDER BY s.pmid, s.segment_number
                 LIMIT {BATCH_SIZE} OFFSET {offset}
             """
-            batch = con.execute(query).fetchall()
-
-            if not batch:
-                print("No more segments to fetch. Exiting.")
-                break
-
-            # --- Filter out already processed segments ---
-            # A segment is processed if its (pmid, segment_number) pair is in our set
-            segments_to_process = [
-                item for item in batch if (item[0], item[1]) not in processed_segments
-            ]
+            start_time = time.time()
+            segments_to_process = con.execute(query).fetchall()
+            end_time = time.time()
+            print(
+                f"Fetched filtered {len(segments_to_process)} segments in "
+                f"{end_time - start_time:.2f} seconds.",
+            )
             num_to_process = len(segments_to_process)
+
+            if not segments_to_process:
+                print("No more segments to process. Exiting.")
+                break
 
             if num_to_process > 0:
                 print(
-                    f"Processing {num_to_process} new segments (batch offset: {offset})...",
+                    (
+                        f"Processing {num_to_process} new segments "
+                        f"(batch offset: {offset})..."
+                    ),
                 )
-
                 # --- Process batch and get sentences with order ---
+                start_time = time.time()
                 sentences_df = process_batch(nlp, segments_to_process)
-
+                end_time = time.time()
+                print(
+                    f"Processed {num_to_process} segments in "
+                    f"{end_time - start_time:.2f} seconds.",
+                )
                 if not sentences_df.empty:
                     # --- Bulk insert using Pandas DataFrame ---
                     # Use append which is optimized for DataFrames
                     con.append(SENTENCES_TABLE, sentences_df)
+                    con.commit()
                     total_segments_processed += num_to_process
                     total_sentences_inserted += len(sentences_df)
                     print(
-                        f"Inserted {len(sentences_df)} new sentences for {num_to_process} segments.",
+                        f"Inserted {len(sentences_df)} new sentences for "
+                        f"{num_to_process} segments.",
                     )
                 else:
                     print(
                         f"No sentences generated for the {num_to_process} segments in this batch.",
                     )
-
-            # Add the newly processed segments to our set to avoid reprocessing in case of script interruption
-            for item in segments_to_process:
-                processed_segments.add((item[0], item[1]))
 
             offset += BATCH_SIZE
 
