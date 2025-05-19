@@ -103,7 +103,6 @@ def main() -> None:
         )
         print("SpaCy model loaded.")
 
-        offset = 0
         total_segments_processed = 0
         total_sentences_inserted = 0
 
@@ -119,7 +118,7 @@ def main() -> None:
                 )
                 AND s.is_header = FALSE -- Do not process header segments
                 ORDER BY s.pmid, s.segment_number
-                LIMIT {BATCH_SIZE} OFFSET {offset}
+                LIMIT {BATCH_SIZE}
             """
             start_time = time.time()
             segments_to_process = con.execute(query).fetchall()
@@ -138,7 +137,6 @@ def main() -> None:
                 print(
                     (
                         f"Processing {num_to_process} new segments "
-                        f"(batch offset: {offset})..."
                     ),
                 )
                 # --- Process batch and get sentences with order ---
@@ -165,7 +163,6 @@ def main() -> None:
                         f"No sentences generated for the {num_to_process} segments in this batch.",
                     )
 
-            offset += BATCH_SIZE
 
         print(
             f"Finished processing. Total new segments processed: {total_segments_processed}.",
