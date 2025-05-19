@@ -1,5 +1,6 @@
 # ruff: noqa : E501, D100
 import os
+import sys  # Added for sys.exit
 import time
 
 import duckdb
@@ -170,13 +171,10 @@ def main() -> None:
             f"Finished processing. Total new segments processed: {total_segments_processed}.",
         )
         print(f"Total new sentences inserted: {total_sentences_inserted}.")
-    except KeyboardInterrupt as e:
+    except KeyboardInterrupt:
         print("KeyboardInterrupt: Exiting the script.")
-        if con:
-            con.close()
-            print("DuckDB connection closed.")
-        raise e
-
+        # The 'finally' block below will be executed before the script terminates.
+        sys.exit(130)  # Exit with status 130 (standard for SIGINT)
     except duckdb.Error as e:
         print(f"DuckDB Error: {e}")
     except spacy.errors as e:
