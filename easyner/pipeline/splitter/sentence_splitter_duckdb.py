@@ -107,6 +107,7 @@ def main() -> None:
                     SELECT 1 FROM {SENTENCES_TABLE} t
                     WHERE t.pmid = s.pmid AND t.segment_number = s.segment_number
                 )
+                AND s.is_header = FALSE -- Do not process header segments
                 ORDER BY s.pmid, s.segment_number
                 LIMIT {BATCH_SIZE} OFFSET {offset}
             """
