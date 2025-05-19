@@ -28,9 +28,9 @@ def _create_abstract_segments_view(db_path: Path) -> None:
             TRIM(segment) AS segment,
             ROW_NUMBER() OVER (PARTITION BY subq.pmid ORDER BY segment_id) AS segment_number,
             -- Check if the segment is a header
-            -- A header is defined as a single word in uppercase
+            -- A header is defined as a less than 10 words all in uppercase
             (
-                len(string_split(segment, ' ')) = 1 AND UPPER(TRIM(segment)) = TRIM(segment)
+                len(string_split(segment, ' ')) < 10 AND UPPER(TRIM(segment)) = TRIM(segment)
             ) AS is_header
         FROM (
             SELECT
