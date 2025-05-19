@@ -64,6 +64,8 @@ def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
                     "segment_number": segment_number,
                     "sentence_in_segment_order": sentence_in_segment_order,
                     "sentence": sent.text,
+                    "start_char": sent.start_char,
+                    "end_char": sent.end_char,
                 },
             )
             sentence_in_segment_order += 1
@@ -84,7 +86,9 @@ def main() -> None:
                 pmid INTEGER,
                 segment_number INTEGER,
                 sentence_in_segment_order INTEGER,
-                sentence VARCHAR
+                sentence VARCHAR,
+                start_char INTEGER,
+                end_char INTEGER,
             );
         """,
         )
