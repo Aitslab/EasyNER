@@ -5,7 +5,10 @@ import time
 import duckdb
 import pandas as pd
 import spacy
+import spacy.tokens
 from dotenv import load_dotenv
+from spacy.language import Language
+from spacy.tokens import Doc, Span
 
 # --- Configuration ---
 load_dotenv()
@@ -23,7 +26,7 @@ N_PROCESS = 3  # Number of parallel spaCy processes
 SPACY_BATCH_SIZE = 100  # Batch size for spaCy processing
 
 
-def process_batch(nlp, batch: list[tuple]) -> pd.DataFrame:
+def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
     """Process a text segment batch using spaCy and preserves sentence order within segments.
 
     Args:
@@ -42,6 +45,7 @@ def process_batch(nlp, batch: list[tuple]) -> pd.DataFrame:
 
     # Process texts in parallel using nlp.pipe
     # We iterate through the docs and their original metadata simultaneously
+    doc: Doc
     for doc, (pmid, segment_number) in zip(
         nlp.pipe(
             texts,
@@ -52,6 +56,7 @@ def process_batch(nlp, batch: list[tuple]) -> pd.DataFrame:
         metadata,
     ):
         sentence_in_segment_order = 1  # Index same as segment_number starts from 1
+        sent: Span
         for sent in doc.sents:
             sentences_data.append(
                 {
