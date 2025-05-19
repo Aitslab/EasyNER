@@ -4,19 +4,18 @@ This module splits abstracts on newlines, removes empty segments, and stores
 the results in a view.
 """
 
+import os
 import sys
-from pathlib import Path
 
 import duckdb
+from dotenv import load_dotenv
 
 
-def _create_abstract_segments_view(db_path: Path) -> None:
+def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
     """Create a view of non-empty abstract segments.
 
     splits abstracts on newlines and returns non-empty segments as rows.
     """
-    conn = duckdb.connect(db_path)
-
     print("Creating abstract_segments view...")
 
     # Fixed query with proper table references
@@ -67,8 +66,17 @@ def _create_abstract_segments_view(db_path: Path) -> None:
 
 if __name__ == "__main__":
     try:
-        db_path = Path("/home/callebalik/EasyNER/data/temp/pubmed.db")
-        _create_abstract_segments_view(db_path)
+        load_dotenv()
+        DB_PATH = os.getenv("DB_PATH")
+        if DB_PATH is None or DB_PATH.strip() == "":
+            msg = "DB_PATH environment variable is not set."
+            raise ValueError(msg)
+        else:
+            print(f"Using database path: {DB_PATH}")
+
+        conn = duckdb.connect(DB_PATH)
+
+        _create_abstract_segments_view(conn)
     except KeyboardInterrupt:
         print("KeyboardInterrupt: Exiting the script.")
         sys.exit(0)
