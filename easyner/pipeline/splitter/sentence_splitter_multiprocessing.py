@@ -331,7 +331,7 @@ def progress_reporter_thread(
 
     start_time = time.time()
 
-    with tqdm(total=total_segments, unit="segment") as pbar:
+    with tqdm(total=total_segments, unit="seg") as pbar:
         last_processed = 0
 
         while not stop_event.is_set() or last_processed < total_segments:
@@ -368,11 +368,10 @@ def progress_reporter_thread(
 
                 pbar.set_postfix(
                     {
-                        "Processed": f"{current_processed}/{total_segments}",
-                        "Sentences": current_sentences,
-                        "Speed": f"{speed:.1f} seg/s",
-                        "Workers": f"{active_workers}/{NUM_WORKERS}",
-                        "Memory": memory_display,
+                        "Avg Speed": f"{speed:.1f} seg/s",
+                        "Sent": current_sentences,
+                        "Active Workers": f"{active_workers}/{NUM_WORKERS}",
+                        "Used Memory": memory_display,
                     },
                 )
 
