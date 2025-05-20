@@ -1,10 +1,12 @@
 # ruff: noqa : E501, D100
+import gc
 import os
 import sys  # Added for sys.exit
 import time
 
 import duckdb
 import pandas as pd
+import psutil
 import spacy
 import spacy.tokens
 from dotenv import load_dotenv
@@ -20,12 +22,28 @@ if DB_PATH is None or DB_PATH.strip() == "":
     raise ValueError(msg)
 else:
     print(f"Using database path: {DB_PATH}")
-SOURCE_VIEW = "abstract_segments"  # Use the view you created
+TEXT_SEGMENTS_TABLE = "abstract_segments"  # Use the view you created
+TEMP_TABLE = "segments_to_process"
 SENTENCES_TABLE = "sentences"  # New table name to reflect order
-BATCH_SIZE = 5000  # Batch size for reading from DuckDB
-SPACY_MODEL = "en_core_web_sm"
-N_PROCESS = 3  # Number of parallel spaCy processes
-SPACY_BATCH_SIZE = 100  # Batch size for spaCy processing
+BATCH_SIZE = 10000  # Batch size for reading from DuckDB
+SPACY_MODEL = "en_core_web_sm"  # Same sentence performance as en_core_web_md
+N_PROCESS = 12  # Number of parallel spaCy processes
+SPACY_BATCH_SIZE = 4000
+MEM_THRESHOLD_MB = 25000  # 25GB threshold
+
+
+def monitor_memory() -> float:
+    """Check memory usage and perform garbage collection if above threshold."""
+    process = psutil.Process(os.getpid())
+    mem_mb = process.memory_info().rss / (1024 * 1024)
+
+    if mem_mb > MEM_THRESHOLD_MB:
+        print(f"Memory usage high ({mem_mb:.1f} MB). Forcing garbage collection...")
+        gc.collect()
+        mem_mb = process.memory_info().rss / (1024 * 1024)
+        print(f"Memory after collection: {mem_mb:.1f} MB")
+
+    return mem_mb
 
 
 def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
@@ -71,6 +89,8 @@ def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
                 },
             )
             sentence_in_segment_order += 1
+        # Explicitly clear the doc to free up memory
+        del doc
 
     return pd.DataFrame(sentences_data)
 
@@ -93,6 +113,9 @@ def main() -> None:
         ), "DB_PATH cannot be None at this point due to module-level check."
         con = duckdb.connect(database=DB_PATH, read_only=False)
 
+        # Configure DuckDB with modest memory settings
+        con.execute("PRAGMA memory_limit='8GB'")
+
         # --- Ensure sentences table exists with new schema ---
         con.execute(
             f"""--sql
@@ -112,129 +135,119 @@ def main() -> None:
         # Load only components needed for sentence segmentation
         nlp = spacy.load(
             SPACY_MODEL,
-            exclude=["ner", "attribute_ruler", "lemmatizer"],
+            exclude=["ner", "attribute_ruler", "lemmatizer", "tagger"],
         )
         print("SpaCy model loaded.")
+        monitor_memory()  # Check memory after loading model
 
-        # Calculate total number of segments to process for tqdm
-        count_query = f"""--sql
-            SELECT COUNT(*)
-            FROM {SOURCE_VIEW} s
+        print("Creating temporary table for processing...")
+        con.execute(
+            f"""--sql
+            CREATE TEMPORARY TABLE {TEMP_TABLE} AS
+            SELECT s.pmid, s.segment_number
+            FROM {TEXT_SEGMENTS_TABLE} s
             WHERE NOT EXISTS (
                 SELECT 1 FROM {SENTENCES_TABLE} t
                 WHERE t.pmid = s.pmid AND t.segment_number = s.segment_number
             )
-            AND s.is_header = FALSE;
-        """
-        count_result = con.execute(count_query).fetchone()
-        total_segments_to_process_initially = count_result[0] if count_result else 0
-        print(f"Total segments to process: {total_segments_to_process_initially}")
-
-        total_segments_processed = 0
-        total_sentences_inserted = 0
-        overall_start_time = time.time()  # For overall SPS calculation
-
-        with tqdm(
-            total=total_segments_to_process_initially,
-            unit="segment",
-            desc="Processing Segments",
-        ) as pbar:
-            while True:
-                query = f"""--sql
-                    SELECT s.pmid, s.segment_number, s.segment
-                    FROM {SOURCE_VIEW} s
-                    WHERE NOT EXISTS (
-                        SELECT 1 FROM {SENTENCES_TABLE} t
-                        WHERE t.pmid = s.pmid AND t.segment_number = s.segment_number
-                    )
-                    AND s.is_header = FALSE -- Do not process header segments
-                    LIMIT {BATCH_SIZE}
-                """
-                segments_to_process = con.execute(query).fetchall()
-                num_to_process = len(segments_to_process)
-
-                if not segments_to_process:
-                    # Check if the initial count was zero and we never entered the processing logic
-                    if total_segments_to_process_initially == 0:
-                        print(
-                            "\nNo segments to process based on initial count. Exiting.",
-                        )
-                        break
-                    # If segments were processed, but now no more are found, it's a normal exit.
-                    # Or, if the progress bar already reflects completion.
-                    if total_segments_processed >= pbar.total:
-                        print("\nNo more segments to process. Exiting.")
-                        break
-                    else:
-                        # If no segments are fetched but tqdm indicates more are expected,
-                        # re-calculate total and update tqdm.
-                        current_total_recheck_result = con.execute(
-                            count_query,
-                        ).fetchone()
-                        current_total_recheck = (
-                            current_total_recheck_result[0]
-                            if current_total_recheck_result
-                            else 0
-                        )
-                        if current_total_recheck > total_segments_processed:
-                            pbar.total = current_total_recheck
-                            pbar.refresh()
-                            if (
-                                not segments_to_process
-                            ):  # Still no segments after refresh
-                                time.sleep(
-                                    1,
-                                )  # Wait a bit before trying again, maybe data is incoming
-                                continue
-                        else:  # No more segments even after recheck
-                            print(
-                                "\nNo more segments to process after re-check. Exiting.",
-                            )
-                            break
-
-                if num_to_process > 0:
-                    # --- Process batch and get sentences with order ---
-                    sentences_df = process_batch(nlp, segments_to_process)
-                    if not sentences_df.empty:
-                        # --- Bulk insert using Pandas DataFrame ---
-                        con.append(SENTENCES_TABLE, sentences_df)
-                        con.commit()  # Commit after each batch append
-
-                        total_sentences_inserted += len(sentences_df)
-
-                    total_segments_processed += num_to_process
-                    pbar.update(num_to_process)
-                    elapsed_time = time.time() - overall_start_time
-                    current_sps = (
-                        total_segments_processed / elapsed_time
-                        if elapsed_time > 0
-                        else 0
-                    )
-                    pbar.set_postfix(
-                        {
-                            "Processed": f"{total_segments_processed}/{pbar.total}",
-                            "Sentences": f"{total_sentences_inserted}",
-                            "SPS": f"{current_sps:.2f}",
-                        },
-                    )
-
-        print(
-            f"\nFinished processing. Total segments processed: {total_segments_processed}.",
+            AND s.is_header = FALSE
+        """,
         )
-        print(f"Total sentences inserted: {total_sentences_inserted}.")
-        total_time_taken = time.time() - overall_start_time
-        if (
-            total_segments_processed > 0 and total_time_taken > 0
-        ):  # Avoid division by zero if no segments or no time
-            print(f"Total time taken: {total_time_taken:.2f} seconds.")
-            overall_sps = total_segments_processed / total_time_taken
-            print(f"Overall Segments Per Second (SPS): {overall_sps:.2f}")
-        elif total_segments_processed == 0:
-            print("No segments were processed.")
-        else:  # total_time_taken is 0 or less, which is unlikely but good to handle
-            print(
-                f"Total time taken: {total_time_taken:.2f} seconds (SPS not calculable).",
-            )
+
+        # Calculate total number of segments to process for tqdm
+        count_result = con.execute(f"SELECT COUNT(*) FROM {TEMP_TABLE}").fetchone()
+        total_segments = count_result[0] if count_result else 0
+        print(f"Total segments to process: {total_segments}")
+
+        if total_segments == 0:
+            print("No segments to process. Exiting.")
+            return
+
+        total_processed = 0
+        total_sentences = 0
+        start_time = time.time()
+
+        with tqdm(total=total_segments, unit="segment") as pbar:
+            offset = 0
+            while offset < total_segments:
+                # Explicitly force garbage collection
+                gc.collect()
+
+                # Get a batch of segment IDs from our temp table
+                # This avoids the expensive NOT EXISTS query
+                batch_ids = con.execute(
+                    f"""--sql
+                    SELECT pmid, segment_number
+                    FROM {TEMP_TABLE}
+                    LIMIT {BATCH_SIZE} OFFSET {offset}
+                """,
+                ).fetchall()
+
+                if not batch_ids:
+                    break
+
+                # For each segment ID, fetch the actual text content
+                # Note: We use a separate query to fetch text only for segments we'll process
+                # This uses much less memory than fetching all columns at once
+                pmids = [id[0] for id in batch_ids]
+                seg_nums = [id[1] for id in batch_ids]
+
+                # Use parameters to avoid SQL injection with UNNEST
+                segments_data = con.execute(
+                    f"""--sql
+                    SELECT s.pmid, s.segment_number, s.segment
+                    FROM {TEXT_SEGMENTS_TABLE} s
+                    WHERE (pmid, segment_number) IN (
+                        SELECT UNNEST(?), UNNEST(?)
+                    )
+                """,
+                    [pmids, seg_nums],
+                ).fetchall()
+
+                # Process this batch
+                sentences_df = process_batch(nlp, segments_data)
+
+                con.append(SENTENCES_TABLE, sentences_df)
+                con.commit()
+                # # Insert in smaller chunks to reduce memory pressure
+                # if not sentences_df.empty:
+                #     for i in range(0, len(sentences_df), 500):
+                #         chunk = sentences_df.iloc[i : i + 500]
+                #         con.append(SENTENCES_TABLE, chunk)
+                #         con.commit()
+
+                #     total_sentences += len(sentences_df)
+
+                # Update counters
+                batch_size = len(segments_data)
+                total_processed += batch_size
+                offset += batch_size
+                pbar.update(batch_size)
+
+                # Update progress display
+                pbar.set_postfix(
+                    {
+                        "Processed": f"{total_processed}/{total_segments}",
+                        "Sentences": total_sentences,
+                        "Memory": f"{monitor_memory():.1f}MB",
+                    },
+                )
+
+                # Clean up
+                del segments_data
+                del sentences_df
+                gc.collect()
+
+        # Final report
+        print(f"Finished processing {total_processed} segments")
+        print(f"Total sentences inserted: {total_sentences}")
+        time_taken = time.time() - start_time
+        print(f"Total time: {time_taken:.2f} seconds")
+        if total_processed > 0 and time_taken > 0:
+            print(f"Speed: {total_processed / time_taken:.2f} segments/second")
+
+        # Clean up temp table
+        con.execute(f"DROP TABLE IF EXISTS {TEMP_TABLE}")
 
     except KeyboardInterrupt:
         print("KeyboardInterrupt: Exiting the script.")
