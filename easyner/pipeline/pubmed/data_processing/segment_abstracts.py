@@ -96,19 +96,32 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
         else:
             print(f"PMID {pmid}, Segment {segment_number}: {seg_text}")
 
-    # segments with uppercase LIKE BACKGROUND
+    # segments with uppercase LIKE BACKGROUND or segments that begin with a sequence of all uppercase followed by a dot and space and then text
+    # TODO: Maybe we could use matched header sequences to match against
+    # TODO: same sequences followed by a dot.
+    regex = r"^[A-Z]+\. .+"
     unmarked_headers = conn.execute(
         """--sql
         SELECT DISTINCT segment
         FROM abstract_segments
         WHERE is_header = FALSE
-        AND UPPER(segment) = segment
-        -- this would inlcude non structured segments with "BACKGROUND Ventilarors..."
-        -- AND segment LIKE '%BACKGROUND%'
-        LIMIT 50
+        AND (
+            UPPER(segment) = segment
+            OR regexp_matches(segment, ?)
+        )
+        LIMIT 100
     """,
+        (regex,),
     ).fetchall()
-    print("\nPotentially unmarked headers (ALL UPPERCASE and not marked):")
+    print(
+        "\nPotentially unmarked headers (ALL UPPERCASE and not marked):"
+        "\n--------------------------------------------------",
+        "\nAlso includes segments that start with uppercase followed by a dot and space",  # noqa: E501
+        "\nThat pattern is not safe tested to be safe to be marked as header and to produce false positives",  # noqa: E501
+        "\nAn example would be 'E. coli O157:H7 is a common pathogen causing coli...",
+        "\nA more unclear example is: BASIR. The incidence and the associated mortality ..",  # noqa: E501
+        "\n---------------SAMPLES LIMIT 100-------------------",
+    )
 
     for segment in unmarked_headers:
         seg_text = segment[0]
