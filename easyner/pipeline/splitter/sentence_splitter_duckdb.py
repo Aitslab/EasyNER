@@ -25,10 +25,10 @@ else:
 TEXT_SEGMENTS_TABLE = "abstract_segments"  # Use the view you created
 TEMP_TABLE = "segments_to_process"
 SENTENCES_TABLE = "sentences"  # New table name to reflect order
-BATCH_SIZE = 10000  # Batch size for reading from DuckDB
+BATCH_SIZE = 20000  # Batch size for reading from DuckDB
 SPACY_MODEL = "en_core_web_sm"  # Same sentence performance as en_core_web_md
-N_PROCESS = 12  # Number of parallel spaCy processes
-SPACY_BATCH_SIZE = 4000
+N_PROCESS = 2  # Number of parallel spaCy processes
+SPACY_BATCH_SIZE = 50
 MEM_THRESHOLD_MB = 25000  # 25GB threshold
 
 
