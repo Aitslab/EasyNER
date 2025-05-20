@@ -1,7 +1,13 @@
 """Module for marking and processing truncated abstracts in PubMed data.
 
 This module provides functionality to identify and handle abstracts that are truncated,
-specifically those marked with '(ABSTRACT TRUNCATED AT 250 WORDS)'.
+specifically those marked with for example '(ABSTRACT TRUNCATED AT 250 WORDS)'.
+
+I believe from the pubmed docs that they started truncating abstracts in the olden days
+when uploading. Then the limit has changed over time and now they are not truncating...
+anymore.
+
+TODO: Check if truncation is surronded by newline.
 """
 
 import sys
@@ -12,28 +18,32 @@ import duckdb
 
 def find_truncated_abstracts(db_path: Path) -> None:
     """Find mark in abstract text and remove it, marking the abstract as truncated."""
-    pattern = "(ABSTRACT TRUNCATED AT 250 WORDS)"  # Appears at end of abstract
+    descriptive_pattern = "(ABSTRACT TRUNCATED AT <number> WORDS)"
+    regex_pattern = r"\(ABSTRACT TRUNCATED AT \d+ WORDS\)"
     conn = duckdb.connect(db_path)
     if conn is None:
         print(f"Failed to connect to the database at {db_path}")
         return
-    # Check for the pattern in all abstracts
+    # Check for the pattern in all abstracts using regex
     result = conn.execute(
         """--sql
         SELECT COUNT(*)
         FROM pubmed
-        WHERE abstract LIKE '%' || ? || '%'
+        WHERE regexp_matches(abstract, ?)
     """,
-        (pattern,),
+        (regex_pattern,),
     ).fetchone()
     count = result[0] if result is not None else 0
-    print(f"Found {count} abstracts with the truncation pattern '{pattern}'")
+    print(
+        f"Found {count} abstracts with the truncation pattern matching '{descriptive_pattern}'",
+    )
 
 
 def remove_truncation_mark_and_add_truncated(db_path: Path) -> None:
     """Remove truncation mark from abstracts and add a 'truncated' flag."""
-    pattern = "(ABSTRACT TRUNCATED AT 250 WORDS)"
-    conn = duckdb.connect(db_path)
+    descriptive_pattern = "(ABSTRACT TRUNCATED AT <number> WORDS)"
+    regex_pattern = r"\(ABSTRACT TRUNCATED AT \d+ WORDS\)"  # Regex for "digits"
+    conn = duckdb.connect(str(db_path))  # Ensure db_path is string for DuckDB < 0.9.0
     if conn is None:
         print(f"Failed to connect to the database at {db_path}")
         return
@@ -47,15 +57,15 @@ def remove_truncation_mark_and_add_truncated(db_path: Path) -> None:
     conn.execute(
         """--sql
         UPDATE pubmed
-        SET abstract = REPLACE(abstract, ?, ''),
+        SET abstract = regexp_replace(abstract, ?, '', 'g'),
             is_truncated = TRUE
-        WHERE abstract LIKE '%' || ? || '%'
+        WHERE regexp_matches(abstract, ?)
     """,
-        (pattern, pattern),
+        (regex_pattern, regex_pattern),
     )
     print(
         f"Removed truncation mark and marked abstracts as truncated "
-        f"for pattern '{pattern}'",
+        f"for patterns matching '{descriptive_pattern}'",
     )
 
 
