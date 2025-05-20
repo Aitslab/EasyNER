@@ -8,13 +8,14 @@ YYYY or YYYY-MM format.
 Thus they are saved as strings in the database.
 """
 
+import os
 import sys
 from pathlib import Path
 
 import duckdb
 
 
-def _resolve_varchar_to_date(db_path: Path) -> None:
+def _resolve_varchar_to_date(conn: duckdb.DuckDBPyConnection) -> None:
     """Resolve incomplete pubmed date data in duckdb.
 
     Simple heuristic:
@@ -24,8 +25,6 @@ def _resolve_varchar_to_date(db_path: Path) -> None:
     - New date is saved as DATE YYYY-MM-DD
 
     """
-    conn = duckdb.connect(db_path)
-
     # First, add a new column to store the resolved dates
     conn.execute("ALTER TABLE pubmed ADD COLUMN IF NOT EXISTS date_resolved DATE")
 
@@ -43,26 +42,61 @@ def _resolve_varchar_to_date(db_path: Path) -> None:
     """,
     )
 
-    conn.close()
-
 
 if __name__ == "__main__":
     try:
-        if len(sys.argv) != 2:
+        db_path_str = None
+        if len(sys.argv) == 2:
+            db_path_str = sys.argv[1]
+        else:
             print("---------------------------------------------------")
-            print("Resolve duplicate PMIDs in the PubMed dataset")
+            print("Resolve incomplete publication dates in the PubMed dataset")
             print("---------------------------------------------------")
-            print("Accepts a single argument: the path to the DuckDB database")
-            print("Example: python resolve_duplicate_pmid.py /path/to/pubmed.db")
+            print(
+                "This script resolves incomplete article publication dates "
+                "by updating them to a YYYY-MM-DD format.",
+            )
+            print("It can accept the database path as a command-line argument.")
+            print(
+                "Example: python resolve_incomplete_publication_dates.py /path/to/pubmed.db",
+            )
             print("---------------------------------------------------")
-            db_path = input("Enter the path to the DuckDB database: ...").strip()
-            if not db_path:
-                print("No path provided. Exiting.")
-                sys.exit(1)
+            user_input = input(
+                "Press enter to use DB_PATH env variable "
+                "or enter the path to the DuckDB database: ...",
+            ).strip()
+            if user_input:
+                db_path_str = user_input
+            else:
+                print(
+                    "No path provided via input, attempting to use environment variable DB_PATH.",
+                )
+                db_path_str = os.getenv("DB_PATH")
 
-        db_path = Path(sys.argv[1])
-        _resolve_varchar_to_date(db_path)
-        print(f"Resolved pubdate values in {db_path}")
+        if not db_path_str:
+            print(
+                "Error: Database path not provided via command-line argument, "
+                "user input, or DB_PATH environment variable.",
+            )
+            sys.exit(1)
+
+        db_path = Path(db_path_str)
+        if not db_path.exists() or not db_path.is_file():
+            print(f"Error: Database file not found at {db_path}")
+            sys.exit(1)
+
+        conn = duckdb.connect(db_path)
+        try:
+            _resolve_varchar_to_date(conn)
+            print(f"Resolved pubdate values in {db_path}")
+        finally:
+            conn.close()
     except KeyboardInterrupt:
         print("KeyboardInterrupt: Exiting the script.")
         sys.exit(0)
+    except duckdb.Error as e:
+        print(f"A DuckDB error occurred: {e}")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        sys.exit(1)
