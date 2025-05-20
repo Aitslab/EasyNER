@@ -198,13 +198,15 @@ def worker_process(
         nlp = spacy.load(
             SPACY_MODEL,
             # Disable components we don't need for sentence splitting
-            # Keep the tagger since lemmatizer needs it
+            # We need the parser
             disable=[
                 "ner",
                 "entity_ruler",
                 "entity_linker",
                 "textcat",
                 "textcat_multilabel",
+                "attribute_ruler",
+                "lemmatizer",
             ],
         )
 
@@ -263,129 +265,6 @@ def worker_process(
         logger.error(f"Worker {worker_id} failed: {str(e)}")
     finally:
         logger.info(f"Worker {worker_id} exiting")
-
-
-def result_writer_process(  # noqa: C901
-    result_queue: Queue,
-    stop_event: Event,
-    processed_counter: Value,
-    sentences_counter: Value,
-) -> None:
-    """Process that handles writing results back to the database.
-
-    This runs as a separate process to ensure database writes don't block processing.
-
-    Args:
-        result_queue: Queue with processed sentence dataframes
-        stop_event: Event to signal process to stop
-        processed_counter: Shared counter for processed segments
-        sentences_counter: Shared counter for sentences found
-
-    """
-    logger.info("Result writer starting")
-
-    try:
-        # Create a single database connection with read_only=False for the writer
-        logger.info(f"Writer connecting to database: {DB_PATH}")
-        # Assert DB_PATH not None for type checking
-        assert DB_PATH is not None, "DB_PATH should not be None"
-        writer_con = main_con.cursor()  # Thread local connection
-        logger.info("Writer connected to database")
-
-        COMMIT_EVERY = 10
-        append_count = 0
-        total_sentences_since_commit = 0
-
-        while not stop_event.is_set() or not result_queue.empty():
-            try:
-                # Get a processed batch from the queue with a timeout
-                result = result_queue.get(timeout=1)
-
-                # Check if this is an error message
-                if (
-                    isinstance(result, tuple)
-                    and len(result) == 3
-                    and result[0] == "ERROR"
-                ):
-                    error_msg, worker_id = result[1], result[2]
-                    logger.error(f"Error from worker {worker_id}: {error_msg}")
-                    continue
-
-                # Result should be a tuple of (count, DataFrame)
-                if isinstance(result, tuple) and len(result) == 2:
-                    count, sentences_df = result
-
-                    # Update processed counter
-                    with processed_counter.get_lock():
-                        processed_counter.value += count
-
-                    # Add sentences to database without immediate commit
-                    if (
-                        isinstance(sentences_df, pd.DataFrame)
-                        and not sentences_df.empty
-                    ):
-                        writer_con.append(SENTENCES_TABLE, sentences_df)
-                        append_count += 1
-                        total_sentences_since_commit += len(sentences_df)
-
-                        # Only commit periodically
-                        if append_count >= COMMIT_EVERY:
-                            logger.debug(
-                                f"Committing after {append_count} appends ({total_sentences_since_commit} sentences)",
-                            )
-                            writer_con.commit()
-
-                            # Update sentence counter after commit
-                            with sentences_counter.get_lock():
-                                sentences_counter.value += total_sentences_since_commit
-
-                            # Reset counters
-                            append_count = 0
-                            total_sentences_since_commit = 0
-
-                    # Log progress occasionally
-                    with processed_counter.get_lock(), sentences_counter.get_lock():
-                        current_processed = processed_counter.value
-                        current_sentences = sentences_counter.value
-
-                    if current_processed % 1000 == 0:
-                        logger.info(
-                            f"Progress: {current_processed} segments processed, {current_sentences} sentences found",
-                        )
-
-                # Clean up
-                del result
-                gc.collect()
-
-            except Empty:
-                # Queue empty - wait a bit
-                time.sleep(0.1)
-                continue
-            except Exception as e:
-                logger.error(f"Result writer error: {str(e)}")
-                time.sleep(1)  # Wait before trying again
-
-    except Exception as e:
-        logger.error(f"Result writer failed: {str(e)}")
-    finally:
-        try:
-            # Add the final commit code here
-            if append_count > 0:
-                logger.info(
-                    f"Final commit of {append_count} pending appends ({total_sentences_since_commit} sentences)",
-                )
-                writer_con.commit()
-
-                # Update sentence counter
-                with sentences_counter.get_lock():
-                    sentences_counter.value += total_sentences_since_commit
-
-            if "writer_con" in locals():
-                writer_con.close()
-                logger.info("Writer closed database connection")
-        except Exception as e:
-            logger.error(f"Error closing writer database connection: {e}")
-        logger.info("Result writer exiting")
 
 
 def memory_monitor_thread(pause_event: Event) -> None:
@@ -519,10 +398,9 @@ def progress_reporter_thread(
         logger.info(f"Speed: {total_processed / time_taken:.2f} segments/second")
 
 
-def setup_database():
-    """Set up the database connection and tables."""
-    logger.info(f"Connecting to database: {DB_PATH}")
-    con = duckdb.connect(database=DB_PATH, read_only=False)
+def setup_database_tables(con: duckdb.DuckDBPyConnection) -> int:
+    """Set up the database tables using the provided connection."""
+    logger.info("Setting up database tables")
 
     # Ensure sentences table exists with proper schema
     logger.info(f"Ensuring {SENTENCES_TABLE} table exists")
@@ -559,15 +437,11 @@ def setup_database():
     total_segments = count_result[0] if count_result else 0
     logger.info(f"Total segments to process: {total_segments}")
 
-    return con, total_segments
+    return total_segments
 
 
 def main() -> None:
-    """Coordinate multiprocessing of sentence splitting.
-
-    This function manages the overall workflow of fetching text segments from
-    the database and distributing them to worker processes for NLP processing.
-    """
+    """Coordinate multiprocessing of sentence splitting."""
     try:
         msg = (
             "---------------------------------\n"
@@ -576,72 +450,31 @@ def main() -> None:
             "\n---------------------------------"
         )
         logger.info(msg)
-
-        # Initial database setup using a context manager to ensure proper cleanup
         assert DB_PATH is not None, "DB_PATH must be set"
 
-        logger.info(f"Creating global DuckDB connection: {DB_PATH}")
-        main_con = duckdb.connect(database=DB_PATH, read_only=False)
-        # Configure DuckDB with memory settings
-        main_con.execute("PRAGMA memory_limit='4GB'")
+        # --- SINGLE DATABASE CONNECTION FOR ALL THREADS ---
+        duckdb_con = duckdb.connect(database=DB_PATH, read_only=False)
+        duckdb_con.execute("PRAGMA memory_limit='4GB'")
 
-        # Ensure sentences table exists with proper schema
-        logger.info(f"Ensuring {SENTENCES_TABLE} table exists")
-        main_con.execute(
-            f"""--sql
-            CREATE TABLE IF NOT EXISTS {SENTENCES_TABLE} (
-                pmid INTEGER,
-                segment_number INTEGER,
-                sentence_in_segment_order INTEGER,
-                sentence VARCHAR,
-                start_char INTEGER,
-                end_char INTEGER
-            );
-            """,
-        )
+        reader_con = duckdb_con.cursor()
 
-        # Create temporary table to track unprocessed segments
-        logger.info("Creating temporary table for unprocessed segments")
-        main_con.execute(
-            f"""--sql
-            CREATE TEMPORARY TABLE {TEMP_TABLE} AS
-            SELECT s.pmid, s.segment_number
-            FROM {TEXT_SEGMENTS_TABLE} s
-            WHERE NOT EXISTS (
-                SELECT 1 FROM {SENTENCES_TABLE} t
-                WHERE t.pmid = s.pmid AND t.segment_number = s.segment_number
-            )
-            AND s.is_header = FALSE
-            """,
-        )
+        # Database setup using the main connection
+        total_segments = setup_database_tables(
+            reader_con,
+        )  # Since reader needs the temp table
 
-        # Count total segments to process
-        count_result = main_con.execute(
-            f"SELECT COUNT(*) FROM {TEMP_TABLE}",
-        ).fetchone()
-        total_segments = count_result[0] if count_result else 0
-        logger.info(f"Total segments to process: {total_segments}")
-
-        if total_segments == 0:
-            logger.info("No segments to process. Exiting.")
-            return
-
-        # Set up shared queues and events for worker coordination
-        task_queue = JoinableQueue(
-            maxsize=NUM_WORKERS * 3,
-        )  # Limited queue size for backpressure
-        result_queue = Queue(maxsize=NUM_WORKERS * 5)  # Larger result queue
-
-        # Events for signaling
+        # Create shared counters and events
+        processed_counter = Value(c_int, 0)
+        sentences_counter = Value(c_int, 0)
+        active_workers_counter = Value(c_int, 0)
         stop_event = Event()
         pause_event = Event()
 
-        # Shared counters for progress tracking
-        processed_counter = Value(c_int, 0)
-        sentences_counter = Value(c_int, 0)
-        active_workers_counter = Value(c_int, 0)  # New counter for active workers
+        # Create queues for worker processes
+        task_queue = JoinableQueue(maxsize=NUM_WORKERS * 3)
+        result_queue = Queue(maxsize=NUM_WORKERS * 5)
 
-        # Start worker processes - these will only do NLP processing
+        # Start worker processes for NLP processing only
         workers = []
         for i in range(NUM_WORKERS):
             p = Process(
@@ -654,40 +487,37 @@ def main() -> None:
                     pause_event,
                     active_workers_counter,
                 ),
-                name=f"worker-{i}",
             )
             p.daemon = True
             p.start()
             workers.append(p)
-            logger.info(f"Started worker process {i}")
 
-        # Start result writer process - this handles all database writes
-        writer = Process(
-            target=result_writer_process,
+        # Start THREAD for database writing - NOT a process
+        writer_thread = threading.Thread(
+            target=result_writer_thread,
             args=(
+                duckdb_con,
                 result_queue,
                 stop_event,
                 processed_counter,
                 sentences_counter,
             ),
-            name="writer",
+            name="writer-thread",
         )
-        writer.daemon = True
-        writer.start()
-        logger.info("Started result writer process")
+        writer_thread.daemon = True
+        writer_thread.start()
 
-        # Start memory monitor thread
-        memory_monitor = threading.Thread(
+        # Start THREAD for memory monitoring
+        memory_thread = threading.Thread(
             target=memory_monitor_thread,
             args=(pause_event,),
             name="memory-monitor",
         )
-        memory_monitor.daemon = True
-        memory_monitor.start()
-        logger.info("Started memory monitor thread")
+        memory_thread.daemon = True
+        memory_thread.start()
 
-        # Start progress reporter thread
-        progress_reporter = threading.Thread(
+        # Start THREAD for progress reporting
+        progress_thread = threading.Thread(
             target=progress_reporter_thread,
             args=(
                 total_segments,
@@ -698,22 +528,23 @@ def main() -> None:
             ),
             name="progress-reporter",
         )
-        progress_reporter.daemon = True
-        progress_reporter.start()
-        logger.info("Started progress reporter thread")
+        progress_thread.daemon = True
+        progress_thread.start()
 
-        # Main loop to feed tasks to workers
+        # === MAIN THREAD READS FROM DATABASE AND FEEDS WORKERS ===
         try:
+            # Create a thread-local cursor from the main connection
+
             offset = 0
-            while offset < total_segments and not stop_event.is_set():
-                # Check if processing is paused due to memory pressure
+            while offset < total_segments:
+                # Check memory pressure
                 if pause_event.is_set():
-                    logger.info("Processing paused due to memory pressure")
-                    time.sleep(2)  # Wait before trying again
+                    logger.info("Main thread paused due to memory pressure")
+                    time.sleep(2)  # Wait before checking again
                     continue
 
-                # Get a batch of segment IDs from the temp table
-                batch_ids = main_con.execute(
+                # Get a batch of segment IDs - using thread-local cursor
+                batch_ids = reader_con.execute(
                     f"""--sql
                     SELECT pmid, segment_number
                     FROM {TEMP_TABLE}
@@ -724,12 +555,12 @@ def main() -> None:
                 if not batch_ids:
                     break
 
-                # Fetch all text segments for this batch at once
-                pmids = [id[0] for id in batch_ids]
-                seg_nums = [id[1] for id in batch_ids]
+                # Convert to native Python lists to avoid serialization issues
+                pmids = [int(id[0]) for id in batch_ids]
+                seg_nums = [int(id[1]) for id in batch_ids]
 
-                # Get the actual text segments
-                segments_data = main_con.execute(
+                # Get segments with thread-local cursor
+                segments_data = reader_con.execute(
                     f"""--sql
                     SELECT s.pmid, s.segment_number, s.segment
                     FROM {TEXT_SEGMENTS_TABLE} s
@@ -740,73 +571,144 @@ def main() -> None:
                     [pmids, seg_nums],
                 ).fetchall()
 
-                # Split into smaller batches for workers
+                # Add to worker queue in smaller batches
                 for i in range(0, len(segments_data), WORKER_BATCH_SIZE):
                     worker_batch = segments_data[i : i + WORKER_BATCH_SIZE]
-
-                    # Send pre-fetched data directly to workers
                     task_queue.put(worker_batch)
 
-                # Update offset for next batch
                 offset += len(batch_ids)
 
-                # Help with memory pressure
-                del batch_ids
-                del segments_data
-                del pmids
-                del seg_nums
+                # Memory management
+                del batch_ids, segments_data, pmids, seg_nums
                 gc.collect()
 
-            # Wait for all tasks to be processed
-            logger.info("Waiting for task queue to empty")
-            task_queue.join()
+            # Signal that no more tasks will be added
+            logger.info("All segments queued for processing")
 
-            # Wait for result queue to empty
-            while not result_queue.empty():
-                logger.info(
-                    f"Waiting for result queue to empty ({result_queue.qsize()} items remaining)",
-                )
-                time.sleep(1)
+        except Exception as e:
+            logger.error(f"Error in main thread: {str(e)}")
 
-            # Signal processes to stop
-            logger.info("Setting stop event")
-            stop_event.set()
+        # Wait for all workers to finish
+        for _ in range(NUM_WORKERS):
+            task_queue.put(None)  # Sentinel to stop workers
 
-            # Wait for worker processes to finish
-            for i, p in enumerate(workers):
-                p.join(timeout=5)
-                logger.info(
-                    f"Worker {i} {'finished' if not p.is_alive() else 'still running'}",
-                )
+        for w in workers:
+            w.join()
 
-            # Wait for writer process to finish
-            writer.join(timeout=10)
-            logger.info(
-                f"Writer {'finished' if not writer.is_alive() else 'still running'}",
-            )
+        # Signal other threads to stop
+        stop_event.set()
 
-            # Wait for progress reporter to finish
-            progress_reporter.join(timeout=5)
-
-            # Final cleanup
-            main_con.execute(f"DROP TABLE IF EXISTS {TEMP_TABLE}")
-            logger.info("Dropped temporary table")
-
-        except KeyboardInterrupt:
-            logger.warning("KeyboardInterrupt: Setting stop event")
-            stop_event.set()
-
-            # Give processes a chance to finish gracefully
-            time.sleep(2)
-
-        logger.info("Sentence splitting with multiprocessing completed")
+        # Wait for threads to finish
+        writer_thread.join()
+        progress_thread.join()
 
     except Exception as e:
         logger.error(f"Error in main process: {str(e)}")
         logger.error(f"Stack trace: {traceback.format_exc()}")
     finally:
-        # Connection is auto-closed by context manager
+        # Clean up
         logger.info("Main process completed")
+
+
+def result_writer_thread(
+    duckdb_con: duckdb.DuckDBPyConnection,
+    result_queue: Queue,
+    stop_event: Event,
+    processed_counter: Value,
+    sentences_counter: Value,
+) -> None:
+    """Thread that handles writing results to the database using thread-local cursor."""
+    logger.info("Result writer thread starting")
+
+    try:
+        # Create thread-local cursor from shared connection
+        writer_con = duckdb_con.cursor()
+        logger.info("Writer thread connected to database")
+
+        COMMIT_EVERY = 10
+        append_count = 0
+        total_sentences_since_commit = 0
+
+        while not stop_event.is_set() or not result_queue.empty():
+            try:
+                result = result_queue.get(timeout=1)
+
+                # Handle error messages
+                if (
+                    isinstance(result, tuple)
+                    and len(result) == 3
+                    and result[0] == "ERROR"
+                ):
+                    error_msg, worker_id = result[1], result[2]
+                    logger.error(f"Error from worker {worker_id}: {error_msg}")
+                    continue
+
+                # Process valid results
+                if isinstance(result, tuple) and len(result) == 2:
+                    count, sentences_df = result
+
+                    # Update processed counter
+                    with processed_counter.get_lock():
+                        processed_counter.value += count
+
+                    # Add sentences to database
+                    if (
+                        isinstance(sentences_df, pd.DataFrame)
+                        and not sentences_df.empty
+                    ):
+                        writer_con.append(SENTENCES_TABLE, sentences_df)
+                        append_count += 1
+                        total_sentences_since_commit += len(sentences_df)
+
+                        # Only commit periodically
+                        if append_count >= COMMIT_EVERY:
+                            logger.debug(
+                                f"Committing after {append_count} appends ({total_sentences_since_commit} sentences)",
+                            )
+                            writer_con.commit()
+
+                            # Update sentence counter
+                            with sentences_counter.get_lock():
+                                sentences_counter.value += total_sentences_since_commit
+
+                            # Reset counters
+                            append_count = 0
+                            total_sentences_since_commit = 0
+
+                # Clean up
+                del result
+                gc.collect()
+
+            except Empty:
+                # Commit any pending changes while idle
+                if append_count > 0:
+                    writer_con.commit()
+                    with sentences_counter.get_lock():
+                        sentences_counter.value += total_sentences_since_commit
+                    append_count = 0
+                    total_sentences_since_commit = 0
+                time.sleep(0.1)
+
+            except Exception as e:
+                logger.error(f"Writer thread error: {str(e)}")
+                time.sleep(1)
+
+    except Exception as e:
+        logger.error(f"Writer thread failed: {str(e)}")
+    finally:
+        # Final commit if needed
+        try:
+            if append_count > 0:
+                logger.info(
+                    f"Final commit of {append_count} pending appends ({total_sentences_since_commit} sentences)",
+                )
+                writer_con.commit()
+                with sentences_counter.get_lock():
+                    sentences_counter.value += total_sentences_since_commit
+        except Exception as e:
+            logger.error(f"Error during final commit: {str(e)}")
+
+        logger.info("Writer thread exiting")
 
 
 if __name__ == "__main__":
