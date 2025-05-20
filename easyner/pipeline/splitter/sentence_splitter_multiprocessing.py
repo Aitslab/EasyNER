@@ -78,11 +78,14 @@ SENTENCES_TABLE = "sentences"
 BATCH_SIZE = 10000  # Reduced batch size for better memory management
 WORKER_BATCH_SIZE = 500  # Small batches for workers to process
 SPACY_MODEL = "en_core_web_sm"
+SPACY_N_PROCESSES = 1  # Set to 1 for multiprocessing
+SPACY_BATCH_SIZE = 200  # Batch size for spaCy processing not same as worker batch size
 # Number of parallel worker processes - adjust based on your machine
 NUM_WORKERS = min(16, max(1, mp.cpu_count() - 1))
 # Memory threshold in MB - adjust based on your system
 MEMORY_HIGH_THRESHOLD = 75  # When to start applying backpressure
 MEMORY_CRITICAL_THRESHOLD = 80  # When to temporarily pause processing
+COMMIT_EVERY = 50
 
 
 def monitor_memory() -> dict:
@@ -146,7 +149,7 @@ def process_batch(nlp: Language, batch: list[tuple]) -> pd.DataFrame:
     # Process texts through spaCy pipeline - don't use n_process here since we're already
     # in a worker process
     for doc, (pmid, segment_number) in zip(
-        nlp.pipe(texts, batch_size=WORKER_BATCH_SIZE),
+        nlp.pipe(texts, batch_size=SPACY_BATCH_SIZE, n_process=SPACY_N_PROCESSES),
         metadata,
     ):
         sentence_in_segment_order = 1
@@ -624,7 +627,6 @@ def result_writer_thread(
         writer_con = duckdb_con.cursor()
         logger.info("Writer thread connected to database")
 
-        COMMIT_EVERY = 10
         append_count = 0
         total_sentences_since_commit = 0
 
