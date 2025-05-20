@@ -58,7 +58,7 @@ if __name__ == "__main__":
             )
             print("It can accept the database path as a command-line argument.")
             print(
-                "Example: python resolve_incomplete_publication_dates.py /path/to/pubmed.db",
+                "Example: python resolve_incomplete_publication_dates.py /path/to/pubmed.db",  # noqa: E501
             )
             print("---------------------------------------------------")
             user_input = input(
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                 db_path_str = user_input
             else:
                 print(
-                    "No path provided via input, attempting to use environment variable DB_PATH.",
+                    "No path provided via input, attempting to use environment variable DB_PATH.",  # noqa: E501
                 )
                 db_path_str = os.getenv("DB_PATH")
 

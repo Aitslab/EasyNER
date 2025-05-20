@@ -35,7 +35,7 @@ def find_truncated_abstracts(db_path: Path) -> None:
     ).fetchone()
     count = result[0] if result is not None else 0
     print(
-        f"Found {count} abstracts with the truncation pattern matching '{descriptive_pattern}'",
+        f"Found {count} abstracts with the truncation pattern matching '{descriptive_pattern}'",  # noqa: E501
     )
 
 

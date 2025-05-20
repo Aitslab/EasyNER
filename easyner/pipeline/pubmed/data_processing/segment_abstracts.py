@@ -26,11 +26,13 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
         SELECT
             subq.pmid,
             TRIM(segment) AS segment,
-            ROW_NUMBER() OVER (PARTITION BY subq.pmid ORDER BY segment_id) AS segment_number,
+            ROW_NUMBER() OVER (PARTITION BY subq.pmid
+            ORDER BY segment_id) AS segment_number,
             -- Check if the segment is a header
             -- A header is defined as a less than 10 words all in uppercase
             (
-                len(string_split(segment, ' ')) < 10 AND UPPER(TRIM(segment)) = TRIM(segment)
+                len(string_split(segment, ' ')) < 10
+                AND UPPER(TRIM(segment)) = TRIM(segment)
             ) AS is_header
         FROM (
             SELECT
@@ -96,7 +98,8 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
         else:
             print(f"PMID {pmid}, Segment {segment_number}: {seg_text}")
 
-    # segments with uppercase LIKE BACKGROUND or segments that begin with a sequence of all uppercase followed by a dot and space and then text
+    # segments with uppercase LIKE BACKGROUND or segments that begin with a
+    # sequence of all uppercase followed by a dot and space and then text
     # TODO: Maybe we could use matched header sequences to match against
     # TODO: same sequences followed by a dot.
     regex = r"^[A-Z]+\. .+"
