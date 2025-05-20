@@ -22,7 +22,8 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
     # Fixed query with proper table references
     conn.execute(
         """--sql
-        CREATE OR REPLACE VIEW abstract_segments AS
+        -- CREATE OR REPLACE VIEW abstract_segments AS
+        CREATE TABLE abstract_segments AS
         SELECT
             subq.pmid,
             TRIM(segment) AS segment,
@@ -49,7 +50,7 @@ def _create_abstract_segments_view(conn: duckdb.DuckDBPyConnection) -> None:
     # Check the number of segments
     result = conn.execute("SELECT COUNT(*) FROM abstract_segments").fetchone()
     segment_count = result[0] if result is not None else 0
-    print(f"Created view with {segment_count} non-empty segments from the abstracts")
+    print(f"Created table with {segment_count} non-empty segments from the abstracts")
 
     # Show sample segments
     print("\nSample segments:")
