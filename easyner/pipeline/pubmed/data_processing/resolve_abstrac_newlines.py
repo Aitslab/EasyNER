@@ -1,16 +1,12 @@
+import os
 import sys
-from pathlib import Path
 
 import duckdb
+from dotenv import load_dotenv
 
 
-def _check_newlines_in_abstracts(db_path: Path) -> None:
+def _check_newlines_in_abstracts(conn: duckdb.DuckDBPyConnection) -> None:
     """Check what kind of newline characters exist in abstracts."""
-    conn = duckdb.connect(db_path)
-    if conn is None:
-        print(f"Failed to connect to the database at {db_path}")
-        return
-
     # Check for actual newlines (ASCII 10)
     result = conn.execute(
         """--sql
@@ -70,8 +66,17 @@ def _check_newlines_in_abstracts(db_path: Path) -> None:
 
 if __name__ == "__main__":
     try:
-        db_path = Path("/home/callebalik/EasyNER/data/temp/pubmed.db")
-        _check_newlines_in_abstracts(db_path)
+        load_dotenv()
+        DB_PATH = os.getenv("DB_PATH")
+        if DB_PATH is None or DB_PATH.strip() == "":
+            msg = "DB_PATH environment variable is not set."
+            raise ValueError(msg)
+        else:
+            print(f"Using database path: {DB_PATH}")
+
+        conn = duckdb.connect(DB_PATH)
+
+        _check_newlines_in_abstracts(conn)
     except KeyboardInterrupt:
         print("KeyboardInterrupt: Exiting the script.")
         sys.exit(0)
