@@ -188,7 +188,7 @@ def run(analysis_config):
         
         path_ = analysis_config["output_path"] + "/analysis_{}/".format(entity)
         os.makedirs(path_, exist_ok=True)
-        plt.savefig(path_+"{}_top_{}_entities.png".format( entity,n), bbox_inches="tight", aspect="auto", format="png")
+        plt.savefig(path_+"{}_top_{}_entities.png".format( entity,n), bbox_inches="tight", format="png")
         df.to_csv(path_+"result_entities_{}.tsv".format(entity), sep="\t")
 
         if not df_id.empty:
@@ -199,7 +199,7 @@ def run(analysis_config):
         
             path_ = analysis_config["output_path"] + "/analysis_{}/".format(entity)
             os.makedirs(path_, exist_ok=True)
-            plt.savefig(path_+"{}_top_{}_ids.png".format( entity,n), bbox_inches="tight", aspect="auto", format="png")
+            plt.savefig(path_+"{}_top_{}_ids.png".format( entity,n), bbox_inches="tight", format="png")
 
             df_id.to_csv(path_+"result_ids_{}.tsv".format(entity), sep="\t")
     
